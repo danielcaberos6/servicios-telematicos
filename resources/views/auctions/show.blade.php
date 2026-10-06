@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @section('title', $subasta->titulo)
 @section('content')
+
     <div class="container section">
         <a class="breadcrumb" href="{{ route('auctions.index') }}">← Volver al catálogo</a>
         <div class="detail-grid">
