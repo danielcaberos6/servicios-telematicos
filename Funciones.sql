@@ -3,6 +3,7 @@
 -- p_actor siempre procede de la sesión autenticada de Laravel, nunca del formulario.
 -- Las funciones usan SECURITY INVOKER; las credenciales de BD son exclusivas del servidor.
 
+
 -- Catálogo público: solo publicaciones activas en su periodo de vigencia.
 create or replace function catalogo_subastas(p_filtros jsonb default '{}'::jsonb)
 returns setof subasta language sql stable as $$
