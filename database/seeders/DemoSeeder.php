@@ -13,6 +13,7 @@ class DemoSeeder extends Seeder
     public function run(): void
     {
         if (! app()->environment(['local', 'testing'])) {
+
             throw new \RuntimeException('Los datos de demostración solo se cargan en entornos locales o de pruebas.');
         }
         $this->call(DatabaseSeeder::class);
