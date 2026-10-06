@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Buscar subastas')
 @section('content')
+
     <section class="search-band">
         <div class="container">
             <form class="search-bar" action="{{ route('auctions.index') }}" method="get"><x-icon name="search" /><input
