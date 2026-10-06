@@ -35,37 +35,9 @@ class SubastaController extends Controller
             'ubicacion' => ['nullable', 'string', 'max:250'],
             'orden' => ['nullable', Rule::in(['recientes', 'finalizan', 'precio_asc', 'precio_desc'])],
         ]);
-        $query = Subasta::activas()->with(['imagenes', 'categoria'])->withCount('pujas')->withMax('pujas', 'monto');
-        if ($request->filled('q')) {
-            $term = '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $filters['q']).'%';
-            $query->where(fn ($q) => $q->where('titulo', 'ilike', $term)->orWhere('descripcion', 'ilike', $term));
-        }
-        foreach (['categoria' => 'id_categoria', 'estado' => 'estado_articulo'] as $key => $column) {
-            if ($request->filled($key)) {
-                $query->where($column, $filters[$key]);
-            }
-        }
-        if ($request->filled('desde')) {
-            $query->where('fecha_inicio', '>=', $filters['desde'].' 00:00:00');
-        }
-        if ($request->filled('hasta')) {
-            $query->where('fecha_inicio', '<=', $filters['hasta'].' 23:59:59.999999');
-        }
-        if ($request->filled('min')) {
-            $query->where('monto_inicial', '>=', $filters['min']);
-        }
-        if ($request->filled('max')) {
-            $query->where('monto_inicial', '<=', $filters['max']);
-        }
-        if ($request->filled('ubicacion')) {
-            $query->where('ubicacion', 'ilike', '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $filters['ubicacion']).'%');
-        }
-        [$column, $direction] = match ($filters['orden'] ?? 'recientes') {
-            'finalizan' => ['fecha_fin', 'asc'], 'precio_asc' => ['monto_inicial', 'asc'],
-            'precio_desc' => ['monto_inicial', 'desc'], default => ['fecha_inicio', 'desc'],
-        };
+        $catalogo = app(\App\Services\CatalogoService::class);
 
-        return view('auctions.index', ['subastas' => $query->orderBy($column, $direction)->orderByDesc('id_subasta')->paginate(12)->withQueryString(), 'categorias' => Categoria::orderBy('nombre_categoria')->get()]);
+        return view('auctions.index', ['subastas' => $catalogo->paginar($filters), 'categorias' => $catalogo->categorias()]);
     }
 
     public function create()
