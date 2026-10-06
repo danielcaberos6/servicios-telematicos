@@ -22,25 +22,30 @@ class DemoSeeder extends Seeder
         foreach ([$demo, $seller] as $user) {
             DB::table('usuario_rol')->insertOrIgnore(['id_usuario' => $user->id_usuario, 'id_rol' => $role]);
         }
-        $items = [
-            ['Cámara réflex con lente 18–55 mm', 'Tecnología', 'Como nuevo', 1450, 'La Paz, Plaza Abaroa, entrada principal', 'camera', 3, 'Cámara réflex en excelente estado, ideal para comenzar en fotografía. Incluye lente, batería, cargador y correa.'],
-            ['Bicicleta urbana de 7 velocidades', 'Deportes', 'Usado', 780, 'Cochabamba, Plaza Colón, fuente central', 'bike', 8, 'Bicicleta para moverte por la ciudad. Frenos revisados, llantas en buen estado y algunos detalles de pintura por el uso.'],
-            ['Audífonos inalámbricos de diadema', 'Tecnología', 'Nuevo', 250, 'Santa Cruz, Ventura Mall, acceso principal', 'headphones', 14, 'Audífonos inalámbricos nuevos, en caja. Incluyen cable de carga, entrada auxiliar y almohadillas acolchadas.'],
-            ['Sillón de lectura estilo nórdico', 'Hogar', 'Como nuevo', 590, 'La Paz, Sopocachi, Plaza España', 'chair', 22, 'Cómodo sillón tapizado color arena con patas de madera. Se usó muy poco y no tiene manchas. El ganador coordina el transporte.'],
-            ['Laptop de 14 pulgadas, 16 GB RAM', 'Tecnología', 'Usado', 2800, 'El Alto, Plaza del Obelisco', 'laptop', 48, 'Laptop para estudio y trabajo. 16 GB de RAM, SSD de 512 GB y cargador original. La batería dura aproximadamente 4 horas.'],
-            ['Reloj de pulsera clásico', 'Moda y accesorios', 'Como nuevo', 320, 'Sucre, Plaza 25 de Mayo', 'watch', 72, 'Reloj de pulsera con correa de cuero marrón y esfera clara. Funcionando correctamente. Incluye su estuche.'],
-            ['Cámara analógica de colección', 'Coleccionables', 'Usado', 420, 'Cochabamba, Plazuela de las Banderas', 'camera', 96, 'Cámara analógica para colección. Conserva sus piezas originales y presenta marcas propias del tiempo. No incluye rollo.'],
-            ['Bicicleta de paseo con canasto', 'Deportes', 'Como nuevo', 950, 'Santa Cruz, Plaza 24 de Septiembre', 'bike', 120, 'Bicicleta de paseo, asiento cómodo y mantenimiento reciente. Ideal para recorridos cortos y paseos de fin de semana.'],
-        ];
+        $items = $this->articulos();
         foreach ($items as $index => [$title, $category, $condition, $price, $location, $image, $hours, $description]) {
-            $owner = $index === 4 ? $demo : $seller;
+            $owner = $index === 0 ? $demo : $seller;
             $auction = $owner->subastas()->firstOrCreate(['titulo' => $title], ['descripcion' => $description, 'id_categoria' => Categoria::where('nombre_categoria', $category)->value('id_categoria'), 'estado_articulo' => $condition, 'monto_inicial' => $price, 'ubicacion' => $location, 'fecha_inicio' => now()->subDays($index % 4)->subMinutes(15), 'fecha_fin' => now()->addHours($hours)]);
             if (! $auction->imagenes()->exists()) {
-                $contents = file_get_contents(public_path('images/demo/'.$image.'.svg'));
-                $path = 'subastas/'.$auction->id_subasta.'/demo.svg';
+                $contents = file_get_contents(public_path('images/ejemplos/'.$image));
+                $path = 'subastas/'.$auction->id_subasta.'/'.$image;
                 Storage::disk('public')->put($path, $contents);
                 $auction->imagenes()->create(['ruta' => $path, 'tamano' => strlen($contents)]);
             }
         }
     }
+
+    private function articulos(): array
+    {
+        return [
+            ['Laptop para estudio y trabajo', 'Electrónica e informática', 'Usado', 2400, 'La Paz, Plaza Abaroa', 'laptop.png', 96, 'Publicación de ejemplo de una laptop para estudio y trabajo. Consulta sus características y acuerda la revisión al momento de la entrega.'],
+            ['Cámara fotográfica digital', 'Electrónica e informática', 'Usado', 1200, 'Cochabamba, Plaza Colón', 'camara.jpg', 48, 'Cámara de fotografía de demostración. Revisa la imagen del artículo y coordina la entrega con el vendedor.'],
+            ['Bicicleta para paseos y deporte', 'Deporte', 'Usado', 800, 'Santa Cruz, Plaza 24 de Septiembre', 'bicicleta.png', 72, 'Bicicleta de ejemplo para paseos y actividades deportivas. El lugar de encuentro se coordina en la plaza indicada.'],
+            ['Camiseta de fútbol firmada', 'Antigüedades y coleccionables', 'Usado', 350, 'La Paz, Plaza España', 'camiseta-firmada.jpg', 120, 'Artículo de colección de demostración. La imagen ilustra una camiseta firmada; esta publicación no acredita autenticidad de las firmas.'],
+            ['Consola de videojuegos', 'Videojuegos', 'Nuevo', 1900, 'Sucre, Plaza 25 de Mayo', 'consola.jpg', 144, 'Consola de videojuegos de demostración. Consulta qué accesorios se incluyen antes de participar.'],
+            ['Guitarra firmada de colección', 'Instrumentos musicales', 'Usado', 650, 'Cochabamba, Plazuela de las Banderas', 'guitarra-firmada.jpg', 168, 'Guitarra de demostración para la categoría de instrumentos musicales. La publicación de ejemplo no acredita autenticidad de las firmas.'],
+            ['Colección de libros', 'Libros, películas y música', 'Usado', 150, 'El Alto, Plaza del Obelisco', 'libros.png', 192, 'Conjunto de libros de demostración. Las fotografías permiten conocer los ejemplares antes de coordinar la entrega.'],
+        ];
+    }
+
 }
