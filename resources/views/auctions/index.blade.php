@@ -27,7 +27,7 @@
                 subasta</a>@endauth
         </div>
         <div class="catalog-layout">
-            <aside class="filter-panel">
+            <aside class="filter-panel">  
                 <div class="filter-heading">
                     <h2><x-icon name="filter" />Filtros</h2><a href="{{ route('auctions.index') }}">Limpiar</a>
                 </div>
