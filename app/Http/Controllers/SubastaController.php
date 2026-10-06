@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SubastaRequest;
-use App\Models\Categoria;
 use App\Models\Subasta;
+use App\Services\CatalogoService;
+use App\Services\OperacionesService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -16,9 +17,9 @@ class SubastaController extends Controller
     public function home()
     {
         return view('home', [
-            'subastas' => Subasta::activas()->with(['imagenes', 'categoria'])->withCount('pujas')->withMax('pujas', 'monto')->orderBy('fecha_fin')->limit(4)->get(),
-            'totalActivas' => Subasta::activas()->count(),
-            'categorias' => Categoria::orderBy('id_categoria')->get(),
+            'subastas' => app(CatalogoService::class)->consultar()->orderBy('fecha_fin')->limit(4)->get(),
+            'totalActivas' => app(CatalogoService::class)->consultar()->count(),
+            'categorias' => app(CatalogoService::class)->categorias(),
         ]);
     }
 
@@ -35,14 +36,14 @@ class SubastaController extends Controller
             'ubicacion' => ['nullable', 'string', 'max:250'],
             'orden' => ['nullable', Rule::in(['recientes', 'finalizan', 'precio_asc', 'precio_desc'])],
         ]);
-        $catalogo = app(\App\Services\CatalogoService::class);
+        $catalogo = app(CatalogoService::class);
 
         return view('auctions.index', ['subastas' => $catalogo->paginar($filters), 'categorias' => $catalogo->categorias()]);
     }
 
     public function create()
     {
-        return view('auctions.form', ['subasta' => new Subasta, 'categorias' => Categoria::orderBy('nombre_categoria')->get()]);
+        return view('auctions.form', ['subasta' => new Subasta, 'categorias' => app(CatalogoService::class)->categorias()]);
     }
 
     public function store(SubastaRequest $request)
@@ -50,7 +51,7 @@ class SubastaController extends Controller
         $paths = [];
         try {
             $subasta = DB::transaction(function () use ($request, &$paths) {
-                $subasta = $request->user()->subastas()->create([...$request->safe()->except(['imagenes', 'eliminar_imagenes']), 'fecha_inicio' => now()]);
+                $subasta = app(OperacionesService::class)->crearSubasta($request->user()->id_usuario, $request->safe()->except(['imagenes', 'eliminar_imagenes']));
                 $this->saveImages($subasta, $request, $paths);
 
                 return $subasta;
@@ -63,17 +64,20 @@ class SubastaController extends Controller
         return redirect()->route('auctions.show', $subasta)->with('status', 'Tu subasta se publicó correctamente y ya aparece en Buscar.');
     }
 
-    public function show(Subasta $subasta)
+    public function show(Request $request, Subasta $subasta)
     {
         $subasta->load(['imagenes', 'categoria', 'usuario'])->loadCount('pujas')->loadMax('pujas', 'monto');
         $ganadora = $subasta->pujas()->with('usuario')->orderByDesc('monto')->first();
 
-        return view('auctions.show', compact('subasta', 'ganadora'));
+        $canViewRanking = $request->user() && ($request->user()->id_usuario === $subasta->id_usuario || $subasta->pujas()->where('id_usuario', $request->user()->id_usuario)->exists());
+        $ranking = $canViewRanking ? app(OperacionesService::class)->ranking($subasta->id_subasta, $request->user()->id_usuario) : [];
+
+        return view('auctions.show', compact('subasta', 'ganadora', 'ranking', 'canViewRanking'));
     }
 
     public function mine(Request $request)
     {
-        $subastas = $request->user()->subastas()->with(['imagenes', 'categoria'])->withCount('pujas')->withMax('pujas', 'monto')->orderByDesc('fecha_inicio')->paginate(12);
+        $subastas = app(OperacionesService::class)->misSubastas($request->user()->id_usuario);
 
         return view('auctions.mine', compact('subastas'));
     }
@@ -83,7 +87,7 @@ class SubastaController extends Controller
         $this->checkOwner($request, $subasta);
         $this->checkEditable($subasta);
 
-        return view('auctions.form', ['subasta' => $subasta->load('imagenes'), 'categorias' => Categoria::orderBy('nombre_categoria')->get()]);
+        return view('auctions.form', ['subasta' => $subasta->load('imagenes'), 'categorias' => app(CatalogoService::class)->categorias()]);
     }
 
     public function update(SubastaRequest $request, Subasta $subasta)
@@ -104,8 +108,10 @@ class SubastaController extends Controller
                     throw ValidationException::withMessages(['imagenes' => 'La subasta puede tener como máximo 5 imágenes.']);
                 }
                 $removed = $images->pluck('ruta')->all();
-                $locked->imagenes()->whereIn('id_imagen', $ids)->delete();
-                $locked->update($request->safe()->except(['imagenes', 'eliminar_imagenes']));
+                foreach ($ids as $imageId) {
+                    app(OperacionesService::class)->eliminarImagen($request->user()->id_usuario, $imageId);
+                }
+                app(OperacionesService::class)->actualizarSubasta($request->user()->id_usuario, $locked->id_subasta, $request->safe()->except(['imagenes', 'eliminar_imagenes']));
                 $this->saveImages($locked, $request, $paths);
             });
         } catch (\Throwable $exception) {
@@ -120,16 +126,7 @@ class SubastaController extends Controller
     public function destroy(Request $request, Subasta $subasta)
     {
         $this->checkOwner($request, $subasta);
-        $paths = DB::transaction(function () use ($subasta) {
-            $locked = Subasta::whereKey($subasta->id_subasta)->lockForUpdate()->firstOrFail();
-            if ($locked->pujas()->exists()) {
-                throw ValidationException::withMessages(['subasta' => 'No puedes eliminar una subasta que recibió pujas.']);
-            }
-            $paths = $locked->imagenes()->pluck('ruta')->all();
-            $locked->delete();
-
-            return $paths;
-        });
+        $paths = app(OperacionesService::class)->eliminarSubasta($request->user()->id_usuario, $subasta->id_subasta);
         Storage::disk('public')->delete($paths);
 
         return redirect()->route('auctions.mine')->with('status', 'Subasta eliminada.');
@@ -140,7 +137,7 @@ class SubastaController extends Controller
         foreach ($request->file('imagenes', []) as $image) {
             $path = $image->store('subastas/'.$subasta->id_subasta, 'public');
             $paths[] = $path;
-            $subasta->imagenes()->create(['ruta' => $path, 'tamano' => $image->getSize()]);
+            app(OperacionesService::class)->guardarImagen($request->user()->id_usuario, $subasta->id_subasta, $path, $image->getSize());
         }
     }
 

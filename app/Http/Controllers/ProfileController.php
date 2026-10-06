@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\OperacionesService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -13,9 +14,11 @@ class ProfileController extends Controller
     public function edit(Request $request)
     {
         $user = $request->user()->fresh('imagen');
-        $reviews = DB::table('resenas')->join('usuario', 'usuario.id_usuario', '=', 'resenas.id_usuario_resenador')->where('id_usuario_resenado', $user->id_usuario)->select('resenas.*', 'usuario.nombre')->orderByDesc('fecha_creacion')->get();
+        $operations = app(OperacionesService::class);
+        $reviews = $operations->resenas($user->id_usuario);
+        $ratings = $operations->valoraciones($user->id_usuario);
 
-        return view('profile.edit', compact('user', 'reviews'));
+        return view('profile.edit', compact('user', 'reviews', 'ratings'));
     }
 
     public function update(Request $request)
@@ -37,17 +40,16 @@ class ProfileController extends Controller
         try {
             DB::transaction(function () use ($request, $data, &$path, &$old) {
                 $user = User::whereKey($request->user()->id_usuario)->lockForUpdate()->firstOrFail();
-                $user->fill(collect($data)->only(['nombre', 'correo', 'biografia', 'ciudad', 'telefono'])->all());
-                if ($request->filled('password')) {
-                    $user->contrasena = $data['password'];
-                }
-                $user->save();
+                $operations = app(OperacionesService::class);
+                $operations->actualizarUsuario($user->id_usuario, collect($data)->only(['nombre', 'correo', 'biografia', 'ciudad', 'telefono', 'password'])->all());
                 if ($request->hasFile('foto') || $request->boolean('quitar_foto')) {
                     $old = $user->imagen?->ruta;
-                    $user->imagen()->delete();
+                    if ($user->imagen) {
+                        $operations->eliminarImagen($user->id_usuario, $user->imagen->id_imagen);
+                    }
                     if ($request->hasFile('foto')) {
                         $path = $request->file('foto')->store('perfiles/'.$user->id_usuario, 'public');
-                        $user->imagen()->create(['ruta' => $path, 'tamano' => $request->file('foto')->getSize()]);
+                        $operations->guardarImagen($user->id_usuario, null, $path, $request->file('foto')->getSize());
                     }
                 }
             });

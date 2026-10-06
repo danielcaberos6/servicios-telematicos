@@ -15,11 +15,11 @@ class Subasta extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['titulo', 'descripcion', 'ubicacion', 'estado_articulo', 'monto_inicial', 'fecha_inicio', 'fecha_fin', 'id_categoria'];
+    protected $fillable = ['titulo', 'descripcion', 'ubicacion', 'latitud', 'longitud', 'estado_articulo', 'monto_inicial', 'fecha_inicio', 'fecha_fin', 'id_categoria'];
 
     protected function casts(): array
     {
-        return ['monto_inicial' => 'decimal:2', 'fecha_inicio' => 'datetime', 'fecha_fin' => 'datetime'];
+        return ['monto_inicial' => 'decimal:2', 'latitud' => 'decimal:6', 'longitud' => 'decimal:6', 'fecha_inicio' => 'datetime', 'fecha_fin' => 'datetime'];
     }
 
     public function scopeActivas(Builder $query): void

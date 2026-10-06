@@ -10,6 +10,33 @@
     --gold: #eac26a;
     --radius: 12px;
 }
+.ratings-panel h2 { font-size: 1.15rem; margin-bottom: 8px; }
+.rating-average { margin: 0; color: var(--blue); }
+.rating-average strong { font-size: 2.5rem; line-height: 1.2; }
+.rating-average span { color: #96721b; }
+.ratings-chart { display: flex; gap: 10px; margin: 24px 0 12px; }
+.rating-column { flex: 1; min-width: 0; text-align: center; }
+.rating-count { display: block; font-size: .85rem; font-weight: 700; }
+.rating-track { height: 130px; display: flex; align-items: flex-end; border-bottom: 3px solid var(--ink); }
+.rating-bar { width: 100%; border-radius: 6px 6px 0 0; background: var(--blue); }
+.stars-1 .rating-bar { background: #8b472c; }
+.stars-2 .rating-bar { background: #dc3036; }
+.stars-3 .rating-bar { background: #23935b; }
+.stars-4 .rating-bar { background: #337de1; }
+.stars-5 .rating-bar { background: #f0c64b; }
+.rating-label { display: block; margin-top: 6px; white-space: nowrap; font-weight: 700; }
+.auction-deadline { display: flex; gap: 12px; align-items: flex-start; margin: 18px 0; padding: 16px; background: #fff6dd; border: 1px solid #e4c872; border-left: 5px solid #bb871e; border-radius: 8px; }
+.auction-deadline strong, .auction-deadline time, .auction-deadline small { display: block; }
+.auction-deadline strong { font-size: 1.12rem; }
+.auction-deadline .icon { margin-top: 4px; flex-shrink: 0; }
+.auction-ended { background: #e8f5ef; border-color: #84bea5; border-left-color: var(--green); }
+.ranking-scroll { overflow-x: auto; }
+.ranking-table { width: 100%; border-collapse: collapse; text-align: left; font-size: .9rem; }
+.ranking-table th, .ranking-table td { padding: 12px 8px; border-bottom: 1px solid var(--line); }
+.ranking-table thead th { color: var(--muted); font-size: .8rem; }
+.ranking-table td:nth-child(3) { white-space: nowrap; }
+.ranking-table .tag { display: inline-block; margin: 4px 0 0 5px; }
+.ranking-leader { background: #eef7f2; }
 * {
     box-sizing: border-box;
 }

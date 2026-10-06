@@ -25,6 +25,29 @@
                     <h2>Acerca de este artículo</h2>
                     <p class="preserve-lines">{{ $subasta->descripcion }}</p>
                 </div>
+                @if ($canViewRanking)
+                    <section class="panel description-panel" aria-labelledby="ranking-title">
+                        <h2 id="ranking-title">Ranking de participantes</h2>
+                        <p class="muted">La mejor oferta de cada usuario. {{ count($ranking) }} participantes.</p>
+                        @if ($ranking)
+                            <div class="ranking-scroll"><table class="ranking-table">
+                                <thead><tr><th scope="col">Puesto</th><th scope="col">Usuario</th><th scope="col">Mejor oferta</th><th scope="col">Pujas</th></tr></thead>
+                                <tbody>@foreach ($ranking as $participant)
+                                    <tr @class(['ranking-leader' => $participant->posicion === 1])>
+                                        <td>#{{ $participant->posicion }}</td>
+                                        <th scope="row">{{ $participant->nombre }}
+                                            @if ($participant->id_usuario === auth()->id())<small>(Tú)</small>@endif
+                                            @if ($participant->posicion === 1)<span class="tag green">{{ $subasta->estado === 'Finalizada' ? 'Ganador' : 'Líder' }}</span>@endif
+                                        </th>
+                                        <td>Bs {{ number_format($participant->mejor_oferta, 2, ',', '.') }}</td><td>{{ $participant->ofertas }}</td>
+                                    </tr>
+                                @endforeach</tbody>
+                            </table></div>
+                        @else
+                            <p>Todavía no hay participantes. El ranking aparecerá al recibir la primera oferta.</p>
+                        @endif
+                    </section>
+                @endif
             </div>
             <div class="detail-info">
                 <div class="detail-badges"><span class="tag">{{ $subasta->categoria?->nombre_categoria }}</span><span
@@ -39,7 +62,13 @@
                     <div class="bid-meta"><span>{{ $subasta->pujas_count }} ofertas</span><span><x-icon
                                 name="clock" />{{ $subasta->estado === 'Activa' ? 'Cierra ' . $subasta->fecha_fin->diffForHumans() : $subasta->estado }}</span>
                     </div>
-                    <p class="muted">Cierre: {{ $subasta->fecha_fin->format('d/m/Y H:i') }} (Bolivia)</p>
+                    <div @class(['auction-deadline', 'auction-ended' => $subasta->estado === 'Finalizada'])>
+                        <x-icon name="clock" />
+                        <div><strong>{{ $subasta->estado === 'Finalizada' ? 'Subasta finalizada' : ($subasta->estado === 'Cancelada' ? 'Subasta cancelada' : 'Finaliza el') }}</strong>
+                            <time datetime="{{ $subasta->fecha_fin->toIso8601String() }}">{{ $subasta->fecha_fin->format('d/m/Y \a \l\a\s H:i') }} (Bolivia)</time>
+                            @if ($subasta->estado === 'Finalizada')<small>{{ $ganadora ? 'La oferta ganadora está confirmada.' : 'La subasta terminó sin ofertas.' }}</small>@endif
+                        </div>
+                    </div>
                     @if ($subasta->estado === 'Activa')
                         @auth
                             @if (auth()->id() === $subasta->id_usuario)

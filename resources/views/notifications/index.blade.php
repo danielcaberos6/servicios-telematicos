@@ -26,7 +26,9 @@
                             <span class="unread-dot" title="No leída"></span>
                         @endunless
                     </h2>
-                    <p>{{ $item->contenido }}</p><time
+                    <p>{{ $item->contenido }}</p>
+                    @if ($item->id_subasta)<p><a href="{{ route('auctions.show', $item->id_subasta) }}">Ver subasta →</a></p>@endif
+                    <time
                         datetime="{{ $item->fecha_notificacion->toIso8601String() }}">{{ $item->fecha_notificacion->diffForHumans() }}</time>
                 </div>
                 <div class="notification-actions">

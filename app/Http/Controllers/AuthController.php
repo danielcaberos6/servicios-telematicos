@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Services\OperacionesService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 
@@ -19,16 +18,7 @@ class AuthController extends Controller
             'correo' => ['required', 'email', 'max:254', 'unique:usuario,correo'],
             'password' => ['required', 'string', 'min:8', 'max:72', 'confirmed'],
         ]);
-        $user = DB::transaction(function () use ($data) {
-            $user = User::create(['nombre' => $data['nombre'], 'correo' => $data['correo'], 'contrasena' => $data['password']]);
-            $role = DB::table('rol')->where('nombre_rol', 'Usuario')->value('id_rol');
-            if ($role) {
-                DB::table('usuario_rol')->insert(['id_usuario' => $user->id_usuario, 'id_rol' => $role]);
-            }
-            $user->notificaciones()->create(['titulo' => '¡Bienvenido a SubastaYA!', 'contenido' => 'Completa tu perfil y encuentra tu próxima oportunidad.']);
-
-            return $user;
-        });
+        $user = app(OperacionesService::class)->registrarUsuario($data);
         Auth::login($user);
         $request->session()->regenerate();
 

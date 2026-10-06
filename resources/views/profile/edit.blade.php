@@ -26,6 +26,21 @@
                         <strong>{{ $reviews->isNotEmpty() ? number_format($reviews->avg('calificacion'), 1) : '—' }}</strong><span>{{ $reviews->count() }}
                             reseñas recibidas</span></div>
                 </div>
+                <section class="panel ratings-panel spaced-heading" aria-labelledby="ratings-title">
+                    <h2 id="ratings-title">Mis valoraciones</h2>
+                    <p class="rating-average"><strong>{{ $reviews->isNotEmpty() ? number_format($reviews->avg('calificacion'), 1) : '—' }}</strong><span> / 5 ★</span></p>
+                    <p class="muted">{{ $reviews->count() }} {{ $reviews->count() === 1 ? 'valoración recibida' : 'valoraciones recibidas' }}</p>
+                    <div class="ratings-chart" role="list" aria-label="Cantidad de valoraciones por estrellas">
+                        @foreach ($ratings as $rating)
+                            <div class="rating-column stars-{{ $rating->estrellas }}" role="listitem" aria-label="{{ $rating->estrellas }} estrellas: {{ $rating->cantidad }} valoraciones">
+                                <span class="rating-count">{{ $rating->cantidad }}</span>
+                                <div class="rating-track" aria-hidden="true"><div class="rating-bar" style="height: {{ round($rating->cantidad / max(1, $ratings->max('cantidad')) * 100) }}%"></div></div>
+                                <span class="rating-label">{{ $rating->estrellas }} ★</span>
+                            </div>
+                        @endforeach
+                    </div>
+                    @if ($reviews->isEmpty())<p class="muted">Tus valoraciones aparecerán aquí cuando recibas reseñas.</p>@endif
+                </section>
             </aside>
             <div>
                 <form class="panel" method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data">
