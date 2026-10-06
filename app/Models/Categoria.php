@@ -13,4 +13,5 @@ class Categoria extends Model
     public $timestamps = false;
 
     protected $fillable = ['nombre_categoria', 'descripcion'];
+
 }
