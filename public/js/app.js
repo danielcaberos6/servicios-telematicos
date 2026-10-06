@@ -1,0 +1,60 @@
+document.querySelector(".menu-toggle")?.addEventListener("click", function () {
+    const expanded = this.getAttribute("aria-expanded") === "true";
+    this.setAttribute("aria-expanded", String(!expanded));
+    document
+        .querySelector("#navigation")
+        .classList.toggle("is-open", !expanded);
+});
+
+document.querySelectorAll("form[data-confirm]").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+        if (!window.confirm(form.dataset.confirm)) event.preventDefault();
+    });
+});
+
+document.querySelectorAll("[data-photo]").forEach((button) => {
+    button.addEventListener("click", () => {
+        document.querySelector("#main-photo").src = button.dataset.photo;
+        document
+            .querySelectorAll("[data-photo]")
+            .forEach((item) =>
+                item.classList.toggle("selected", item === button),
+            );
+    });
+});
+
+document.querySelectorAll("input[data-preview]").forEach((input) => {
+    let urls = [];
+    input.addEventListener("change", () => {
+        urls.forEach(URL.revokeObjectURL);
+        urls = [];
+        const target = document.getElementById(input.dataset.preview);
+        target.replaceChildren();
+        const files = [...input.files];
+        if (
+            files.length > 5 ||
+            files.some(
+                (file) =>
+                    file.size > 5 * 1024 * 1024 ||
+                    !["image/jpeg", "image/png", "image/webp"].includes(
+                        file.type,
+                    ),
+            )
+        ) {
+            input.setCustomValidity(
+                "Selecciona hasta 5 fotos JPG, PNG o WebP de máximo 5 MB cada una.",
+            );
+            input.reportValidity();
+            return;
+        }
+        input.setCustomValidity("");
+        files.forEach((file) => {
+            const url = URL.createObjectURL(file);
+            urls.push(url);
+            const image = document.createElement("img");
+            image.src = url;
+            image.alt = `Vista previa de ${file.name}`;
+            target.append(image);
+        });
+    });
+});

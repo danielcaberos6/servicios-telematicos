@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Models\Categoria;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,11 +16,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        foreach (['Tecnología', 'Hogar', 'Deportes', 'Moda y accesorios', 'Coleccionables', 'Otros'] as $name) {
+            Categoria::firstOrCreate(['nombre_categoria' => $name]);
+        }
+        foreach (['Usuario', 'Administrador', 'Moderador'] as $role) {
+            DB::table('rol')->insertOrIgnore(['nombre_rol' => $role]);
+        }
     }
 }
