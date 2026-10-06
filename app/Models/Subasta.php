@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Subasta extends Model
 {
-    public const CONDITIONS = ['Nuevo', 'Como nuevo', 'Usado'];
+    public const CONDITIONS = ['Nuevo', 'Usado'];
 
     protected $table = 'subasta';
 

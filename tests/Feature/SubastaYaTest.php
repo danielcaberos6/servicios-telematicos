@@ -23,8 +23,8 @@ class SubastaYaTest extends TestCase
         return array_replace([
             'titulo' => 'Cámara fotográfica de prueba',
             'descripcion' => 'Artículo en excelente estado con todos sus accesorios originales.',
-            'id_categoria' => Categoria::firstOrCreate(['nombre_categoria' => 'Tecnología'])->id_categoria,
-            'estado_articulo' => 'Como nuevo',
+            'id_categoria' => Categoria::firstOrCreate(['nombre_categoria' => 'Electrónica e informática'])->id_categoria,
+            'estado_articulo' => 'Usado',
             'ubicacion' => 'La Paz, Plaza Abaroa',
             'monto_inicial' => '100.50',
             'fecha_fin' => now()->addDays(3)->format('Y-m-d\TH:i'),
@@ -120,7 +120,7 @@ class SubastaYaTest extends TestCase
         $match = $this->auction(null, ['titulo' => 'Cámara única buscada', 'fecha_inicio' => now()->subDays(2), 'monto_inicial' => 350]);
         $other = $this->auction(null, ['titulo' => 'Otro artículo visible', 'monto_inicial' => 90]);
         $this->auction(null, ['titulo' => 'Cámara fuera de precio', 'monto_inicial' => 900]);
-        $params = ['q' => 'cámara', 'categoria' => $match->id_categoria, 'estado' => 'Como nuevo', 'ubicacion' => 'la paz', 'desde' => now()->subDays(3)->toDateString(), 'hasta' => now()->subDay()->toDateString(), 'min' => 300, 'max' => 400];
+        $params = ['q' => 'cámara', 'categoria' => $match->id_categoria, 'estado' => 'Usado', 'ubicacion' => 'la paz', 'desde' => now()->subDays(3)->toDateString(), 'hasta' => now()->subDay()->toDateString(), 'min' => 300, 'max' => 400];
         $this->get('/buscar?'.http_build_query($params))->assertOk()->assertSee($match->titulo)->assertDontSee($other->titulo)->assertDontSee('Cámara fuera de precio');
         $this->get('/buscar?orden=precio_asc')->assertSeeInOrder([$other->titulo, $match->titulo, 'Cámara fuera de precio']);
         $this->getJson('/buscar?min=500&max=100')->assertUnprocessable()->assertJsonValidationErrors('max');
@@ -270,9 +270,9 @@ class SubastaYaTest extends TestCase
         for ($i = 1; $i <= 13; $i++) {
             $this->auction($owner, ['titulo' => 'Artículo paginado '.$i]);
         }
-        $first = $this->get('/buscar?estado=Como+nuevo&min=50')->assertOk();
+        $first = $this->get('/buscar?estado=Usado&min=50')->assertOk();
         $first->assertSee('Página 1 de 2');
-        $first->assertSee('estado=Como%20nuevo&amp;min=50&amp;page=2', false);
-        $this->get('/buscar?estado=Como+nuevo&min=50&page=2')->assertOk()->assertSee('Página 2 de 2');
+        $first->assertSee('estado=Usado&amp;min=50&amp;page=2', false);
+        $this->get('/buscar?estado=Usado&min=50&page=2')->assertOk()->assertSee('Página 2 de 2');
     }
 }

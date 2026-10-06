@@ -165,7 +165,7 @@ create unique index usuario_correo_normalizado on usuario (lower(correo));
 alter table puja add column fecha_puja timestamptz not null default now();
 alter table subasta alter column estado_subasta set not null;
 alter table subasta add constraint subasta_estado_valido check (estado_subasta in ('Activa', 'Cancelada', 'Finalizada'));
-alter table subasta add constraint articulo_estado_valido check (estado_articulo in ('Nuevo', 'Como nuevo', 'Usado'));
+alter table subasta add constraint articulo_estado_valido check (estado_articulo in ('Nuevo', 'Usado'));
 create index subasta_catalogo_idx on subasta (estado_subasta, fecha_fin, fecha_inicio);
 create index subasta_categoria_idx on subasta (id_categoria);
 create index subasta_usuario_idx on subasta (id_usuario);
@@ -253,4 +253,20 @@ begin
 end;
 $$;
 
-
+-- BEGIN SEMILLAS PREDETERMINADAS
+insert into categoria (nombre_categoria) values
+    ('Vehículos'),
+    ('Antigüedades y coleccionables'),
+    ('Electrónica e informática'),
+    ('Muebles'),
+    ('Juguetes y juegos'),
+    ('Ropa, calzado y accesorios'),
+    ('Instrumentos musicales'),
+    ('Deporte'),
+    ('Videojuegos'),
+    ('Libros, películas y música'),
+    ('Varios')
+on conflict (nombre_categoria) do nothing;
+insert into rol (nombre_rol) values ('Usuario'), ('Administrador'), ('Moderador')
+on conflict (nombre_rol) do nothing;
+-- END SEMILLAS PREDETERMINADAS
