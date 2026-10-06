@@ -1,0 +1,42 @@
+services:
+  laravel:
+    build: .
+    working_dir: /app
+    command: >
+      sh -c "
+      composer install &&
+      php artisan serve --host=0.0.0.0 --port=8000
+      "
+    container_name: ServiciosTelematicos
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres
+    environment:
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    networks:
+      - telematicos_network
+
+  postgres:
+    image: postgres:16
+    container_name: Telematicos
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=ServiciosTelematicos
+      - POSTGRES_USER=ServiciosTelematicos
+      - POSTGRES_PASSWORD=ServiciosTelematicos
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - telematicos_network
+
+networks:
+  telematicos_network:
+
+volumes:
+  pgdata:
