@@ -1,42 +1,62 @@
-services:
-  laravel:
-    build: .
+name: subastaya
+
+x-app: &app
+    restart: unless-stopped
+    build:
+        context: .
+        dockerfile: dockerfile
     working_dir: /app
-    command: >
-      sh -c "
-      composer install &&
-      php artisan serve --host=0.0.0.0 --port=8000
-      "
-    container_name: ServiciosTelematicos
-    ports:
-      - "8000:8000"
     volumes:
-      - .:/app
-    depends_on:
-      - postgres
+        - .:/app
+        - vendor:/app/vendor
     environment:
-      - DB_CONNECTION=pgsql
-      - DB_HOST=postgres
-      - DB_PORT=5432
-    networks:
-      - telematicos_network
+        APP_URL: http://localhost:${APP_PORT:-8000}
+        DB_CONNECTION: pgsql
+        DB_HOST: postgres
+        DB_PORT: 5432
+        DB_DATABASE: ${DB_DATABASE:-subastaya}
+        DB_USERNAME: ${DB_USERNAME:-subastaya}
+        DB_PASSWORD: ${DB_PASSWORD:-subastaya_local}
 
-  postgres:
-    image: postgres:16
-    container_name: Telematicos
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_DB=ServiciosTelematicos
-      - POSTGRES_USER=ServiciosTelematicos
-      - POSTGRES_PASSWORD=ServiciosTelematicos
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    networks:
-      - telematicos_network
+services:
+    laravel:
+        <<: *app
+        ports:
+            - "127.0.0.1:${APP_PORT:-8000}:8000"
+        depends_on:
+            postgres:
+                condition: service_healthy
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:8000/up"]
+            interval: 10s
+            timeout: 5s
+            retries: 12
 
-networks:
-  telematicos_network:
+    scheduler:
+        <<: *app
+        entrypoint: ["php", "artisan", "schedule:work"]
+        depends_on:
+            laravel:
+                condition: service_healthy
+
+    postgres:
+        restart: unless-stopped
+        image: postgres:16
+        environment:
+            POSTGRES_DB: ${DB_DATABASE:-subastaya}
+            POSTGRES_USER: ${DB_USERNAME:-subastaya}
+            POSTGRES_PASSWORD: ${DB_PASSWORD:-subastaya_local}
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+        ports:
+            - "127.0.0.1:${POSTGRES_PORT:-5434}:5432"
+        healthcheck:
+            test:
+                ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+            interval: 5s
+            timeout: 5s
+            retries: 12
 
 volumes:
-  pgdata:
+    pgdata:
+    vendor:
