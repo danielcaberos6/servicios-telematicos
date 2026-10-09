@@ -119,6 +119,12 @@
                             </div>
                             <div class="publish-field">
                                 <label for="fecha_fin">Fecha y hora de cierre <span class="required-mark">*</span></label>
+                                <div class="duration-presets" data-duration-presets data-target="fecha_fin" role="group" aria-label="Duración rápida de la subasta">
+                                    <button type="button" class="duration-preset-btn" data-days="3">+ 3 días</button>
+                                    <button type="button" class="duration-preset-btn" data-days="5">+ 5 días</button>
+                                    <button type="button" class="duration-preset-btn" data-days="7">+ 7 días</button>
+                                    <button type="button" class="duration-preset-btn" data-days="14">+ 14 días</button>
+                                </div>
                                 <input id="fecha_fin" name="fecha_fin" type="datetime-local" required
                                     value="{{ old('fecha_fin', $subasta->fecha_fin?->format('Y-m-d\TH:i')) }}"
                                     min="{{ now()->format('Y-m-d\TH:i') }}" max="{{ now()->addYear()->format('Y-m-d\TH:i') }}"

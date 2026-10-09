@@ -410,4 +410,17 @@ class SubastaYaTest extends TestCase
         $first->assertSee('estado=Usado&amp;min=50&amp;page=2', false);
         $this->get('/buscar?estado=Usado&min=50&page=2')->assertOk()->assertSee('Página 2 de 2');
     }
+
+    public function test_create_form_displays_quick_duration_presets(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user)
+            ->get('/subastas/crear')
+            ->assertOk()
+            ->assertSee('data-duration-presets', false)
+            ->assertSee('+ 3 días')
+            ->assertSee('+ 5 días')
+            ->assertSee('+ 7 días')
+            ->assertSee('+ 14 días');
+    }
 }

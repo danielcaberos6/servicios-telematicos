@@ -107,6 +107,44 @@
 .publish-field small {
     margin-top: 8px;
 }
+.duration-presets {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 4px 0 10px;
+}
+.duration-preset-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 11px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    user-select: none;
+    line-height: 1.2;
+}
+.duration-preset-btn:hover {
+    background: #e9f0f8;
+    border-color: #b7cede;
+    color: var(--blue);
+}
+.duration-preset-btn:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 1px;
+}
+.duration-preset-btn.is-active {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(7, 62, 131, 0.25);
+}
 .publish-photo-rules {
     display: flex;
     flex-wrap: wrap;

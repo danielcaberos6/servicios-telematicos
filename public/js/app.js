@@ -78,3 +78,40 @@ document.querySelectorAll("[data-carrusel]").forEach((carrusel) => {
     window.addEventListener("resize", actualizar);
     actualizar();
 });
+
+document.querySelectorAll("[data-duration-presets]").forEach((container) => {
+    const targetInput = document.getElementById(container.dataset.target);
+    if (!targetInput) return;
+
+    const buttons = container.querySelectorAll("[data-days]");
+    const pad = (n) => String(n).padStart(2, "0");
+
+    const formatLocalDateTime = (date) => {
+        const y = date.getFullYear();
+        const m = pad(date.getMonth() + 1);
+        const d = pad(date.getDate());
+        const h = pad(date.getHours());
+        const min = pad(date.getMinutes());
+        return `${y}-${m}-${d}T${h}:${min}`;
+    };
+
+    buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+            const days = parseInt(button.dataset.days, 10);
+            if (isNaN(days)) return;
+
+            const targetDate = new Date();
+            targetDate.setDate(targetDate.getDate() + days);
+
+            targetInput.value = formatLocalDateTime(targetDate);
+            targetInput.dispatchEvent(new Event("input", { bubbles: true }));
+            targetInput.dispatchEvent(new Event("change", { bubbles: true }));
+
+            buttons.forEach((btn) => btn.classList.toggle("is-active", btn === button));
+        });
+    });
+
+    targetInput.addEventListener("input", () => {
+        buttons.forEach((btn) => btn.classList.remove("is-active"));
+    });
+});
