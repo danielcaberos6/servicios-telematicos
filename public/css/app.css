@@ -1081,6 +1081,9 @@ small {
     padding-top: 0;
     border: 0;
 }
+.auction-form .section-number {
+    flex-shrink: 0;
+}
 .section-number {
     background: #edf3fb;
     color: var(--blue);
@@ -1093,6 +1096,19 @@ small {
 }
 .auction-form > .muted {
     font-size: 12px;
+}
+.auction-form small {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--muted);
+}
+.auction-form input::placeholder,
+.auction-form textarea::placeholder {
+    color: #64748b;
+}
+.auction-form textarea {
+    min-height: 160px;
+    line-height: 1.6;
 }
 label {
     display: block;
@@ -1160,6 +1176,10 @@ form small {
     justify-content: flex-end;
     gap: 12px;
 }
+.auction-form .form-footer .button:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 3px;
+}
 .upload-area {
     padding: 28px 20px;
     border: 1px dashed #a9bfd6;
@@ -1177,6 +1197,11 @@ form small {
     height: 34px;
     color: #52769c;
 }
+.auction-form .upload-area:hover,
+.auction-form .upload-area:focus-within {
+    border-color: var(--blue);
+    background: #edf3fb;
+}
 .upload-area span {
     font-size: 11px;
     font-weight: 400;
@@ -1187,6 +1212,16 @@ form small {
     border: 0;
     max-width: 350px;
     margin-top: 8px;
+}
+.auction-form input[type="file"]::file-selector-button {
+    margin-right: 10px;
+    padding: 8px 12px;
+    border: 1px solid #bfcedc;
+    border-radius: 6px;
+    background: #fff;
+    color: var(--blue);
+    font: inherit;
+    cursor: pointer;
 }
 .image-preview,
 .existing-images {
@@ -1205,6 +1240,11 @@ form small {
 }
 .existing-images label {
     margin: 0;
+}
+.auction-form .image-preview img,
+.auction-form .existing-images img {
+    object-fit: contain;
+    background: #f5f8fc;
 }
 .existing-images label span {
     display: flex;
@@ -2019,11 +2059,20 @@ form small {
     .form-grid {
         gap: 12px;
     }
+    .auction-form .form-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
     .panel {
         padding: 20px;
     }
     .form-footer {
         gap: 8px;
+    }
+    .auction-form .form-footer {
+        flex-direction: column;
+    }
+    .auction-form .form-footer .button {
+        width: 100%;
     }
     .detail-grid {
         display: block;

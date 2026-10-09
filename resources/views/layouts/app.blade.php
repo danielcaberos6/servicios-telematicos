@@ -9,6 +9,7 @@
     <title>@yield('title', 'Dale una nueva historia a lo que te gusta') · SubastaYA</title>
     <link rel="icon" href="{{ asset('images/favicon.svg') }}" type="image/svg+xml">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    @stack('styles')
     <script src="{{ asset('js/app.js') }}" defer></script>
 </head>
 
