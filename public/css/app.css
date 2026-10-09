@@ -1097,6 +1097,11 @@ small {
 .auction-form > .muted {
     font-size: 12px;
 }
+.auction-form small {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--muted);
+}
 label {
     display: block;
     font-size: 13px;
