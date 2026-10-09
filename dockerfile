@@ -22,6 +22,13 @@ RUN mkdir -p storage/framework/views \
     bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
+# El contenedor corre con el UID/GID del anfitrión: los archivos creados en el
+# proyecto montado y en el volumen vendor pertenecen al usuario, no a root.
+ARG UID=1000
+ARG GID=1000
+RUN chown -R ${UID}:${GID} /app
+ENV COMPOSER_HOME=/tmp/composer
+
 RUN printf 'upload_max_filesize=5M\npost_max_size=30M\ndate.timezone=America/La_Paz\n' > /usr/local/etc/php/conf.d/subastaya.ini
 RUN sed -i 's/\r$//' /app/scripts/docker-entrypoint.sh && chmod +x /app/scripts/docker-entrypoint.sh
 EXPOSE 8000
