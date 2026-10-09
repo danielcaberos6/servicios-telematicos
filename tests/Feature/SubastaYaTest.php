@@ -421,6 +421,39 @@ class SubastaYaTest extends TestCase
             ->assertSee('+ 3 días')
             ->assertSee('+ 5 días')
             ->assertSee('+ 7 días')
-            ->assertSee('+ 14 días');
+            ->assertSee('+ 14 días')
+            ->assertSee('btn-geolocalizacion', false);
+    }
+
+    public function test_auction_can_be_published_with_gps_coordinates_and_displays_google_maps_link(): void
+    {
+        $owner = User::factory()->create();
+        $response = $this->actingAs($owner)->post('/subastas', $this->payload([
+            'latitud' => '-16.505123',
+            'longitud' => '-68.129456',
+        ]));
+        $response->assertSessionHasNoErrors()->assertRedirect();
+
+        $auction = Subasta::latest('id_subasta')->firstOrFail();
+        $this->assertEquals('-16.505123', (string) $auction->latitud);
+        $this->assertEquals('-68.129456', (string) $auction->longitud);
+
+        $this->get('/subastas/'.$auction->id_subasta)
+            ->assertOk()
+            ->assertSee('Ver punto de encuentro en Google Maps')
+            ->assertSee('https://www.google.com/maps/search/?api=1&query=-16.505123,-68.129456', false);
+    }
+
+    public function test_invalid_gps_coordinates_are_rejected(): void
+    {
+        $owner = User::factory()->create();
+        $this->actingAs($owner)->post('/subastas', $this->payload([
+            'latitud' => '95.123',
+            'longitud' => '-68.123',
+        ]))->assertSessionHasErrors('latitud');
+
+        $this->post('/subastas', $this->payload([
+            'latitud' => '-16.500',
+        ]))->assertSessionHasErrors('longitud');
     }
 }

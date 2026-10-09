@@ -157,3 +157,70 @@ document.querySelectorAll("[data-duration-presets]").forEach((container) => {
         buttons.forEach((btn) => btn.classList.remove("is-active"));
     });
 });
+
+const gpsBtn = document.getElementById("btn-geolocalizacion");
+if (gpsBtn) {
+    const latInput = document.getElementById("latitud");
+    const lngInput = document.getElementById("longitud");
+    const statusContainer = document.getElementById("gps-status");
+
+    const clearCoords = () => {
+        latInput.value = "";
+        lngInput.value = "";
+        statusContainer.innerHTML = "";
+    };
+
+    const attachClearListener = () => {
+        document.getElementById("btn-quitar-gps")?.addEventListener("click", clearCoords);
+    };
+
+    attachClearListener();
+
+    const renderBadge = (lat, lng) => {
+        statusContainer.innerHTML = `
+            <span class="gps-coords-badge">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                Coordenadas registradas: ${lat.toFixed(6)}, ${lng.toFixed(6)}
+                <button type="button" class="btn-clear-gps" id="btn-quitar-gps" title="Quitar coordenadas" aria-label="Quitar coordenadas">✕</button>
+            </span>
+        `;
+        attachClearListener();
+    };
+
+    gpsBtn.addEventListener("click", () => {
+        if (!navigator.geolocation) {
+            alert("Tu navegador no soporta geolocalización.");
+            return;
+        }
+
+        const originalHtml = gpsBtn.innerHTML;
+        gpsBtn.disabled = true;
+        gpsBtn.innerHTML = `<span>Buscando GPS...</span>`;
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                gpsBtn.disabled = false;
+                gpsBtn.innerHTML = originalHtml;
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                latInput.value = lat.toFixed(6);
+                lngInput.value = lng.toFixed(6);
+                renderBadge(lat, lng);
+            },
+            (error) => {
+                gpsBtn.disabled = false;
+                gpsBtn.innerHTML = originalHtml;
+                let message = "No se pudo obtener la ubicación.";
+                if (error.code === error.PERMISSION_DENIED) {
+                    message = "Permiso de geolocalización denegado en el navegador.";
+                } else if (error.code === error.POSITION_UNAVAILABLE) {
+                    message = "La información de ubicación no está disponible.";
+                } else if (error.code === error.TIMEOUT) {
+                    message = "Se agotó el tiempo de espera para obtener la ubicación.";
+                }
+                alert(message);
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+        );
+    });
+}
