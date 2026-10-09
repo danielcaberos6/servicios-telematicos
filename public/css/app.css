@@ -2025,6 +2025,12 @@ form small {
     .form-footer {
         gap: 8px;
     }
+    .auction-form .form-footer {
+        flex-direction: column;
+    }
+    .auction-form .form-footer .button {
+        width: 100%;
+    }
     .detail-grid {
         display: block;
     }
