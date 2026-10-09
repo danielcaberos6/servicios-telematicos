@@ -2019,6 +2019,9 @@ form small {
     .form-grid {
         gap: 12px;
     }
+    .auction-form .form-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
     .panel {
         padding: 20px;
     }
