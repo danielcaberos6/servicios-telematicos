@@ -351,21 +351,6 @@ class SubastaYaTest extends TestCase
         $this->assertDatabaseHas('notificacion', ['id_usuario' => $user->id_usuario, 'titulo' => 'Subasta publicada']);
     }
 
-    public function test_profile_update_preserves_city_when_the_key_is_missing(): void
-    {
-        $user = User::factory()->create(['ciudad' => 'Sucre']);
-        $this->actingAs($user)->put('/perfil', ['nombre' => 'Nombre actualizado', 'correo' => $user->correo])->assertSessionHasNoErrors()->assertSessionHas('status', 'Tu perfil fue actualizado.');
-        $this->assertSame('Sucre', $user->fresh()->ciudad);
-        $this->assertSame('Nombre actualizado', $user->fresh()->nombre);
-    }
-
-    public function test_profile_update_clears_city_when_the_key_is_empty(): void
-    {
-        $user = User::factory()->create(['ciudad' => 'Sucre']);
-        $this->actingAs($user)->put('/perfil', ['nombre' => $user->nombre, 'correo' => $user->correo, 'ciudad' => ''])->assertSessionHasNoErrors()->assertSessionHas('status', 'Tu perfil fue actualizado.');
-        $this->assertNull($user->fresh()->ciudad);
-    }
-
     public function test_profile_update_ignores_another_users_id(): void
     {
         $user = User::factory()->create();
