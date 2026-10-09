@@ -1106,6 +1106,10 @@ small {
 .auction-form textarea::placeholder {
     color: #64748b;
 }
+.auction-form textarea {
+    min-height: 160px;
+    line-height: 1.6;
+}
 label {
     display: block;
     font-size: 13px;
