@@ -23,6 +23,7 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
+        $request->mergeIfMissing($request->user()->only(['nombre', 'correo', 'biografia', 'ciudad', 'telefono']));
         $request->merge(['correo' => mb_strtolower(trim((string) $request->input('correo')))]);
         $data = $request->validate([
             'nombre' => ['required', 'string', 'max:100'],
