@@ -12,7 +12,7 @@
             <p class="muted">Entra a tu cuenta de SubastaYA.</p>
             <form method="post" action="{{ route('iniciar-sesion') }}">@csrf<label for="correo">Correo electrónico</label><input
                     id="correo" name="correo" type="email" value="{{ old('correo') }}" required autocomplete="email"
-                    placeholder="tu@correo.com"><label for="password">Contraseña</label><input id="password"
+                    placeholder="tucorreo@gmail.com"><label for="password">Contraseña</label><input id="password"
                     name="password" type="password" required autocomplete="current-password"><label
                     class="checkbox-label"><input type="checkbox" name="remember" value="1"
                         @checked(old('remember'))>Recordarme en este equipo</label><button
