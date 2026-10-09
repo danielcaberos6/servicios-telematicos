@@ -1,0 +1,325 @@
+.publish-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    margin-bottom: 30px;
+}
+.publish-heading .page-title {
+    margin: 6px 0 10px;
+}
+.publish-heading p {
+    margin: 0;
+    color: var(--muted);
+}
+.publish-heading .eyebrow {
+    color: var(--blue);
+}
+.publish-required {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 12px;
+    background: var(--paper);
+}
+.publish-required span,
+.required-mark {
+    color: var(--blue);
+}
+.publish-layout {
+    grid-template-columns: minmax(0, 2.5fr) minmax(260px, 1fr);
+    gap: 28px;
+    align-items: start;
+}
+.publish-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+    min-width: 0;
+}
+.publish-section {
+    padding: 28px;
+    box-shadow: 0 4px 18px rgb(6 41 67 / 3%);
+}
+.publish-section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding-bottom: 22px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+}
+.publish-section-heading > div {
+    min-width: 0;
+}
+.auction-form .publish-section h2 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 5px;
+    padding: 0;
+    border: 0;
+    font-size: 20px;
+    line-height: 1.35;
+}
+.publish-section-heading p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+.publish-section .section-number {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+.publish-optional {
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--paper);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 500;
+}
+.publish-fields {
+    display: grid;
+    gap: 22px;
+}
+.publish-field {
+    min-width: 0;
+}
+.publish-field label {
+    margin: 0 0 8px;
+}
+.publish-field input,
+.publish-field select,
+.publish-field textarea {
+    border-radius: 8px;
+    font-size: 14px;
+}
+.publish-field input,
+.publish-field select {
+    min-height: 48px;
+}
+.publish-field small {
+    margin-top: 8px;
+}
+.publish-photo-rules {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+.publish-photo-rules span {
+    padding: 4px 9px;
+    border-radius: 6px;
+    background: var(--paper);
+    color: #496883;
+    font-size: 12px;
+}
+.publish-upload {
+    margin: 0;
+    padding: 28px 20px;
+    gap: 10px;
+}
+.publish-upload-icon {
+    display: grid;
+    place-items: center;
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    background: #edf3fb;
+}
+.publish-upload-icon .icon {
+    width: 28px;
+    height: 28px;
+    color: var(--blue);
+}
+.publish-upload strong {
+    font-size: 14px;
+}
+.publish-upload > span:not(.publish-upload-icon) {
+    font-size: 12px;
+    line-height: 1.5;
+}
+.publish-upload input {
+    min-width: 0;
+    max-width: 350px;
+    width: 100%;
+}
+.auction-form .publish-photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    margin: 18px 0 0;
+}
+.publish-photo-grid:empty {
+    display: none;
+}
+.publish-upload + .publish-photo-grid:empty {
+    margin: 0;
+}
+.existing-images.publish-photo-grid {
+    margin: 0 0 18px;
+}
+.auction-form .publish-photo-grid img {
+    display: block;
+    width: 100%;
+    height: 120px;
+    padding: 6px;
+    border-radius: 10px;
+}
+.publish-photo-card {
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+}
+.auction-form .publish-photo-card img {
+    border: 0;
+    border-radius: 0;
+}
+.existing-images .publish-photo-card span {
+    padding: 10px;
+    font-size: 12px;
+    border-top: 1px solid var(--line);
+}
+.publish-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 22px 28px;
+    background: var(--paper);
+}
+.publish-actions > p {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0;
+    font-size: 12px;
+    color: var(--muted);
+}
+.publish-actions > p .icon {
+    flex-shrink: 0;
+    color: var(--blue);
+}
+.publish-actions .form-footer {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+.publish-aside {
+    position: sticky;
+    top: 110px;
+}
+.publish-advice {
+    background: #f5f8fc;
+}
+.publish-advice .eyebrow {
+    margin: 0 0 8px;
+    color: var(--blue);
+}
+.publish-advice h3 {
+    margin: 0 0 24px;
+    line-height: 1.4;
+}
+.publish-tips {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 20px;
+}
+.publish-tips li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+.publish-tips .icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--blue);
+}
+.publish-tips strong {
+    font-size: 13px;
+}
+.publish-tips p {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+.publish-meeting {
+    margin-top: 18px;
+    border: 1px solid #dce7f4;
+    line-height: 1.6;
+}
+.publish-meeting > .icon {
+    flex-shrink: 0;
+}
+.publish-meeting strong {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--navy);
+}
+@media (max-width: 1000px) {
+    .publish-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .publish-aside {
+        position: static;
+    }
+    .publish-tips {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+@media (max-width: 700px) {
+    .publish-heading {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .publish-form {
+        gap: 18px;
+    }
+    .publish-section {
+        padding: 20px;
+    }
+    .publish-section-heading {
+        gap: 12px;
+        padding-bottom: 18px;
+        margin-bottom: 20px;
+    }
+    .auction-form .publish-section h2 {
+        font-size: 18px;
+    }
+    .publish-section .section-number {
+        width: 32px;
+        height: 32px;
+    }
+    .publish-fields {
+        gap: 20px;
+    }
+    .publish-upload {
+        padding: 22px 12px;
+    }
+    .publish-actions {
+        padding: 20px;
+        align-items: stretch;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .publish-actions .form-footer {
+        width: 100%;
+    }
+    .publish-tips {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 18px;
+    }
+}
