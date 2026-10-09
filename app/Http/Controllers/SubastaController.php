@@ -24,7 +24,7 @@ class SubastaController extends Controller
     public function inicio()
     {
         return view('inicio', [
-            'subastas' => $this->catalogoService->consultar()->orderBy('fecha_fin')->limit(4)->get(),
+            'subastas' => $this->catalogoService->consultar()->orderBy('fecha_fin')->limit(8)->get(),
             'totalActivas' => $this->catalogoService->consultar()->count(),
             'categorias' => $this->catalogoService->categorias(),
         ]);
