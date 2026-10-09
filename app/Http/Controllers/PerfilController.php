@@ -53,7 +53,11 @@ class PerfilController extends Controller
             throw $e;
         }
         if ($old) {
-            Storage::disk('public')->delete($old);
+            try {
+                Storage::disk('public')->delete($old);
+            } catch (\Throwable $e) {
+                report($e);
+            }
         }
 
         return back()->with('status', 'Tu perfil fue actualizado.');

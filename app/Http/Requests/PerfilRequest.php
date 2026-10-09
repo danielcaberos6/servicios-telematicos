@@ -21,7 +21,7 @@ class PerfilRequest extends FormRequest
             'correo' => ['required', 'email', 'max:254', Rule::unique('usuario', 'correo')->ignore($usuario->id_usuario, 'id_usuario')],
             'biografia' => ['nullable', 'string', 'max:1000'],
             'ciudad' => ['nullable', 'string', 'max:100'],
-            'telefono' => ['nullable', 'string', 'max:25', 'regex:/^[+0-9()\s-]+$/'],
+            'telefono' => ['nullable', 'string', 'max:25', 'regex:/^[+0-9()\s-]+$/', 'regex:/^(?:[+()\s-]*[0-9]){7,15}[+()\s-]*$/'],
             'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120', 'dimensions:max_width=8000,max_height=8000'],
             'quitar_foto' => ['nullable', 'boolean'],
             'password' => ['nullable', 'string', 'min:8', 'max:72', 'confirmed'],
