@@ -1081,6 +1081,9 @@ small {
     padding-top: 0;
     border: 0;
 }
+.auction-form .section-number {
+    flex-shrink: 0;
+}
 .section-number {
     background: #edf3fb;
     color: var(--blue);
