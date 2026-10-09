@@ -2,54 +2,47 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PerfilRequest;
 use App\Models\User;
-use App\Services\OperacionesService;
+use App\Services\ImagenService;
+use App\Services\UsuarioService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 
-class ProfileController extends Controller
+class PerfilController extends Controller
 {
+    public function __construct(
+        private ImagenService $imagenService,
+        private UsuarioService $usuarioService,
+    ) {}
+
     public function edit(Request $request)
     {
         $user = $request->user()->fresh('imagen');
-        $operations = app(OperacionesService::class);
-        $reviews = $operations->resenas($user->id_usuario);
-        $ratings = $operations->valoraciones($user->id_usuario);
+        $reviews = $this->usuarioService->resenas($user->id_usuario);
+        $ratings = $this->usuarioService->valoraciones($user->id_usuario);
 
-        return view('profile.edit', compact('user', 'reviews', 'ratings'));
+        return view('perfil.edit', compact('user', 'reviews', 'ratings'));
     }
 
-    public function update(Request $request)
+    public function update(PerfilRequest $request)
     {
-        $request->merge(['correo' => mb_strtolower(trim((string) $request->input('correo')))]);
-        $data = $request->validate([
-            'nombre' => ['required', 'string', 'max:100'],
-            'correo' => ['required', 'email', 'max:254', Rule::unique('usuario', 'correo')->ignore($request->user()->id_usuario, 'id_usuario')],
-            'biografia' => ['nullable', 'string', 'max:1000'],
-            'ciudad' => ['nullable', 'string', 'max:100'],
-            'telefono' => ['nullable', 'string', 'max:25', 'regex:/^[+0-9()\s-]+$/'],
-            'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120', 'dimensions:max_width=8000,max_height=8000'],
-            'quitar_foto' => ['nullable', 'boolean'],
-            'password' => ['nullable', 'string', 'min:8', 'max:72', 'confirmed'],
-            'current_password' => [Rule::requiredIf($request->filled('password') || $request->input('correo') !== $request->user()->correo), 'nullable', 'current_password'],
-        ]);
+        $data = $request->validated();
         $path = null;
         $old = null;
         try {
             DB::transaction(function () use ($request, $data, &$path, &$old) {
                 $user = User::whereKey($request->user()->id_usuario)->lockForUpdate()->firstOrFail();
-                $operations = app(OperacionesService::class);
-                $operations->actualizarUsuario($user->id_usuario, collect($data)->only(['nombre', 'correo', 'biografia', 'ciudad', 'telefono', 'password'])->all());
+                $this->usuarioService->actualizar($user->id_usuario, collect($data)->only(['nombre', 'correo', 'biografia', 'ciudad', 'telefono', 'password'])->all());
                 if ($request->hasFile('foto') || $request->boolean('quitar_foto')) {
                     $old = $user->imagen?->ruta;
                     if ($user->imagen) {
-                        $operations->eliminarImagen($user->id_usuario, $user->imagen->id_imagen);
+                        $this->imagenService->eliminar($user->id_usuario, $user->imagen->id_imagen);
                     }
                     if ($request->hasFile('foto')) {
                         $path = $request->file('foto')->store('perfiles/'.$user->id_usuario, 'public');
-                        $operations->guardarImagen($user->id_usuario, null, $path, $request->file('foto')->getSize());
+                        $this->imagenService->guardar($user->id_usuario, null, $path, $request->file('foto')->getSize());
                     }
                 }
             });

@@ -1,11 +1,11 @@
-@extends('layouts.app')
+@extends('plantillas.principal')
 @section('title', $subasta->exists ? 'Editar subasta' : 'Crear subasta')
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/auction-form.css') }}">
 @endpush
 @section('content')
     <div class="container section publish-page">
-        <a class="breadcrumb" href="{{ route('auctions.mine') }}">← Mis Subastas</a>
+        <a class="breadcrumb" href="{{ route('subastas.mias') }}">← Mis Subastas</a>
         <header class="publish-heading">
             <div>
                 <p class="eyebrow">DALE UNA NUEVA OPORTUNIDAD</p>
@@ -17,7 +17,7 @@
 
         <div class="form-layout publish-layout">
             <form class="auction-form publish-form" method="post"
-                action="{{ $subasta->exists ? route('auctions.update', $subasta) : route('auctions.store') }}"
+                action="{{ $subasta->exists ? route('subastas.update', $subasta) : route('subastas.store') }}"
                 enctype="multipart/form-data">
                 @csrf
                 @if ($subasta->exists)
@@ -91,7 +91,7 @@
                         </div>
                     @endif
                     <label class="upload-area publish-upload" for="imagenes">
-                        <span class="publish-upload-icon"><x-icon name="image" /></span>
+                        <span class="publish-upload-icon"><x-icono nombre="image" /></span>
                         <strong>Selecciona las fotos de tu artículo</strong>
                         <span>La primera fotografía será la portada de la publicación.</span>
                         <input id="imagenes" name="imagenes[]" type="file" multiple accept="image/jpeg,image/png,image/webp"
@@ -137,10 +137,10 @@
                 </section>
 
                 <div class="panel publish-actions">
-                    <p><x-icon name="shield" /> Revisa los datos antes de {{ $subasta->exists ? 'guardar los cambios' : 'publicar' }}.</p>
+                    <p><x-icono nombre="shield" /> Revisa los datos antes de {{ $subasta->exists ? 'guardar los cambios' : 'publicar' }}.</p>
                     <div class="form-footer">
-                        <a class="button secondary" href="{{ $subasta->exists ? route('auctions.show', $subasta) : route('auctions.mine') }}">Cancelar</a>
-                        <button class="button primary" type="submit"><x-icon name="gavel" />
+                        <a class="button secondary" href="{{ $subasta->exists ? route('subastas.show', $subasta) : route('subastas.mias') }}">Cancelar</a>
+                        <button class="button primary" type="submit"><x-icono nombre="gavel" />
                             {{ $subasta->exists ? 'Guardar cambios' : 'Publicar subasta' }}
                         </button>
                     </div>
@@ -152,12 +152,12 @@
                     <p class="eyebrow">ANTES DE PUBLICAR</p>
                     <h3 id="publish-advice-heading">Los detalles hacen la diferencia</h3>
                     <ul class="publish-tips">
-                        <li><x-icon name="box" /><div><strong>Un título claro</strong><p>Identifica el artículo y menciona su característica principal.</p></div></li>
-                        <li><x-icon name="image" /><div><strong>Fotos propias</strong><p>Muestra el artículo y sus detalles de uso con buena iluminación.</p></div></li>
-                        <li><x-icon name="clock" /><div><strong>Condiciones claras</strong><p>Elige el monto y el cierre con cuidado. Con una oferta, ya no podrás editar ni eliminar la subasta.</p></div></li>
+                        <li><x-icono nombre="box" /><div><strong>Un título claro</strong><p>Identifica el artículo y menciona su característica principal.</p></div></li>
+                        <li><x-icono nombre="image" /><div><strong>Fotos propias</strong><p>Muestra el artículo y sus detalles de uso con buena iluminación.</p></div></li>
+                        <li><x-icono nombre="clock" /><div><strong>Condiciones claras</strong><p>Elige el monto y el cierre con cuidado. Con una oferta, ya no podrás editar ni eliminar la subasta.</p></div></li>
                     </ul>
                 </div>
-                <div class="info-note publish-meeting"><x-icon name="pin" />
+                <div class="info-note publish-meeting"><x-icono nombre="pin" />
                     <div><strong>Un lugar público para encontrarse</strong><p>El pago y la entrega se coordinan entre vendedor y ganador.</p></div>
                 </div>
             </aside>

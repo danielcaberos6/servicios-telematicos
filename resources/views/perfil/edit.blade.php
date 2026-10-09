@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('plantillas.principal')
 @section('title', 'Mi perfil')
 @section('content')
     <div class="container section">
@@ -43,7 +43,7 @@
                 </section>
             </aside>
             <div>
-                <form class="panel" method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data">
+                <form class="panel" method="post" action="{{ route('perfil.update') }}" enctype="multipart/form-data">
                     @csrf @method('PUT')<h2>Información personal</h2><label for="nombre">Nombre completo
                         *</label><input id="nombre" name="nombre" value="{{ old('nombre', $user->nombre) }}" required
                         maxlength="100">

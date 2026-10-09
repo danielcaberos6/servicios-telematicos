@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PujaRequest;
 use App\Models\Subasta;
-use App\Services\OperacionesService;
-use Illuminate\Http\Request;
+use App\Services\PujaService;
 
 class PujaController extends Controller
 {
-    public function store(Request $request, Subasta $subasta)
+    public function __construct(
+        private PujaService $pujaService,
+    ) {}
+
+    public function store(PujaRequest $request, Subasta $subasta)
     {
-        $data = $request->validate(['monto' => ['required', 'numeric', 'decimal:0,2', 'min:0.01', 'max:9999999999.99']]);
-        app(OperacionesService::class)->pujar($request->user()->id_usuario, $subasta->id_subasta, (string) $data['monto']);
+        $data = $request->validated();
+        $this->pujaService->registrar($request->user()->id_usuario, $subasta->id_subasta, (string) $data['monto']);
 
         return back()->with('status', 'Tu oferta fue registrada.');
     }

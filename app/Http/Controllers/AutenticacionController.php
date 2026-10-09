@@ -2,33 +2,33 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\OperacionesService;
+use App\Http\Requests\InicioSesionRequest;
+use App\Http\Requests\RegistroRequest;
+use App\Services\UsuarioService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 
-class AuthController extends Controller
+class AutenticacionController extends Controller
 {
-    public function register(Request $request)
+    public function __construct(
+        private UsuarioService $usuarioService,
+    ) {}
+
+    public function registrar(RegistroRequest $request)
     {
-        $request->merge(['correo' => mb_strtolower(trim((string) $request->input('correo')))]);
-        $data = $request->validate([
-            'nombre' => ['required', 'string', 'max:100'],
-            'correo' => ['required', 'email', 'max:254', 'unique:usuario,correo'],
-            'password' => ['required', 'string', 'min:8', 'max:72', 'confirmed'],
-        ]);
-        $user = app(OperacionesService::class)->registrarUsuario($data);
+        $data = $request->validated();
+        $user = $this->usuarioService->registrar($data);
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->intended(route('home'))->with('status', 'Tu cuenta está lista. ¡Bienvenido a SubastaYA!');
+        return redirect()->intended(route('inicio'))->with('status', 'Tu cuenta está lista. ¡Bienvenido a SubastaYA!');
     }
 
-    public function login(Request $request)
+    public function iniciarSesion(InicioSesionRequest $request)
     {
-        $request->merge(['correo' => mb_strtolower(trim((string) $request->input('correo')))]);
-        $data = $request->validate(['correo' => ['required', 'email'], 'password' => ['required', 'string']]);
+        $data = $request->validated();
         $key = 'login:'.hash('sha256', $data['correo'].'|'.$request->ip());
         if (RateLimiter::tooManyAttempts($key, 5)) {
             throw ValidationException::withMessages(['correo' => 'Demasiados intentos. Vuelve a intentar en '.RateLimiter::availableIn($key).' segundos.']);
@@ -40,15 +40,15 @@ class AuthController extends Controller
         RateLimiter::clear($key);
         $request->session()->regenerate();
 
-        return redirect()->intended(route('home'));
+        return redirect()->intended(route('inicio'));
     }
 
-    public function logout(Request $request)
+    public function cerrarSesion(Request $request)
     {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('home')->with('status', 'Cerraste sesión correctamente.');
+        return redirect()->route('inicio')->with('status', 'Cerraste sesión correctamente.');
     }
 }

@@ -1,4 +1,4 @@
-@props(['name' => 'gavel'])
+@props(['nombre' => 'gavel'])
 @php
     $paths = [
         'home' => 'm3 10 9-7 9 7M5 9v12h14V9M9 21v-8h6v8',
@@ -25,5 +25,5 @@
 @endphp
 <svg {{ $attributes->class(['icon']) }} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="{{ $paths[$name] ?? $paths['box'] }}" />
+    <path d="{{ $paths[$nombre] ?? $paths['box'] }}" />
 </svg>

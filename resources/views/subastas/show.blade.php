@@ -1,15 +1,15 @@
-@extends('layouts.app')
+@extends('plantillas.principal')
 @section('title', $subasta->titulo)
 @section('content')
 
     <div class="container section">
-        <a class="breadcrumb" href="{{ route('auctions.index') }}">← Volver al catálogo</a>
+        <a class="breadcrumb" href="{{ route('subastas.index') }}">← Volver al catálogo</a>
         <div class="detail-grid">
             <div>
                 <div class="detail-image">
                     @if ($subasta->imagenes->isNotEmpty())
                     <img id="main-photo" src="{{ $subasta->imagenes->first()->url }}" alt="{{ $subasta->titulo }}">@else
-                        <div class="image-placeholder"><x-icon name="image" /><span>Este artículo todavía no tiene
+                        <div class="image-placeholder"><x-icono nombre="image" /><span>Este artículo todavía no tiene
                                 fotos</span></div>
                     @endif
                 </div>
@@ -60,11 +60,11 @@
                     <small>{{ $subasta->pujas_count ? 'Oferta actual' : 'Monto inicial' }}</small><strong
                         class="detail-price">Bs
                         {{ number_format($subasta->pujas_max_monto ?? $subasta->monto_inicial, 2, ',', '.') }}</strong>
-                    <div class="bid-meta"><span>{{ $subasta->pujas_count }} ofertas</span><span><x-icon
-                                name="clock" />{{ $subasta->estado === 'Activa' ? 'Cierra ' . $subasta->fecha_fin->diffForHumans() : $subasta->estado }}</span>
+                    <div class="bid-meta"><span>{{ $subasta->pujas_count }} ofertas</span><span><x-icono
+                                nombre="clock" />{{ $subasta->estado === 'Activa' ? 'Cierra ' . $subasta->fecha_fin->diffForHumans() : $subasta->estado }}</span>
                     </div>
                     <div @class(['auction-deadline', 'auction-ended' => $subasta->estado === 'Finalizada'])>
-                        <x-icon name="clock" />
+                        <x-icono nombre="clock" />
                         <div><strong>{{ $subasta->estado === 'Finalizada' ? 'Subasta finalizada' : ($subasta->estado === 'Cancelada' ? 'Subasta cancelada' : 'Finaliza el') }}</strong>
                             <time datetime="{{ $subasta->fecha_fin->toIso8601String() }}">{{ $subasta->fecha_fin->format('d/m/Y \a \l\a\s H:i') }} (Bolivia)</time>
                             @if ($subasta->estado === 'Finalizada')<small>{{ $ganadora ? 'La oferta ganadora está confirmada.' : 'La subasta terminó sin ofertas.' }}</small>@endif
@@ -74,12 +74,12 @@
                         @auth
                             @if (auth()->id() === $subasta->id_usuario)
                                 <div class="info-note">Esta es tu subasta. @if (!$subasta->pujas_count)
-                                        <a href="{{ route('auctions.edit', $subasta) }}">Editar publicación →</a>
+                                        <a href="{{ route('subastas.edit', $subasta) }}">Editar publicación →</a>
                                     @else
                                         Recibiste ofertas; la edición está cerrada.
                                     @endif
                                 </div>
-                            @else<form method="post" action="{{ route('bids.store', $subasta) }}"
+                            @else<form method="post" action="{{ route('pujas.store', $subasta) }}"
                                     data-confirm="¿Confirmas esta oferta? Las ofertas registradas no pueden retirarse.">
                                     @csrf<label for="monto">Tu oferta (Bs)</label>
                                     <div class="bid-input"><input id="monto" name="monto" type="number" step="0.01"
@@ -89,13 +89,13 @@
                                             required><button class="button primary" type="submit">Hacer oferta</button></div>
                                 </form>
                             @endif
-                        @else<a class="button primary full-width" href="{{ route('login') }}">Inicia sesión para
+                        @else<a class="button primary full-width" href="{{ route('iniciar-sesion') }}">Inicia sesión para
                             ofertar</a>@endauth
                     @else<p>Esta subasta ya no admite ofertas.</p>
                     @endif
                 </div>
                 <div class="panel meeting-panel">
-                    <h3><x-icon name="pin" />Punto de encuentro</h3>
+                    <h3><x-icono nombre="pin" />Punto de encuentro</h3>
                     <p>{{ $subasta->ubicacion }}</p><small>El vendedor y el ganador coordinan la entrega y el pago.</small>
                 </div>
                 <div class="seller"><span

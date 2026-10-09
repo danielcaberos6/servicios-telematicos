@@ -1,10 +1,10 @@
-@extends('layouts.app')
+@extends('plantillas.principal')
 @section('title', 'Buscar subastas')
 @section('content')
 
     <section class="search-band">
         <div class="container">
-            <form class="search-bar" action="{{ route('auctions.index') }}" method="get"><x-icon name="search" /><input
+            <form class="search-bar" action="{{ route('subastas.index') }}" method="get"><x-icono nombre="search" /><input
                     type="search" name="q" value="{{ request('q') }}" placeholder="¿Qué estás buscando hoy?"
                     aria-label="Buscar por título o descripción" maxlength="120">
                 @foreach (request()->except(['q', 'page']) as $key => $value)
@@ -23,15 +23,15 @@
                 <p class="eyebrow">EXPLORA Y ENCUENTRA</p>
                 <h1 class="page-title">Catálogo de subastas</h1>
                 <p>Artículos activos, listos para recibir tu oferta.</p>
-            </div>@auth<a href="{{ route('auctions.create') }}" class="button primary"><x-icon name="plus" />Crear
+            </div>@auth<a href="{{ route('subastas.create') }}" class="button primary"><x-icono nombre="plus" />Crear
                 subasta</a>@endauth
         </div>
         <div class="catalog-layout">
             <aside class="filter-panel">  
                 <div class="filter-heading">
-                    <h2><x-icon name="filter" />Filtros</h2><a href="{{ route('auctions.index') }}">Limpiar</a>
+                    <h2><x-icono nombre="filter" />Filtros</h2><a href="{{ route('subastas.index') }}">Limpiar</a>
                 </div>
-                <form method="get" action="{{ route('auctions.index') }}">
+                <form method="get" action="{{ route('subastas.index') }}">
                     <input type="hidden" name="q" value="{{ request('q') }}">
                     <label for="categoria">Categoría</label><select id="categoria" name="categoria">
                         <option value="">Todas las categorías</option>
@@ -86,7 +86,7 @@
                     <div class="filter-chips">
                         @foreach (request()->except(['page', 'orden']) as $key => $value)
                             @if (is_scalar($value) && $value !== null && $value !== '')
-                                <a href="{{ route('auctions.index', request()->except([$key, 'page'])) }}"
+                                <a href="{{ route('subastas.index', request()->except([$key, 'page'])) }}"
                                     aria-label="Quitar filtro {{ $key }}">{{ ['q' => 'Búsqueda', 'categoria' => 'Categoría', 'estado' => 'Estado', 'desde' => 'Desde', 'hasta' => 'Hasta', 'min' => 'Desde Bs', 'max' => 'Hasta Bs', 'ubicacion' => 'Lugar'][$key] ?? $key }}:
                                     {{ $key === 'categoria' ? $categorias->firstWhere('id_categoria', $value)?->nombre_categoria : $value }}
                                     <span>×</span></a>
@@ -96,13 +96,13 @@
                 @endif
                 <div class="auction-grid catalog-grid">
                     @forelse($subastas as $subasta)
-                    <x-auction-card :subasta="$subasta" />@empty<div class="empty-state"><x-icon name="search" />
+                    <x-tarjeta-subasta :subasta="$subasta" />@empty<div class="empty-state"><x-icono nombre="search" />
                             <h2>No encontramos coincidencias</h2>
                             <p>Prueba con otra búsqueda o amplía los filtros.</p><a class="button secondary"
-                                href="{{ route('auctions.index') }}">Limpiar filtros</a>
+                                href="{{ route('subastas.index') }}">Limpiar filtros</a>
                         </div>
                     @endforelse
-                </div><x-pagination :items="$subastas" />
+                </div><x-paginacion :elementos="$subastas" />
             </section>
         </div>
     </div>
