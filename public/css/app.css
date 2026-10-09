@@ -1237,6 +1237,11 @@ form small {
 .existing-images label {
     margin: 0;
 }
+.auction-form .image-preview img,
+.auction-form .existing-images img {
+    object-fit: contain;
+    background: #f5f8fc;
+}
 .existing-images label span {
     display: flex;
     align-items: center;
