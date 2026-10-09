@@ -51,7 +51,7 @@
                         <div><label for="correo">Correo electrónico *</label><input id="correo" name="correo"
                                 type="email" value="{{ old('correo', $user->correo) }}" required maxlength="254"></div>
                         <div><label for="telefono">Teléfono</label><input id="telefono" name="telefono" type="tel"
-                                value="{{ old('telefono', $user->telefono) }}" maxlength="25"></div>
+                                value="{{ old('telefono', $user->telefono) }}" maxlength="25" pattern="(?:[\+\(\)\s\-]*[0-9]){7,15}[\+\(\)\s\-]*"></div>
                     </div><label for="ciudad">Ciudad</label><input id="ciudad" name="ciudad"
                         value="{{ old('ciudad', $user->ciudad) }}" maxlength="100"><label for="biografia">Biografía</label>
                     <textarea id="biografia" name="biografia" rows="3" maxlength="1000">{{ old('biografia', $user->biografia) }}</textarea><label for="foto">Foto de perfil</label><input id="foto"

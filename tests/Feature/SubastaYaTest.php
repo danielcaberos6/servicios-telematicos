@@ -235,6 +235,24 @@ class SubastaYaTest extends TestCase
         $this->assertSame($before, $user->fresh()->getAttributes());
     }
 
+    public function test_profile_rejects_phones_without_seven_to_fifteen_digits(): void
+    {
+        $user = User::factory()->create(['telefono' => '76543210']);
+        $before = $user->fresh()->getAttributes();
+        $this->actingAs($user);
+        foreach (['+++', '---', '12345', '1234567890123456'] as $phone) {
+            $this->put('/perfil', ['nombre' => 'Nombre rechazado', 'correo' => $user->correo, 'telefono' => $phone])->assertSessionHasErrors('telefono');
+            $this->assertSame($before, $user->fresh()->getAttributes());
+        }
+    }
+
+    public function test_profile_accepts_phone_with_country_code_spaces_and_hyphens(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user)->put('/perfil', ['nombre' => $user->nombre, 'correo' => $user->correo, 'telefono' => '+591 7123-4567'])->assertSessionHasNoErrors()->assertSessionHas('status', 'Tu perfil fue actualizado.');
+        $this->assertSame('+591 7123-4567', $user->fresh()->telefono);
+    }
+
     public function test_profile_rejects_invalid_photo_formats(): void
     {
         Storage::fake('public');
