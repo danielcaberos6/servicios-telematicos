@@ -7,7 +7,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::unprepared(file_get_contents(base_path('Funciones.sql')));
+        DB::unprepared(file_get_contents(database_path('sql/Funciones.sql')));
     }
 
     public function down(): void

@@ -2,30 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\FiltroNotificacionesRequest;
 use App\Models\Notificacion;
-use App\Services\OperacionesService;
+use App\Services\NotificacionService;
 use Illuminate\Http\Request;
 
 class NotificacionController extends Controller
 {
-    public function index(Request $request)
-    {
-        $filters = $request->validate(['q' => ['nullable', 'string', 'max:120'], 'solo_no_leidas' => ['nullable', 'boolean']]);
+    public function __construct(
+        private NotificacionService $notificacionService,
+    ) {}
 
-        return view('notifications.index', ['notificaciones' => app(OperacionesService::class)->notificaciones($request->user()->id_usuario, $filters)]);
+    public function index(FiltroNotificacionesRequest $request)
+    {
+        $filters = $request->validated();
+
+        return view('notificaciones.index', ['notificaciones' => $this->notificacionService->listar($request->user()->id_usuario, $filters)]);
     }
 
-    public function read(Request $request, Notificacion $notificacion)
+    public function leer(Request $request, Notificacion $notificacion)
     {
         abort_unless($notificacion->id_usuario === $request->user()->id_usuario, 403);
-        app(OperacionesService::class)->leerNotificacion($request->user()->id_usuario, $notificacion->id_notificacion);
+        $this->notificacionService->leer($request->user()->id_usuario, $notificacion->id_notificacion);
 
         return back()->with('status', 'Notificación marcada como leída.');
     }
 
-    public function readAll(Request $request)
+    public function leerTodas(Request $request)
     {
-        app(OperacionesService::class)->leerTodas($request->user()->id_usuario);
+        $this->notificacionService->leerTodas($request->user()->id_usuario);
 
         return back()->with('status', 'Todas tus notificaciones están leídas.');
     }
@@ -33,7 +38,7 @@ class NotificacionController extends Controller
     public function destroy(Request $request, Notificacion $notificacion)
     {
         abort_unless($notificacion->id_usuario === $request->user()->id_usuario, 403);
-        app(OperacionesService::class)->eliminarNotificacion($request->user()->id_usuario, $notificacion->id_notificacion);
+        $this->notificacionService->eliminar($request->user()->id_usuario, $notificacion->id_notificacion);
 
         return back()->with('status', 'Notificación eliminada.');
     }

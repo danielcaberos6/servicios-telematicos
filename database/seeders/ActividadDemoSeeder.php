@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Subasta;
 use App\Models\User;
-use App\Services\OperacionesService;
+use App\Services\PujaService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -35,7 +35,7 @@ class ActividadDemoSeeder extends Seeder
             if ($auction && $auction->estado === 'Activa' && ! $auction->pujas()->exists()) {
                 foreach ([0, 1, 0, 2, 1] as $i => $personIndex) {
                     $amount = number_format((float) $auction->monto_inicial + ($i + 1) * 100, 2, '.', '');
-                    app(OperacionesService::class)->pujar($people[$personIndex]->id_usuario, $auction->id_subasta, $amount);
+                    app(PujaService::class)->registrar($people[$personIndex]->id_usuario, $auction->id_subasta, $amount);
                 }
             }
         });

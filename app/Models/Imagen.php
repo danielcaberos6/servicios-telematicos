@@ -16,6 +16,6 @@ class Imagen extends Model
 
     public function getUrlAttribute(): string
     {
-        return route('images.show', $this);
+        return route('imagenes.show', $this);
     }
 }

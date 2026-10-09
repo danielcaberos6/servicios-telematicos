@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('subastas:instalar-funciones', function () {
-    DB::transaction(fn () => DB::unprepared(file_get_contents(base_path('Funciones.sql'))));
+    DB::transaction(fn () => DB::unprepared(file_get_contents(database_path('sql/Funciones.sql'))));
     $this->info('Funciones.sql instalado. Las tablas y sus datos se conservaron.');
 })->purpose('Instala o actualiza las funciones y triggers de PostgreSQL');
 

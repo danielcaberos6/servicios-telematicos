@@ -17,7 +17,7 @@ return new class extends Migration
             );
             ALTER TABLE notificacion ADD COLUMN IF NOT EXISTS id_subasta bigint REFERENCES subasta(id_subasta) ON DELETE SET NULL;
             SQL);
-        DB::unprepared(file_get_contents(base_path('Funciones.sql')));
+        DB::unprepared(file_get_contents(database_path('sql/Funciones.sql')));
     }
 
     public function down(): void

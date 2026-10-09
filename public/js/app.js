@@ -58,3 +58,23 @@ document.querySelectorAll("input[data-preview]").forEach((input) => {
         });
     });
 });
+
+document.querySelectorAll("[data-carrusel]").forEach((carrusel) => {
+    const pista = carrusel.querySelector("[data-carrusel-pista]");
+    const anterior = carrusel.querySelector("[data-carrusel-anterior]");
+    const siguiente = carrusel.querySelector("[data-carrusel-siguiente]");
+    const actualizar = () => {
+        anterior.disabled = pista.scrollLeft <= 4;
+        siguiente.disabled =
+            pista.scrollLeft + pista.clientWidth >= pista.scrollWidth - 4;
+    };
+    anterior.addEventListener("click", () =>
+        pista.scrollBy({ left: -pista.clientWidth }),
+    );
+    siguiente.addEventListener("click", () =>
+        pista.scrollBy({ left: pista.clientWidth }),
+    );
+    pista.addEventListener("scroll", actualizar, { passive: true });
+    window.addEventListener("resize", actualizar);
+    actualizar();
+});

@@ -12,7 +12,7 @@ return new class extends Migration
         if (DB::getDriverName() !== 'pgsql') {
             throw new RuntimeException('SubastaYA requiere PostgreSQL. Revisa DB_CONNECTION en .env.');
         }
-        DB::unprepared(file_get_contents(base_path('Script.sql')));
+        DB::unprepared(file_get_contents(database_path('sql/Script.sql')));
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->foreignId('user_id')->nullable()->index();
