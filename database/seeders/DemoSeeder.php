@@ -28,7 +28,7 @@ class DemoSeeder extends Seeder
             $owner = $index === 0 ? $demo : $seller;
             $auction = $owner->subastas()->firstOrCreate(['titulo' => $title], ['descripcion' => $description, 'id_categoria' => Categoria::where('nombre_categoria', $category)->value('id_categoria'), 'estado_articulo' => $condition, 'monto_inicial' => $price, 'ubicacion' => $location, 'fecha_inicio' => now()->subDays($index % 4)->subMinutes(15), 'fecha_fin' => now()->addHours($hours)]);
             if (! $auction->imagenes()->exists()) {
-                $contents = file_get_contents(public_path('images/ejemplos/'.$image));
+                $contents = file_get_contents(public_path('imagenes/ejemplos/'.$image));
                 $path = 'subastas/'.$auction->id_subasta.'/'.$image;
                 Storage::disk('public')->put($path, $contents);
                 $auction->imagenes()->create(['ruta' => $path, 'tamano' => strlen($contents)]);
@@ -48,5 +48,4 @@ class DemoSeeder extends Seeder
             ['Colección de libros', 'Libros, películas y música', 'Usado', 150, 'El Alto, Plaza del Obelisco', 'libros.png', 192, 'Conjunto de libros de demostración. Las fotografías permiten conocer los ejemplares antes de coordinar la entrega.'],
         ];
     }
-
 }

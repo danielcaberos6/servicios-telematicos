@@ -10,3 +10,4 @@ storage/framework/views
 docker-compose.yml
 pgdata
 .runtime
+.env.bak

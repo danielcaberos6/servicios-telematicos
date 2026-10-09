@@ -10,7 +10,7 @@ return new class extends Migration
         // Bloqueo exclusivo: la conversión de categorías no compite con publicaciones o pujas.
         DB::statement('LOCK TABLE subasta IN ACCESS EXCLUSIVE MODE');
         DB::unprepared('DROP TRIGGER IF EXISTS subasta_proteccion ON subasta');
-        $seed = explode('-- BEGIN SEMILLAS PREDETERMINADAS', file_get_contents(base_path('Script.sql')))[1];
+        $seed = explode('-- BEGIN SEMILLAS PREDETERMINADAS', file_get_contents(database_path('sql/Script.sql')))[1];
         DB::unprepared(explode('-- END SEMILLAS PREDETERMINADAS', $seed)[0]);
         foreach (['Tecnología' => 'Electrónica e informática', 'Hogar' => 'Muebles', 'Deportes' => 'Deporte', 'Moda y accesorios' => 'Ropa, calzado y accesorios', 'Coleccionables' => 'Antigüedades y coleccionables', 'Otros' => 'Varios'] as $old => $new) {
             $oldId = DB::table('categoria')->where('nombre_categoria', $old)->value('id_categoria');

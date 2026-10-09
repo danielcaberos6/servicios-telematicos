@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $script = file_get_contents(base_path('Script.sql'));
+        $script = file_get_contents(database_path('sql/Script.sql'));
         $seed = explode('-- BEGIN SEMILLAS PREDETERMINADAS', $script)[1];
         DB::unprepared(explode('-- END SEMILLAS PREDETERMINADAS', $seed)[0]);
     }
