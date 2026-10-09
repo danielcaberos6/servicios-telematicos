@@ -246,6 +246,43 @@ class SubastaYaTest extends TestCase
         }
     }
 
+    public function test_profile_rejects_phones_just_outside_the_digit_limits(): void
+    {
+        $user = User::factory()->create(['telefono' => '76543210']);
+        $before = $user->fresh()->getAttributes();
+        $this->actingAs($user);
+        foreach (['123456', '1234567890123456'] as $phone) {
+            $this->put('/perfil', ['nombre' => $user->nombre, 'correo' => $user->correo, 'telefono' => $phone])->assertSessionHasErrors('telefono');
+            $this->assertSame($before, $user->fresh()->getAttributes());
+        }
+    }
+
+    public function test_profile_accepts_phones_at_the_digit_limits(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        foreach (['1234567', '123456789012345'] as $phone) {
+            $this->put('/perfil', ['nombre' => $user->nombre, 'correo' => $user->correo, 'telefono' => $phone])->assertSessionHasNoErrors()->assertSessionHas('status', 'Tu perfil fue actualizado.');
+            $this->assertSame($phone, $user->fresh()->telefono);
+        }
+    }
+
+    public function test_profile_rejects_empty_name_without_changing_the_profile(): void
+    {
+        $user = User::factory()->create();
+        $before = $user->fresh()->getAttributes();
+        $this->actingAs($user)->put('/perfil', ['nombre' => '', 'correo' => $user->correo, 'ciudad' => 'Sucre'])->assertSessionHasErrors('nombre');
+        $this->assertSame($before, $user->fresh()->getAttributes());
+    }
+
+    public function test_profile_rejects_empty_email_without_changing_the_profile(): void
+    {
+        $user = User::factory()->create();
+        $before = $user->fresh()->getAttributes();
+        $this->actingAs($user)->put('/perfil', ['nombre' => 'Nombre rechazado', 'correo' => '', 'current_password' => 'password'])->assertSessionHasErrors('correo');
+        $this->assertSame($before, $user->fresh()->getAttributes());
+    }
+
     public function test_profile_accepts_phone_with_country_code_spaces_and_hyphens(): void
     {
         $user = User::factory()->create();
