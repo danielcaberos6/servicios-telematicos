@@ -96,6 +96,7 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             'search_path' => 'public',
+            'timezone' => 'America/La_Paz',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
         ],
 
