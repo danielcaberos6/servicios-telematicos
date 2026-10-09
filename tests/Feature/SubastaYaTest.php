@@ -227,6 +227,86 @@ class SubastaYaTest extends TestCase
         $this->assertTrue(Hash::check('NuevaClave123', $user->fresh()->contrasena));
     }
 
+    public function test_profile_rejects_phone_with_letters_without_changing_the_profile(): void
+    {
+        $user = User::factory()->create(['telefono' => '76543210']);
+        $before = $user->fresh()->getAttributes();
+        $this->actingAs($user)->put('/perfil', ['nombre' => 'Nombre rechazado', 'correo' => $user->correo, 'telefono' => 'abc123'])->assertSessionHasErrors('telefono');
+        $this->assertSame($before, $user->fresh()->getAttributes());
+    }
+
+    public function test_profile_rejects_invalid_photo_formats(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        foreach ([UploadedFile::fake()->image('perfil.gif'), UploadedFile::fake()->create('perfil.pdf', 1, 'application/pdf')] as $photo) {
+            $this->put('/perfil', ['nombre' => $user->nombre, 'correo' => $user->correo, 'foto' => $photo])->assertSessionHasErrors('foto');
+            $this->assertNull($user->fresh()->imagen);
+        }
+        $this->assertSame([], Storage::disk('public')->allFiles());
+    }
+
+    public function test_profile_rejects_photos_larger_than_five_megabytes(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create();
+        $this->actingAs($user)->put('/perfil', ['nombre' => $user->nombre, 'correo' => $user->correo, 'foto' => UploadedFile::fake()->image('perfil.png')->size(5121)])->assertSessionHasErrors('foto');
+        $this->assertNull($user->fresh()->imagen);
+        $this->assertSame([], Storage::disk('public')->allFiles());
+    }
+
+    public function test_profile_password_changes_require_the_correct_current_password(): void
+    {
+        $user = User::factory()->create();
+        $before = $user->fresh()->getAttributes();
+        $data = ['nombre' => 'Nombre rechazado', 'correo' => $user->correo, 'password' => 'NuevaClave123', 'password_confirmation' => 'NuevaClave123'];
+        $this->actingAs($user)->put('/perfil', $data)->assertSessionHasErrors('current_password');
+        $this->assertSame($before, $user->fresh()->getAttributes());
+        $this->put('/perfil', [...$data, 'current_password' => 'incorrecta'])->assertSessionHasErrors('current_password');
+        $this->assertSame($before, $user->fresh()->getAttributes());
+    }
+
+    public function test_profile_rejects_email_already_used_by_another_user(): void
+    {
+        $user = User::factory()->create();
+        $other = User::factory()->create();
+        $before = $user->fresh()->getAttributes();
+        $this->actingAs($user)->put('/perfil', ['nombre' => 'Nombre rechazado', 'correo' => $other->correo, 'current_password' => 'password'])->assertSessionHasErrors('correo');
+        $this->assertSame($before, $user->fresh()->getAttributes());
+    }
+
+    public function test_profile_accepts_empty_phone_and_photo_and_displays_confirmation(): void
+    {
+        $user = User::factory()->create(['telefono' => '76543210']);
+        $this->actingAs($user)->from('/perfil')->put('/perfil', ['nombre' => 'Perfil actualizado', 'correo' => $user->correo, 'telefono' => '', 'foto' => ''])->assertSessionHasNoErrors()->assertRedirect('/perfil')->assertSessionHas('status', 'Tu perfil fue actualizado.');
+        $this->assertSame('Perfil actualizado', $user->fresh()->nombre);
+        $this->assertNull($user->fresh()->telefono);
+        $this->assertNull($user->fresh()->imagen);
+        $this->get('/perfil')->assertOk()->assertSee('Tu perfil fue actualizado.');
+    }
+
+    public function test_user_without_phone_or_photo_can_publish_an_auction(): void
+    {
+        $user = User::factory()->create(['telefono' => null]);
+        $this->assertNull($user->imagen);
+        $this->actingAs($user)->post('/subastas', $this->payload())->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertDatabaseCount('subasta', 1);
+        $this->assertDatabaseHas('subasta', ['id_usuario' => $user->id_usuario, 'titulo' => 'Cámara fotográfica de prueba']);
+        $this->assertDatabaseHas('notificacion', ['id_usuario' => $user->id_usuario, 'titulo' => 'Subasta publicada']);
+    }
+
+    public function test_profile_update_ignores_another_users_id(): void
+    {
+        $user = User::factory()->create();
+        $other = User::factory()->create(['telefono' => '76543210']);
+        $before = $other->fresh()->getAttributes();
+        $this->actingAs($user)->put('/perfil', ['id_usuario' => $other->id_usuario, 'nombre' => 'Mi nuevo nombre', 'correo' => $user->correo, 'telefono' => '71234567'])->assertSessionHasNoErrors()->assertSessionHas('status', 'Tu perfil fue actualizado.');
+        $this->assertSame($before, $other->fresh()->getAttributes());
+        $this->assertSame('Mi nuevo nombre', $user->fresh()->nombre);
+        $this->assertSame('71234567', $user->fresh()->telefono);
+    }
+
     public function test_auction_text_is_escaped_when_displayed(): void
     {
         $auction = $this->auction(null, ['titulo' => '<script>alert(1)</script>', 'descripcion' => '<img src=x onerror=alert(1)>']);
