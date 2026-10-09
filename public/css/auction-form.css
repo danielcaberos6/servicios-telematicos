@@ -162,6 +162,7 @@
     margin: 0;
     padding: 28px 20px;
     gap: 10px;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
 }
 .publish-upload-icon {
     display: grid;
@@ -170,14 +171,17 @@
     height: 54px;
     border-radius: 14px;
     background: #edf3fb;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease;
 }
 .publish-upload-icon .icon {
     width: 28px;
     height: 28px;
     color: var(--blue);
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease;
 }
 .publish-upload strong {
     font-size: 14px;
+    transition: color 0.2s ease;
 }
 .publish-upload > span:not(.publish-upload-icon) {
     font-size: 12px;
@@ -187,6 +191,23 @@
     min-width: 0;
     max-width: 350px;
     width: 100%;
+}
+.auction-form .publish-upload.is-dragover {
+    border-color: var(--blue);
+    border-style: dashed;
+    background: #eaf3fd;
+    transform: scale(1.015);
+    box-shadow: 0 8px 28px rgba(7, 62, 131, 0.14);
+}
+.publish-upload.is-dragover .publish-upload-icon {
+    background: #d4e7fc;
+    transform: translateY(-4px) scale(1.1);
+}
+.publish-upload.is-dragover .publish-upload-icon .icon {
+    color: var(--blue-dark);
+}
+.publish-upload.is-dragover strong {
+    color: var(--blue);
 }
 .auction-form .publish-photo-grid {
     display: grid;

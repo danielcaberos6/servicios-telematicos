@@ -57,6 +57,48 @@ document.querySelectorAll("input[data-preview]").forEach((input) => {
             target.append(image);
         });
     });
+
+    const dropArea = input.closest(".upload-area");
+    if (dropArea) {
+        let dragCounter = 0;
+        ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+            dropArea.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        });
+
+        dropArea.addEventListener("dragenter", () => {
+            dragCounter++;
+            dropArea.classList.add("is-dragover");
+        });
+
+        dropArea.addEventListener("dragleave", () => {
+            dragCounter--;
+            if (dragCounter <= 0) {
+                dragCounter = 0;
+                dropArea.classList.remove("is-dragover");
+            }
+        });
+
+        dropArea.addEventListener("drop", (e) => {
+            dragCounter = 0;
+            dropArea.classList.remove("is-dragover");
+            const droppedFiles = e.dataTransfer?.files;
+            if (droppedFiles && droppedFiles.length > 0) {
+                try {
+                    const dt = new DataTransfer();
+                    for (let i = 0; i < droppedFiles.length; i++) {
+                        dt.items.add(droppedFiles[i]);
+                    }
+                    input.files = dt.files;
+                } catch {
+                    input.files = droppedFiles;
+                }
+                input.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+        });
+    }
 });
 
 document.querySelectorAll("[data-carrusel]").forEach((carrusel) => {

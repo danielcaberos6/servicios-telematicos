@@ -93,7 +93,7 @@
                     <label class="upload-area publish-upload" for="imagenes">
                         <span class="publish-upload-icon"><x-icono nombre="image" /></span>
                         <strong>Selecciona las fotos de tu artículo</strong>
-                        <span>La primera fotografía será la portada de la publicación.</span>
+                        <span>O arrastra y suelta tus archivos aquí. La primera fotografía será la portada.</span>
                         <input id="imagenes" name="imagenes[]" type="file" multiple accept="image/jpeg,image/png,image/webp"
                             data-preview="image-preview" aria-describedby="photo-help">
                     </label>
