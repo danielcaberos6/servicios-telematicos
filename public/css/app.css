@@ -1193,6 +1193,11 @@ form small {
     height: 34px;
     color: #52769c;
 }
+.auction-form .upload-area:hover,
+.auction-form .upload-area:focus-within {
+    border-color: var(--blue);
+    background: #edf3fb;
+}
 .upload-area span {
     font-size: 11px;
     font-weight: 400;
