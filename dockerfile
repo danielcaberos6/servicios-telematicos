@@ -13,14 +13,14 @@ WORKDIR /app
 
 COPY . /app
 
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
-
 RUN mkdir -p storage/framework/views \
-    storage/framework/cache \
+    storage/framework/cache/data \
     storage/framework/sessions \
     storage/logs \
     bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
+
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
 # El contenedor corre con el UID/GID del anfitrión: los archivos creados en el
 # proyecto montado y en el volumen vendor pertenecen al usuario, no a root.
