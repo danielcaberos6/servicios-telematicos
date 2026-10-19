@@ -21,6 +21,8 @@ class SubastaRequest extends FormRequest
             'id_categoria' => ['required', 'integer', 'exists:categoria,id_categoria'],
             'estado_articulo' => ['required', Rule::in(Subasta::CONDITIONS)],
             'ubicacion' => ['required', 'string', 'min:5', 'max:250'],
+            'latitud' => ['nullable', 'numeric', 'between:-90,90', 'required_with:longitud'],
+            'longitud' => ['nullable', 'numeric', 'between:-180,180', 'required_with:latitud'],
             'monto_inicial' => ['required', 'numeric', 'decimal:0,2', 'min:0.01', 'max:9999999999.99'],
             // La fecha de publicación se fija en el servidor; la subasta inicia al publicarse.
             'fecha_fin' => ['required', 'date', 'after:now', 'before:'.now()->addYear()->toDateTimeString()],

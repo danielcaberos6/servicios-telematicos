@@ -93,7 +93,7 @@
                     <label class="upload-area publish-upload" for="imagenes">
                         <span class="publish-upload-icon"><x-icono nombre="image" /></span>
                         <strong>Selecciona las fotos de tu artículo</strong>
-                        <span>La primera fotografía será la portada de la publicación.</span>
+                        <span>O arrastra y suelta tus archivos aquí. La primera fotografía será la portada.</span>
                         <input id="imagenes" name="imagenes[]" type="file" multiple accept="image/jpeg,image/png,image/webp"
                             data-preview="image-preview" aria-describedby="photo-help">
                     </label>
@@ -119,6 +119,12 @@
                             </div>
                             <div class="publish-field">
                                 <label for="fecha_fin">Fecha y hora de cierre <span class="required-mark">*</span></label>
+                                <div class="duration-presets" data-duration-presets data-target="fecha_fin" role="group" aria-label="Duración rápida de la subasta">
+                                    <button type="button" class="duration-preset-btn" data-days="3">+ 3 días</button>
+                                    <button type="button" class="duration-preset-btn" data-days="5">+ 5 días</button>
+                                    <button type="button" class="duration-preset-btn" data-days="7">+ 7 días</button>
+                                    <button type="button" class="duration-preset-btn" data-days="14">+ 14 días</button>
+                                </div>
                                 <input id="fecha_fin" name="fecha_fin" type="datetime-local" required
                                     value="{{ old('fecha_fin', $subasta->fecha_fin?->format('Y-m-d\TH:i')) }}"
                                     min="{{ now()->format('Y-m-d\TH:i') }}" max="{{ now()->addYear()->format('Y-m-d\TH:i') }}"
@@ -128,9 +134,24 @@
                         </div>
                         <div class="publish-field">
                             <label for="ubicacion">Punto de encuentro <span class="required-mark">*</span></label>
-                            <input id="ubicacion" name="ubicacion" value="{{ old('ubicacion', $subasta->ubicacion) }}"
-                                required minlength="5" maxlength="250" placeholder="Ej. La Paz, Plaza Abaroa, entrada principal"
-                                aria-describedby="location-help">
+                            <div class="location-group">
+                                <input id="ubicacion" name="ubicacion" value="{{ old('ubicacion', $subasta->ubicacion) }}"
+                                    required minlength="5" maxlength="250" placeholder="Ej. La Paz, Plaza Abaroa, entrada principal"
+                                    aria-describedby="location-help">
+                                <button type="button" id="btn-geolocalizacion" class="button secondary btn-gps" title="Obtener coordenadas de tu ubicación actual">
+                                    <x-icono nombre="pin" /> Usar mi ubicación actual
+                                </button>
+                            </div>
+                            <input type="hidden" id="latitud" name="latitud" value="{{ old('latitud', $subasta->latitud) }}">
+                            <input type="hidden" id="longitud" name="longitud" value="{{ old('longitud', $subasta->longitud) }}">
+                            <div id="gps-status" class="gps-status" aria-live="polite">
+                                @if (old('latitud', $subasta->latitud) && old('longitud', $subasta->longitud))
+                                    <span class="gps-coords-badge">
+                                        <x-icono nombre="pin" /> Coordenadas registradas: {{ old('latitud', $subasta->latitud) }}, {{ old('longitud', $subasta->longitud) }}
+                                        <button type="button" class="btn-clear-gps" id="btn-quitar-gps" title="Quitar coordenadas" aria-label="Quitar coordenadas">✕</button>
+                                    </span>
+                                @endif
+                            </div>
                             <small id="location-help">Indica la ciudad y un lugar público donde coordinarás la entrega y el pago.</small>
                         </div>
                     </div>
