@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable
 {
@@ -30,6 +31,14 @@ class User extends Authenticatable
     public function getAuthPasswordName(): string
     {
         return 'contrasena';
+    }
+
+    public function esAdministrador(): bool
+    {
+        return DB::table('usuario_rol')
+            ->join('rol', 'rol.id_rol', '=', 'usuario_rol.id_rol')
+            ->where('usuario_rol.id_usuario', $this->id_usuario)
+            ->where('rol.nombre_rol', 'Administrador')->exists();
     }
 
     public function imagen()
