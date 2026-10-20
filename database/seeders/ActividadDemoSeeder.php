@@ -19,10 +19,11 @@ class ActividadDemoSeeder extends Seeder
         DB::transaction(function () {
             $demo = User::where('correo', 'demo@subastaya.test')->firstOrFail();
             $people = [];
-            foreach ([['Ana', 1], ['Marco', 3], ['Sofía', 4], ['Diego', 5], ['Valeria', 5]] as $i => [$name, $stars]) {
+            foreach ([['Ana Quispe', 1], ['Marco Rojas', 3], ['Sofía Mamani', 4], ['Diego Salinas', 5], ['Valeria Flores', 5]] as $i => [$name, $stars]) {
                 $people[] = $person = User::firstOrCreate(['correo' => 'participante'.($i + 1).'@subastaya.test'], [
-                    'nombre' => $name.' Demo', 'contrasena' => 'SubastaYA2026!', 'ciudad' => 'La Paz',
+                    'nombre' => $name, 'contrasena' => 'SubastaYA2026!', 'ciudad' => 'La Paz',
                 ]);
+                User::whereKey($person->id_usuario)->where('nombre', explode(' ', $name)[0].' Demo')->update(['nombre' => $name]);
                 if (! DB::table('resenas')->where('id_usuario_resenado', $demo->id_usuario)->where('id_usuario_resenador', $person->id_usuario)->exists()) {
                     DB::table('resenas')->insert([
                         'id_usuario_resenado' => $demo->id_usuario, 'id_usuario_resenador' => $person->id_usuario,

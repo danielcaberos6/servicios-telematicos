@@ -17,7 +17,8 @@ class DemoSeeder extends Seeder
             throw new \RuntimeException('Los datos de demostración solo se cargan en entornos locales o de pruebas.');
         }
         $this->call(DatabaseSeeder::class);
-        $demo = User::firstOrCreate(['correo' => 'demo@subastaya.test'], ['nombre' => 'Rodrigo Demo', 'contrasena' => 'SubastaYA2026!', 'ciudad' => 'La Paz', 'biografia' => 'Me gusta encontrar nuevas oportunidades y dar otra vida a mis artículos.']);
+        $demo = User::firstOrCreate(['correo' => 'demo@subastaya.test'], ['nombre' => 'Rodrigo Vargas', 'contrasena' => 'SubastaYA2026!', 'ciudad' => 'La Paz', 'biografia' => 'Me gusta encontrar nuevas oportunidades y dar otra vida a mis artículos.']);
+        User::whereKey($demo->id_usuario)->where('nombre', 'Rodrigo Demo')->update(['nombre' => 'Rodrigo Vargas']);
         $seller = User::firstOrCreate(['correo' => 'vendedor@subastaya.test'], ['nombre' => 'Lucía Mendoza', 'contrasena' => 'SubastaYA2026!', 'ciudad' => 'Cochabamba']);
         $role = DB::table('rol')->where('nombre_rol', 'Usuario')->value('id_rol');
         foreach ([$demo, $seller] as $user) {
