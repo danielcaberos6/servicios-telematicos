@@ -181,6 +181,10 @@ create index puja_subasta_monto_idx on puja (id_subasta, monto desc);
 create index imagen_subasta_idx on imagen (id_subasta);
 create unique index imagen_perfil_unica on imagen (id_usuario) where id_usuario is not null;
 create index notificacion_usuario_idx on notificacion (id_usuario, leido, fecha_notificacion desc);
+create index usuario_registro_idx on usuario (fecha_registro);
+create index subasta_publicacion_idx on subasta (fecha_inicio);
+create index puja_usuario_fecha_idx on puja (id_usuario, fecha_puja);
+create index resenas_usuario_fecha_idx on resenas (id_usuario_resenado, fecha_creacion);
 
 -- BEGIN SEMILLAS PREDETERMINADAS
 insert into categoria (nombre_categoria) values

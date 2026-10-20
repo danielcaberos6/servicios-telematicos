@@ -305,3 +305,132 @@ begin
 end;
 $$;
 
+-- BEGIN REPORTES ADMINISTRATIVOS
+-- Los acumulados y los límites de fecha se interpretan en hora de Bolivia.
+create or replace function exigir_administrador(p_actor bigint) returns void language plpgsql stable as $$
+begin
+    if p_actor is null or not exists (
+        select 1 from usuario_rol ur join rol r on r.id_rol=ur.id_rol
+        where ur.id_usuario=p_actor and r.nombre_rol='Administrador'
+    ) then raise exception 'Solo el administrador puede consultar los reportes.' using errcode='42501'; end if;
+end;
+$$;
+
+create or replace function validar_periodo_reportes(p_filtros jsonb) returns void language plpgsql stable as $$
+declare inicio date := (p_filtros->>'desde')::date; fin date := (p_filtros->>'hasta')::date;
+begin
+    if inicio is null or fin is null or inicio > fin then
+        raise exception 'La fecha inicial no puede ser posterior a la fecha final.';
+    end if;
+    if inicio < date '1900-01-01' or fin > date '2100-12-31' then
+        raise exception 'El periodo debe estar entre 1900 y 2100.';
+    end if;
+end;
+$$;
+
+create or replace function ciudades_reporte(p_actor bigint) returns table(ciudad text) language plpgsql stable as $$
+begin
+    perform exigir_administrador(p_actor);
+    return query select distinct coalesce(nullif(trim(u.ciudad),''),'Sin ciudad') from usuario u order by 1;
+end;
+$$;
+
+create or replace function reporte_subastas(p_actor bigint,p_filtros jsonb) returns jsonb language plpgsql stable as $$
+declare
+    d_inicio date; d_fin date; t_inicio timestamptz; t_fin timestamptz;
+    pagina integer := greatest(1,coalesce((p_filtros->>'page')::integer,1)); resultado jsonb;
+begin
+    perform exigir_administrador(p_actor);
+    perform validar_periodo_reportes(p_filtros);
+    d_inicio := (p_filtros->>'desde')::date; d_fin := (p_filtros->>'hasta')::date;
+    t_inicio := d_inicio::timestamp at time zone 'America/La_Paz';
+    t_fin := (d_fin+1)::timestamp at time zone 'America/La_Paz';
+    with base as (
+        select s.id_subasta,s.titulo,u.nombre as vendedor,coalesce(c.nombre_categoria,'Sin categoría') as categoria,
+            s.id_categoria,s.monto_inicial,s.fecha_inicio,s.fecha_fin,s.ubicacion,
+            case when s.estado_subasta='Activa' and s.fecha_fin <= statement_timestamp() then 'Finalizada' else s.estado_subasta end as estado,
+            (select count(*) from puja p where p.id_subasta=s.id_subasta) as pujas
+        from subasta s join usuario u on u.id_usuario=s.id_usuario left join categoria c on c.id_categoria=s.id_categoria
+        where s.fecha_inicio >= t_inicio and s.fecha_inicio < t_fin
+    ), filtradas as materialized (
+        select * from base b where
+            (nullif(p_filtros->>'categoria','') is null or b.id_categoria=(p_filtros->>'categoria')::bigint)
+            and (nullif(p_filtros->>'estado','') is null or b.estado=p_filtros->>'estado')
+            and (nullif(p_filtros->>'ubicacion','') is null or strpos(lower(coalesce(b.ubicacion,'')),lower(p_filtros->>'ubicacion'))>0)
+            and (nullif(p_filtros->>'q','') is null or strpos(lower(b.titulo || ' ' || b.vendedor),lower(p_filtros->>'q'))>0)
+    ), meses as (
+        select m, (select count(*) from filtradas s where date_trunc('month',s.fecha_inicio at time zone 'America/La_Paz')=m) as cantidad
+        from generate_series(date_trunc('month',d_inicio::timestamp),date_trunc('month',d_fin::timestamp),interval '1 month') m
+    ), categorias as (
+        select categoria as etiqueta,count(*) as cantidad from filtradas group by categoria
+    ), detalle as (
+        select * from filtradas order by fecha_fin desc,id_subasta desc limit 15 offset (pagina-1)*15
+    )
+    select jsonb_build_object(
+        'indicadores',jsonb_build_object('total',count(*),'activas',count(*) filter(where estado='Activa'),
+            'finalizadas',count(*) filter(where estado='Finalizada'),'canceladas',count(*) filter(where estado='Cancelada')),
+        'categorias',coalesce((select jsonb_agg(to_jsonb(c) order by cantidad desc,etiqueta) from categorias c),'[]'::jsonb),
+        'meses',(select jsonb_agg(jsonb_build_object('mes',to_char(m,'YYYY-MM'),'cantidad',cantidad) order by m) from meses),
+        'detalle',coalesce((select jsonb_agg(to_jsonb(d) order by fecha_fin desc,id_subasta desc) from detalle d),'[]'::jsonb),
+        'total',count(*)
+    ) into resultado from filtradas;
+    return resultado;
+end;
+$$;
+
+create or replace function reporte_usuarios(p_actor bigint,p_filtros jsonb) returns jsonb language plpgsql stable as $$
+declare
+    d_inicio date; d_fin date; t_inicio timestamptz; t_fin timestamptz; t_anterior timestamptz;
+    pagina integer := greatest(1,coalesce((p_filtros->>'page')::integer,1)); resultado jsonb;
+begin
+    perform exigir_administrador(p_actor);
+    perform validar_periodo_reportes(p_filtros);
+    d_inicio := (p_filtros->>'desde')::date; d_fin := (p_filtros->>'hasta')::date;
+    t_inicio := d_inicio::timestamp at time zone 'America/La_Paz';
+    t_fin := (d_fin+1)::timestamp at time zone 'America/La_Paz';
+    t_anterior := (d_inicio-(d_fin-d_inicio+1))::timestamp at time zone 'America/La_Paz';
+    with base as (
+        select u.id_usuario,u.nombre,coalesce(nullif(trim(u.ciudad),''),'Sin ciudad') as ciudad,u.fecha_registro,
+            (select count(*) from subasta s where s.id_usuario=u.id_usuario and s.fecha_inicio<t_fin) as publicaciones,
+            (select count(*) from puja p where p.id_usuario=u.id_usuario and p.fecha_puja<t_fin) as pujas,
+            (select avg(r.calificacion) from resenas r where r.id_usuario_resenado=u.id_usuario and r.fecha_creacion<t_fin) as valoracion
+        from usuario u where u.fecha_registro<t_fin
+    ), filtrados as materialized (
+        select * from base b where
+            (nullif(p_filtros->>'ciudad','') is null or b.ciudad=p_filtros->>'ciudad')
+            and (nullif(p_filtros->>'q','') is null or strpos(lower(b.nombre),lower(p_filtros->>'q'))>0)
+            and (nullif(p_filtros->>'valoracion','') is null or b.valoracion >= (p_filtros->>'valoracion')::numeric)
+            and (nullif(p_filtros->>'actividad','') is null
+                or (p_filtros->>'actividad'='publicadores' and b.publicaciones>0)
+                or (p_filtros->>'actividad'='postores' and b.pujas>0)
+                or (p_filtros->>'actividad'='sin_actividad' and b.publicaciones+b.pujas=0))
+    ), resenas_filtradas as materialized (
+        select r.* from resenas r join filtrados u on u.id_usuario=r.id_usuario_resenado where r.fecha_creacion<t_fin
+    ), resumen as (
+        select count(*) as total,count(*) filter(where fecha_registro>=t_inicio) as nuevos,
+            count(*) filter(where fecha_registro>=t_anterior and fecha_registro<t_inicio) as anteriores,
+            count(*) filter(where publicaciones>0) as publicadores from filtrados
+    ), meses as (
+        select m,(select count(*) from filtrados u where u.fecha_registro < least(t_fin,(m+interval '1 month') at time zone 'America/La_Paz')) as cantidad
+        from generate_series(date_trunc('month',d_inicio::timestamp),date_trunc('month',d_fin::timestamp),interval '1 month') m
+    ), ciudades as (
+        select ciudad as etiqueta,count(*) as cantidad from filtrados group by ciudad
+    ), valoraciones as (
+        select e as estrellas,(select count(*) from resenas_filtradas r where round(r.calificacion)::integer=e) as cantidad from generate_series(1,5) e
+    ), detalle as (
+        select * from filtrados order by publicaciones+pujas desc,nombre,id_usuario limit 15 offset (pagina-1)*15
+    )
+    select jsonb_build_object(
+        'indicadores',jsonb_build_object('total',total,'nuevos',nuevos,'anteriores',anteriores,'publicadores',publicadores,
+            'crecimiento',case when anteriores>0 then round(100.0*(nuevos-anteriores)/anteriores,1) when nuevos=0 then 0 else null end,
+            'valoracion',(select round(avg(calificacion),2) from resenas_filtradas)),
+        'meses',(select jsonb_agg(jsonb_build_object('mes',to_char(m,'YYYY-MM'),'cantidad',cantidad) order by m) from meses),
+        'ciudades',coalesce((select jsonb_agg(to_jsonb(c) order by cantidad desc,etiqueta) from ciudades c),'[]'::jsonb),
+        'valoraciones',(select jsonb_agg(to_jsonb(v) order by estrellas) from valoraciones v),
+        'detalle',coalesce((select jsonb_agg(to_jsonb(d) order by publicaciones+pujas desc,nombre,id_usuario) from detalle d),'[]'::jsonb),
+        'total',total
+    ) into resultado from resumen;
+    return resultado;
+end;
+$$;
+-- END REPORTES ADMINISTRATIVOS
