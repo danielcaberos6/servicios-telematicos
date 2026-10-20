@@ -15,6 +15,18 @@ Artisan::command('subastas:finalizar', function () {
 })->purpose('Finaliza subastas vencidas y notifica a sus participantes');
 Schedule::command('subastas:finalizar')->everyMinute()->withoutOverlapping();
 
+Artisan::command('subastas:crear-bd-pruebas', function () {
+    // Debe coincidir con DB_DATABASE de phpunit.xml.
+    $nombre = 'subastaya_test';
+    if (DB::selectOne('select 1 as existe from pg_database where datname = ?', [$nombre])) {
+        $this->info("La base {$nombre} ya existe.");
+
+        return;
+    }
+    DB::statement('create database '.DB::getQueryGrammar()->wrap($nombre));
+    $this->info("Base {$nombre} creada.");
+})->purpose('Crea la base de datos que usa la suite de pruebas');
+
 use Illuminate\Foundation\Inspiring;
 
 Artisan::command('inspire', function () {

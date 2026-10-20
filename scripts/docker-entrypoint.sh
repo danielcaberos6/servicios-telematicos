@@ -7,5 +7,6 @@ if ! grep -q '^APP_KEY=base64:' .env; then
 fi
 php artisan migrate --force
 php artisan db:seed --force
+php artisan subastas:crear-bd-pruebas
 cd public
 exec php -S 0.0.0.0:8000 ../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php

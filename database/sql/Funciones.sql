@@ -46,8 +46,13 @@ begin
     if p_datos ? 'contrasena' and coalesce(p_datos->>'contrasena','') !~ '^\$2[ayb]\$' then
         raise exception 'La contraseña debe llegar cifrada desde Laravel.';
     end if;
-    update usuario set nombre = p_datos->>'nombre', correo = lower(trim(p_datos->>'correo')),
-        ciudad = p_datos->>'ciudad', telefono = p_datos->>'telefono', biografia = p_datos->>'biografia',
+    -- Una clave ausente conserva el valor actual; una clave con null lo borra.
+    update usuario set
+        nombre = case when p_datos ? 'nombre' then p_datos->>'nombre' else nombre end,
+        correo = case when p_datos ? 'correo' then lower(trim(p_datos->>'correo')) else correo end,
+        ciudad = case when p_datos ? 'ciudad' then p_datos->>'ciudad' else ciudad end,
+        telefono = case when p_datos ? 'telefono' then p_datos->>'telefono' else telefono end,
+        biografia = case when p_datos ? 'biografia' then p_datos->>'biografia' else biografia end,
         contrasena = coalesce(p_datos->>'contrasena', contrasena)
     where id_usuario = p_actor returning * into resultado;
     if not found then raise exception 'Usuario no encontrado.' using errcode = 'P0002'; end if;
@@ -298,6 +303,9 @@ begin
         if ganador is not null then
             insert into notificacion (id_usuario,id_subasta,titulo,contenido) values
                 (ganador,articulo.id_subasta,'¡Ganaste una subasta!','Ganaste «' || articulo.titulo || '». Consulta el detalle para coordinar la entrega.');
+            insert into notificacion (id_usuario,id_subasta,titulo,contenido)
+            select distinct p.id_usuario,articulo.id_subasta,'Subasta finalizada','Terminó «' || articulo.titulo || '». Tu oferta no fue la ganadora.'
+            from puja p where p.id_subasta = articulo.id_subasta and p.id_usuario <> ganador;
         end if;
         total := total + 1;
     end loop;

@@ -95,6 +95,18 @@ class OperacionesSqlTest extends TestCase
         $this->actingAs($reviewer)->get('/perfil')->assertOk()->assertSee('0 valoraciones recibidas');
     }
 
+    public function test_profile_update_keeps_missing_fields_and_clears_explicit_nulls(): void
+    {
+        $user = User::factory()->create(['ciudad' => 'Sucre', 'telefono' => '71234567', 'biografia' => 'Coleccionista de cámaras.']);
+        app(UsuarioService::class)->actualizar($user->id_usuario, ['nombre' => 'Nombre actualizado', 'correo' => $user->correo]);
+        $fresh = $user->fresh();
+        $this->assertSame('Nombre actualizado', $fresh->nombre);
+        $this->assertSame(['Sucre', '71234567', 'Coleccionista de cámaras.'], [$fresh->ciudad, $fresh->telefono, $fresh->biografia]);
+        app(UsuarioService::class)->actualizar($user->id_usuario, ['ciudad' => null]);
+        $this->assertNull($user->fresh()->ciudad);
+        $this->assertSame('Nombre actualizado', $user->fresh()->nombre);
+    }
+
     public function test_coordinates_are_optional_but_must_form_a_valid_pair(): void
     {
         $auction = $this->auction(User::factory()->create());

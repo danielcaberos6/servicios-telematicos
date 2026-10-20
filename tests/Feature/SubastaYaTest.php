@@ -384,6 +384,22 @@ class SubastaYaTest extends TestCase
         $this->actingAs(User::factory()->create())->get('/subastas/'.$auction->id_subasta)->assertDontSee($owner->correo)->assertDontSee($winner->correo);
     }
 
+    public function test_finalization_notifies_losing_participants_once(): void
+    {
+        $auction = $this->auction(null, ['fecha_fin' => now()->addSeconds(2)]);
+        $loser = User::factory()->create();
+        $winner = User::factory()->create();
+        $this->actingAs($loser)->post('/subastas/'.$auction->id_subasta.'/pujas', ['monto' => 150])->assertSessionHasNoErrors();
+        $this->actingAs($loser)->post('/subastas/'.$auction->id_subasta.'/pujas', ['monto' => 160])->assertSessionHasNoErrors();
+        $this->actingAs($winner)->post('/subastas/'.$auction->id_subasta.'/pujas', ['monto' => 170])->assertSessionHasNoErrors();
+        DB::statement('select pg_sleep(2.1)');
+        $this->artisan('subastas:finalizar')->assertSuccessful();
+        $this->artisan('subastas:finalizar')->assertSuccessful();
+        $this->assertSame(1, Notificacion::where('id_usuario', $loser->id_usuario)->where('titulo', 'Subasta finalizada')->count());
+        $this->assertSame(0, Notificacion::where('id_usuario', $winner->id_usuario)->where('titulo', 'Subasta finalizada')->count());
+        $this->assertSame(1, Notificacion::where('id_usuario', $winner->id_usuario)->where('titulo', '¡Ganaste una subasta!')->count());
+    }
+
     public function test_image_ownership_and_combined_upload_limit_are_enforced(): void
     {
         Storage::fake('public');
