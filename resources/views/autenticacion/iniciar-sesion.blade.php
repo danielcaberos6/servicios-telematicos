@@ -1,5 +1,8 @@
 @extends('plantillas.principal')
 @section('title', 'Iniciar sesión')
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/autenticacion.css') }}">
+@endpush
 @section('content')
     <div class="auth-wrap">
         <div class="auth-story"><x-icono nombre="gavel" />
@@ -10,7 +13,7 @@
         <div class="panel auth-panel">
             <h2>Iniciar sesión</h2>
             <p class="muted">Entra a tu cuenta de SubastaYA.</p>
-            <form method="post" action="{{ route('iniciar-sesion') }}">@csrf<label for="correo">Correo electrónico</label><input
+            <form method="post" action="{{ route('iniciar-sesion') }}">@csrf<x-selector-modalidad administrador /><label for="correo">Correo electrónico</label><input
                     id="correo" name="correo" type="email" value="{{ old('correo') }}" required autocomplete="email"
                     placeholder="tucorreo@gmail.com"><label for="password">Contraseña</label><input id="password"
                     name="password" type="password" required autocomplete="current-password"><label
