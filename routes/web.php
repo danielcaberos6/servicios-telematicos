@@ -5,12 +5,20 @@ use App\Http\Controllers\ImagenController;
 use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PujaController;
+use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\SubastaController;
+use App\Http\Middleware\SoloAdministrador;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [SubastaController::class, 'inicio'])->name('inicio');
 Route::get('/buscar', [SubastaController::class, 'index'])->name('subastas.index');
 Route::get('/imagenes/{imagen}', [ImagenController::class, 'show'])->name('imagenes.show');
+
+Route::middleware(['auth', SoloAdministrador::class])->prefix('reportes')->name('reportes.')->group(function () {
+    Route::redirect('/', '/reportes/subastas')->name('index');
+    Route::get('/subastas', [ReporteController::class, 'subastas'])->name('subastas');
+    Route::get('/usuarios', [ReporteController::class, 'usuarios'])->name('usuarios');
+});
 
 Route::middleware('guest')->group(function () {
     Route::view('/iniciar-sesion', 'autenticacion.iniciar-sesion')->name('iniciar-sesion');

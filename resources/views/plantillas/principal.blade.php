@@ -33,6 +33,10 @@
                         @endif
                     </a>
                 @endforeach
+                @if (auth()->user()?->esAdministrador())
+                    <a href="{{ route('reportes.subastas') }}" @class(['nav-link', 'active' => request()->routeIs('reportes.*')])
+                        @if (request()->routeIs('reportes.*')) aria-current="page" @endif>Reportes</a>
+                @endif
             </nav>
             <div class="account-nav">
                 @auth
