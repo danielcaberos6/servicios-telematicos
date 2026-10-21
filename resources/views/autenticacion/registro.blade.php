@@ -2,6 +2,7 @@
 @section('title', 'Crear cuenta')
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/autenticacion.css') }}">
+    <script src="{{ asset('js/autenticacion.js') }}" data-inicio="{{ route('inicio') }}"></script>
 @endpush
 @section('content')
     <div class="auth-wrap">
