@@ -1,7 +1,6 @@
 @extends('plantillas.principal')
 @section('title', 'Crear cuenta')
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/autenticacion.css') }}">
     <script src="{{ asset('js/autenticacion.js') }}" data-inicio="{{ route('inicio') }}"></script>
 @endpush
 @section('content')
@@ -14,7 +13,7 @@
         <div class="panel auth-panel">
             <h2>Crea tu cuenta</h2>
             <p class="muted">El primer paso para encontrar algo especial.</p>
-            <form method="post" action="{{ route('registro') }}">@csrf<x-selector-modalidad /><label for="nombre">Nombre completo</label><input
+            <form method="post" action="{{ route('registro') }}">@csrf<label for="nombre">Nombre completo</label><input
                     id="nombre" name="nombre" value="{{ old('nombre') }}" required maxlength="100"
                     autocomplete="name"><label for="correo">Correo electrónico</label><input id="correo" name="correo"
                     type="email" value="{{ old('correo') }}" required maxlength="254" autocomplete="email"><label
