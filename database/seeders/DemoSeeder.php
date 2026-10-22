@@ -20,10 +20,15 @@ class DemoSeeder extends Seeder
         $demo = User::firstOrCreate(['correo' => 'demo@subastaya.test'], ['nombre' => 'Rodrigo Vargas', 'contrasena' => 'SubastaYA2026!', 'ciudad' => 'La Paz', 'biografia' => 'Me gusta encontrar nuevas oportunidades y dar otra vida a mis artículos.']);
         User::whereKey($demo->id_usuario)->where('nombre', 'Rodrigo Demo')->update(['nombre' => 'Rodrigo Vargas']);
         $seller = User::firstOrCreate(['correo' => 'vendedor@subastaya.test'], ['nombre' => 'Lucía Mendoza', 'contrasena' => 'SubastaYA2026!', 'ciudad' => 'Cochabamba']);
+        $admin = User::firstOrCreate(['correo' => 'admin@subastaya.test'], ['nombre' => 'Administrador', 'contrasena' => 'Admin2026!', 'ciudad' => 'La Paz']);
+
         $role = DB::table('rol')->where('nombre_rol', 'Usuario')->value('id_rol');
+        $roleAdmin = DB::table('rol')->where('nombre_rol', 'Administrador')->value('id_rol');
+
         foreach ([$demo, $seller] as $user) {
             DB::table('usuario_rol')->insertOrIgnore(['id_usuario' => $user->id_usuario, 'id_rol' => $role]);
         }
+        DB::table('usuario_rol')->insertOrIgnore(['id_usuario' => $admin->id_usuario, 'id_rol' => $roleAdmin]);
         $items = $this->articulos();
         foreach ($items as $index => [$title, $category, $condition, $price, $location, $image, $hours, $description]) {
             $owner = $index === 0 ? $demo : $seller;
