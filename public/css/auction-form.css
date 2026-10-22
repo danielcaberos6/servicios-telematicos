@@ -107,6 +107,116 @@
 .publish-field small {
     margin-top: 8px;
 }
+.duration-presets {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 4px 0 10px;
+}
+.duration-preset-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 11px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    user-select: none;
+    line-height: 1.2;
+}
+.duration-preset-btn:hover {
+    background: #e9f0f8;
+    border-color: #b7cede;
+    color: var(--blue);
+}
+.duration-preset-btn:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 1px;
+}
+.duration-preset-btn.is-active {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(7, 62, 131, 0.25);
+}
+.location-group {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+}
+.location-group input {
+    flex: 1;
+    min-width: 0;
+}
+.btn-gps {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    padding: 0 16px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--blue);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.btn-gps:hover {
+    background: #e9f2fb;
+    border-color: #b7cede;
+    color: var(--blue-dark);
+}
+.btn-gps:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 1px;
+}
+.btn-gps .icon {
+    width: 16px;
+    height: 16px;
+}
+.gps-status {
+    min-height: 24px;
+    margin-top: 6px;
+}
+.gps-coords-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: #edf7ed;
+    color: #176538;
+    border: 1px solid #b7dfc6;
+    font-size: 12px;
+    font-weight: 500;
+}
+.gps-coords-badge .icon {
+    width: 14px;
+    height: 14px;
+}
+.btn-clear-gps {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #c93b2b;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 0 2px;
+    line-height: 1;
+    border-radius: 3px;
+    margin-left: 4px;
+}
+.btn-clear-gps:hover {
+    color: #9c1c11;
+}
 .publish-photo-rules {
     display: flex;
     flex-wrap: wrap;
@@ -124,6 +234,7 @@
     margin: 0;
     padding: 28px 20px;
     gap: 10px;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
 }
 .publish-upload-icon {
     display: grid;
@@ -132,14 +243,17 @@
     height: 54px;
     border-radius: 14px;
     background: #edf3fb;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease;
 }
 .publish-upload-icon .icon {
     width: 28px;
     height: 28px;
     color: var(--blue);
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease;
 }
 .publish-upload strong {
     font-size: 14px;
+    transition: color 0.2s ease;
 }
 .publish-upload > span:not(.publish-upload-icon) {
     font-size: 12px;
@@ -149,6 +263,23 @@
     min-width: 0;
     max-width: 350px;
     width: 100%;
+}
+.auction-form .publish-upload.is-dragover {
+    border-color: var(--blue);
+    border-style: dashed;
+    background: #eaf3fd;
+    transform: scale(1.015);
+    box-shadow: 0 8px 28px rgba(7, 62, 131, 0.14);
+}
+.publish-upload.is-dragover .publish-upload-icon {
+    background: #d4e7fc;
+    transform: translateY(-4px) scale(1.1);
+}
+.publish-upload.is-dragover .publish-upload-icon .icon {
+    color: var(--blue-dark);
+}
+.publish-upload.is-dragover strong {
+    color: var(--blue);
 }
 .auction-form .publish-photo-grid {
     display: grid;
@@ -305,6 +436,13 @@
     }
     .publish-fields {
         gap: 20px;
+    }
+    .location-group {
+        flex-direction: column;
+    }
+    .btn-gps {
+        min-height: 44px;
+        justify-content: center;
     }
     .publish-upload {
         padding: 22px 12px;

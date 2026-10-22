@@ -384,6 +384,22 @@ class SubastaYaTest extends TestCase
         $this->actingAs(User::factory()->create())->get('/subastas/'.$auction->id_subasta)->assertDontSee($owner->correo)->assertDontSee($winner->correo);
     }
 
+    public function test_finalization_notifies_losing_participants_once(): void
+    {
+        $auction = $this->auction(null, ['fecha_fin' => now()->addSeconds(2)]);
+        $loser = User::factory()->create();
+        $winner = User::factory()->create();
+        $this->actingAs($loser)->post('/subastas/'.$auction->id_subasta.'/pujas', ['monto' => 150])->assertSessionHasNoErrors();
+        $this->actingAs($loser)->post('/subastas/'.$auction->id_subasta.'/pujas', ['monto' => 160])->assertSessionHasNoErrors();
+        $this->actingAs($winner)->post('/subastas/'.$auction->id_subasta.'/pujas', ['monto' => 170])->assertSessionHasNoErrors();
+        DB::statement('select pg_sleep(2.1)');
+        $this->artisan('subastas:finalizar')->assertSuccessful();
+        $this->artisan('subastas:finalizar')->assertSuccessful();
+        $this->assertSame(1, Notificacion::where('id_usuario', $loser->id_usuario)->where('titulo', 'Subasta finalizada')->count());
+        $this->assertSame(0, Notificacion::where('id_usuario', $winner->id_usuario)->where('titulo', 'Subasta finalizada')->count());
+        $this->assertSame(1, Notificacion::where('id_usuario', $winner->id_usuario)->where('titulo', '¡Ganaste una subasta!')->count());
+    }
+
     public function test_image_ownership_and_combined_upload_limit_are_enforced(): void
     {
         Storage::fake('public');
@@ -409,5 +425,51 @@ class SubastaYaTest extends TestCase
         $first->assertSee('Página 1 de 2');
         $first->assertSee('estado=Usado&amp;min=50&amp;page=2', false);
         $this->get('/buscar?estado=Usado&min=50&page=2')->assertOk()->assertSee('Página 2 de 2');
+    }
+
+    public function test_create_form_displays_quick_duration_presets(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user)
+            ->get('/subastas/crear')
+            ->assertOk()
+            ->assertSee('data-duration-presets', false)
+            ->assertSee('+ 3 días')
+            ->assertSee('+ 5 días')
+            ->assertSee('+ 7 días')
+            ->assertSee('+ 14 días')
+            ->assertSee('btn-geolocalizacion', false);
+    }
+
+    public function test_auction_can_be_published_with_gps_coordinates_and_displays_google_maps_link(): void
+    {
+        $owner = User::factory()->create();
+        $response = $this->actingAs($owner)->post('/subastas', $this->payload([
+            'latitud' => '-16.505123',
+            'longitud' => '-68.129456',
+        ]));
+        $response->assertSessionHasNoErrors()->assertRedirect();
+
+        $auction = Subasta::latest('id_subasta')->firstOrFail();
+        $this->assertEquals('-16.505123', (string) $auction->latitud);
+        $this->assertEquals('-68.129456', (string) $auction->longitud);
+
+        $this->get('/subastas/'.$auction->id_subasta)
+            ->assertOk()
+            ->assertSee('Ver punto de encuentro en Google Maps')
+            ->assertSee('https://www.google.com/maps/search/?api=1&query=-16.505123,-68.129456', false);
+    }
+
+    public function test_invalid_gps_coordinates_are_rejected(): void
+    {
+        $owner = User::factory()->create();
+        $this->actingAs($owner)->post('/subastas', $this->payload([
+            'latitud' => '95.123',
+            'longitud' => '-68.123',
+        ]))->assertSessionHasErrors('latitud');
+
+        $this->post('/subastas', $this->payload([
+            'latitud' => '-16.500',
+        ]))->assertSessionHasErrors('longitud');
     }
 }

@@ -96,7 +96,16 @@
                 </div>
                 <div class="panel meeting-panel">
                     <h3><x-icono nombre="pin" />Punto de encuentro</h3>
-                    <p>{{ $subasta->ubicacion }}</p><small>El vendedor y el ganador coordinan la entrega y el pago.</small>
+                    <p>{{ $subasta->ubicacion }}</p>
+                    @if ($subasta->latitud && $subasta->longitud)
+                        <div class="meeting-map-action">
+                            <a href="https://www.google.com/maps/search/?api=1&query={{ $subasta->latitud }},{{ $subasta->longitud }}"
+                                target="_blank" rel="noopener noreferrer" class="button secondary small map-link">
+                                <x-icono nombre="pin" /> Ver punto de encuentro en Google Maps ↗
+                            </a>
+                        </div>
+                    @endif
+                    <small>El vendedor y el ganador coordinan la entrega y el pago.</small>
                 </div>
                 <div class="seller"><span
                         class="avatar small">{{ mb_strtoupper(mb_substr($subasta->usuario->nombre, 0, 1)) }}</span>
