@@ -19,7 +19,7 @@
                     <h2>
                         {{ $user->nombre }}</h2>
                     <p>{{ $user->ciudad ?: 'Agrega tu ciudad' }}</p>
-                    <p><strong>{{ $user->identidad_verificada ? 'Verificado' : 'No verificado' }}</strong></p>
+                    <p><x-distintivo-identidad :usuario="$user" /></p>
                     <p class="muted">Miembro desde {{ $user->fecha_registro->translatedFormat('F Y') }}</p>
                     <div class="profile-stat"><strong>{{ $user->subastas()->count() }}</strong><span>subastas
                             publicadas</span></div>

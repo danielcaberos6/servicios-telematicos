@@ -11,6 +11,11 @@ class IdentidadService
 {
     use EjecutaFuncionesSql;
 
+    public function resolver(int $actor, int $id, string $decision, ?string $motivo): void
+    {
+        $this->ejecutar('select resolver_verificacion(?,?,?,?)', [$actor, $id, $decision, $motivo], 'identidad');
+    }
+
     public function solicitar(int $actor, int $version, UploadedFile $documento): int
     {
         $ruta = $documento->store((string) $actor, 'identidad');

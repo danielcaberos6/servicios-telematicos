@@ -18,6 +18,8 @@ Route::get('/buscar', [SubastaController::class, 'index'])->name('subastas.index
 Route::get('/imagenes/{imagen}', [ImagenController::class, 'show'])->name('imagenes.show');
 
 Route::middleware(['auth', SoloAdministrador::class])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/identidad', [IdentidadController::class, 'index'])->name('identidad.index');
+    Route::patch('/identidad/{verificacion}', [IdentidadController::class, 'resolver'])->name('identidad.resolver');
     Route::resource('categorias', CategoriaController::class)->except('show', 'destroy');
     Route::patch('/categorias/{categoria}/estado', [CategoriaController::class, 'estado'])->name('categorias.estado');
     Route::get('/usuarios', [GestionUsuarioController::class, 'index'])->name('usuarios.index');

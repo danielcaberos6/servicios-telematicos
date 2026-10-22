@@ -25,7 +25,7 @@
                 @php
                     $esAdministrador = auth()->user()?->esAdministrador() ?? false;
                     $enlaces = $esAdministrador
-                        ? [['inicio', 'home', 'Inicio'], ['admin.usuarios.index', 'user', 'Usuarios'], ['admin.categorias.index', 'box', 'Categorías']]
+                        ? [['inicio', 'home', 'Inicio'], ['admin.usuarios.index', 'user', 'Usuarios'], ['admin.categorias.index', 'box', 'Categorías'], ['admin.identidad.index', 'shield', 'Identidad']]
                         : [['inicio', 'home', 'Inicio'], ['perfil.edit', 'user', 'Perfil'], ['subastas.index', 'search', 'Buscar'], ['subastas.mias', 'gavel', 'Mis Subastas'], ['notificaciones.index', 'bell', 'Notificaciones']];
                 @endphp
                 @foreach ($enlaces as [$route, $icon, $label])
