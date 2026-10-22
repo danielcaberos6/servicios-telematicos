@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AutenticacionController;
+use App\Http\Controllers\GestionUsuarioController;
 use App\Http\Controllers\ImagenController;
 use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\PerfilController;
@@ -13,6 +14,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [SubastaController::class, 'inicio'])->name('inicio');
 Route::get('/buscar', [SubastaController::class, 'index'])->name('subastas.index');
 Route::get('/imagenes/{imagen}', [ImagenController::class, 'show'])->name('imagenes.show');
+
+Route::middleware(['auth', SoloAdministrador::class])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/usuarios', [GestionUsuarioController::class, 'index'])->name('usuarios.index');
+});
 
 Route::middleware(['auth', SoloAdministrador::class])->prefix('reportes')->name('reportes.')->group(function () {
     Route::redirect('/', '/reportes/subastas')->name('index');

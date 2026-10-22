@@ -12,10 +12,10 @@ class SoloAdministrador
     {
         if (! $request->user()?->esAdministrador()) {
             if ($request->expectsJson()) {
-                abort(403, 'Solo el administrador puede consultar los reportes.');
+                abort(403, 'Solo los administradores pueden acceder a esta sección.');
             }
 
-            return redirect()->route('inicio')->withErrors(['acceso' => 'Los reportes están disponibles solo para administradores.']);
+            return redirect()->route('inicio')->withErrors(['acceso' => 'Esta sección está disponible solo para administradores.']);
         }
 
         return $next($request);
