@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AutenticacionController;
+use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\GestionUsuarioController;
 use App\Http\Controllers\ImagenController;
 use App\Http\Controllers\NotificacionController;
@@ -16,6 +17,8 @@ Route::get('/buscar', [SubastaController::class, 'index'])->name('subastas.index
 Route::get('/imagenes/{imagen}', [ImagenController::class, 'show'])->name('imagenes.show');
 
 Route::middleware(['auth', SoloAdministrador::class])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('categorias', CategoriaController::class)->except('show', 'destroy');
+    Route::patch('/categorias/{categoria}/estado', [CategoriaController::class, 'estado'])->name('categorias.estado');
     Route::get('/usuarios', [GestionUsuarioController::class, 'index'])->name('usuarios.index');
     Route::patch('/usuarios/{usuario}', [GestionUsuarioController::class, 'update'])->name('usuarios.update');
     Route::get('/usuarios/{usuario}/historial', [GestionUsuarioController::class, 'historial'])->name('usuarios.historial');
