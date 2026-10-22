@@ -19,6 +19,7 @@
                     <h2>
                         {{ $user->nombre }}</h2>
                     <p>{{ $user->ciudad ?: 'Agrega tu ciudad' }}</p>
+                    <p><strong>{{ $user->identidad_verificada ? 'Verificado' : 'No verificado' }}</strong></p>
                     <p class="muted">Miembro desde {{ $user->fecha_registro->translatedFormat('F Y') }}</p>
                     <div class="profile-stat"><strong>{{ $user->subastas()->count() }}</strong><span>subastas
                             publicadas</span></div>
@@ -81,6 +82,7 @@
                     </div>
                     <div class="form-footer"><button class="button primary" type="submit">Guardar perfil</button></div>
                 </form>
+                @include('identidad.perfil')
                 <div class="panel spaced-heading">
                     <h2>Reseñas y valoraciones</h2>
                     @forelse($reviews as $review)

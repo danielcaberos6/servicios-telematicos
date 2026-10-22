@@ -24,6 +24,7 @@ class User extends Authenticatable
     {
         return [
             'activo' => 'boolean',
+            'identidad_verificada' => 'boolean',
             'fecha_registro' => 'datetime',
             'contrasena' => 'hashed',
         ];

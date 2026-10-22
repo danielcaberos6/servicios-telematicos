@@ -3,6 +3,7 @@
 use App\Http\Controllers\AutenticacionController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\GestionUsuarioController;
+use App\Http\Controllers\IdentidadController;
 use App\Http\Controllers\ImagenController;
 use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\PerfilController;
@@ -38,6 +39,9 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    Route::post('/perfil/identidad', [IdentidadController::class, 'store'])->middleware('throttle:5,1')->name('identidad.store');
+    Route::get('/identidad/{verificacion}', [IdentidadController::class, 'show'])->name('identidad.show');
+    Route::get('/identidad/{verificacion}/documento', [IdentidadController::class, 'documento'])->name('identidad.documento');
     Route::post('/cerrar-sesion', [AutenticacionController::class, 'cerrarSesion'])->name('cerrar-sesion');
     Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
     Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
