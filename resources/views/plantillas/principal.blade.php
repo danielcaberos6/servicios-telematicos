@@ -29,8 +29,14 @@
                         : [['inicio', 'home', 'Inicio'], ['perfil.edit', 'user', 'Perfil'], ['subastas.index', 'search', 'Buscar'], ['subastas.mias', 'gavel', 'Mis Subastas'], ['notificaciones.index', 'bell', 'Notificaciones']];
                 @endphp
                 @foreach ($enlaces as [$route, $icon, $label])
-                    <a href="{{ route($route) }}" @class(['nav-link', 'active' => request()->routeIs($route)])
-                        @if (request()->routeIs($route)) aria-current="page" @endif><x-icono
+                    @php
+                        $activo = str_starts_with($route, 'admin.')
+                            ? request()->routeIs(Str::beforeLast($route, '.') . '.*')
+                            : request()->routeIs($route);
+                        $activo = $activo || ($route === 'admin.identidad.index' && request()->routeIs('identidad.show'));
+                    @endphp
+                    <a href="{{ route($route) }}" @class(['nav-link', 'active' => $activo])
+                        @if ($activo) aria-current="page" @endif><x-icono
                             :nombre="$icon" />{{ $label }}@if (
                                 $route === 'notificaciones.index' &&
                                     auth()->check() &&

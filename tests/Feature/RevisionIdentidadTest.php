@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\Categoria;
 use App\Models\User;
 use App\Models\VerificacionIdentidad;
 use App\Services\IdentidadService;
+use App\Services\SubastaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -98,5 +100,21 @@ class RevisionIdentidadTest extends TestCase
         $this->assertFalse($solicitud->refresh()->vigente);
         $this->assertSame($admin->id_usuario, $solicitud->id_revisor);
         $this->assertNotNull($solicitud->fecha_decision);
+    }
+
+    public function test_public_seller_badge_does_not_expose_the_document_or_its_private_url(): void
+    {
+        $admin = $this->admin();
+        $solicitud = $this->solicitud();
+        app(IdentidadService::class)->resolver($admin->id_usuario, $solicitud->id_verificacion, 'Aprobada', null);
+        $auction = app(SubastaService::class)->crear($solicitud->id_usuario, [
+            'titulo' => 'Artículo de usuario verificado', 'descripcion' => 'Artículo de prueba con descripción completa.',
+            'ubicacion' => 'La Paz, Plaza Abaroa', 'id_categoria' => Categoria::first()->id_categoria,
+            'estado_articulo' => 'Usado', 'monto_inicial' => 100, 'fecha_fin' => now()->addDays(3)->toDateTimeString(),
+        ]);
+        $this->get('/subastas/'.$auction->id_subasta)->assertOk()->assertSee('✓ Verificado')
+            ->assertDontSee($solicitud->ruta_documento)->assertDontSee(route('identidad.documento', $solicitud));
+        $solicitud->usuario->forceFill(['nombres' => 'Nombre actualizado'])->save();
+        $this->get('/subastas/'.$auction->id_subasta)->assertSee('No verificado')->assertDontSee('✓ Verificado');
     }
 }
