@@ -10,6 +10,16 @@ class GestionUsuarioService
 {
     use EjecutaFuncionesSql;
 
+    public function cambiar(int $actor, int $usuario, string $operacion, bool $valor): void
+    {
+        $this->ejecutar('select gestionar_cuenta(?,?,?,?::boolean)', [$actor, $usuario, $operacion, $valor ? 'true' : 'false'], 'cuenta');
+    }
+
+    public function historial(int $actor, int $usuario): array
+    {
+        return $this->ejecutar('select * from historial_cuenta(?,?)', [$actor, $usuario], 'cuenta');
+    }
+
     public function listar(int $actor, array $filtros): LengthAwarePaginator
     {
         $resultado = $this->ejecutar('select listar_usuarios_gestion(?, ?::jsonb) as datos', [$actor, $this->json($filtros)], 'usuarios')[0];

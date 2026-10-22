@@ -37,7 +37,7 @@
                 <table class="ranking-table gestion-tabla">
                     <thead><tr>
                         <th scope="col">Nombre</th><th scope="col">Correo</th><th scope="col">Rol</th>
-                        <th scope="col">Estado</th><th scope="col">Fecha de registro</th>
+                        <th scope="col">Estado</th><th scope="col">Fecha de registro</th><th scope="col">Acciones</th>
                     </tr></thead>
                     <tbody>
                         @forelse ($usuarios as $usuario)
@@ -47,9 +47,26 @@
                                 <td>{{ $usuario['administrador'] ? 'Administrador' : 'Usuario' }}</td>
                                 <td><span class="gestion-estado {{ $usuario['activo'] ? 'gestion-activa' : 'gestion-inactiva' }}">{{ $usuario['activo'] ? 'Activa' : 'Desactivada' }}</span></td>
                                 <td>{{ \Carbon\Carbon::parse($usuario['fecha_registro'])->timezone('America/La_Paz')->format('d/m/Y') }}</td>
+                                <td class="gestion-acciones">
+                                    @if ($usuario['id_usuario'] !== auth()->id())
+                                        <form method="post" action="{{ route('admin.usuarios.update', $usuario['id_usuario']) }}">
+                                            @csrf @method('PATCH')
+                                            <input type="hidden" name="operacion" value="estado">
+                                            <input type="hidden" name="valor" value="{{ $usuario['activo'] ? 0 : 1 }}">
+                                            <button type="submit" class="button secondary">{{ $usuario['activo'] ? 'Desactivar' : 'Activar' }}</button>
+                                        </form>
+                                    @endif
+                                    <form method="post" action="{{ route('admin.usuarios.update', $usuario['id_usuario']) }}">
+                                        @csrf @method('PATCH')
+                                        <input type="hidden" name="operacion" value="administrador">
+                                        <input type="hidden" name="valor" value="{{ $usuario['administrador'] ? 0 : 1 }}">
+                                        <button type="submit" class="button secondary">{{ $usuario['administrador'] ? 'Retirar administrador' : 'Hacer administrador' }}</button>
+                                    </form>
+                                    <a href="{{ route('admin.usuarios.historial', $usuario['id_usuario']) }}">Ver historial</a>
+                                </td>
                             </tr>
                         @empty
-                            <tr><td colspan="5" class="gestion-vacio">No se encontraron usuarios con estos filtros.</td></tr>
+                            <tr><td colspan="6" class="gestion-vacio">No se encontraron usuarios con estos filtros.</td></tr>
                         @endforelse
                     </tbody>
                 </table>

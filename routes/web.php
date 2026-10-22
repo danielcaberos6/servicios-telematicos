@@ -17,6 +17,8 @@ Route::get('/imagenes/{imagen}', [ImagenController::class, 'show'])->name('image
 
 Route::middleware(['auth', SoloAdministrador::class])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/usuarios', [GestionUsuarioController::class, 'index'])->name('usuarios.index');
+    Route::patch('/usuarios/{usuario}', [GestionUsuarioController::class, 'update'])->name('usuarios.update');
+    Route::get('/usuarios/{usuario}/historial', [GestionUsuarioController::class, 'historial'])->name('usuarios.historial');
 });
 
 Route::middleware(['auth', SoloAdministrador::class])->prefix('reportes')->name('reportes.')->group(function () {

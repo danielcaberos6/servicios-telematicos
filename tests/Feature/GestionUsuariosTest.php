@@ -79,4 +79,43 @@ class GestionUsuariosTest extends TestCase
             }
         }
     }
+
+    public function test_account_changes_are_audited_and_repeated_requests_do_not_duplicate_decisions(): void
+    {
+        $admin = $this->admin();
+        $user = User::factory()->create();
+        $this->actingAs($admin);
+        foreach ([['estado', false], ['estado', false], ['estado', true], ['administrador', true], ['administrador', false]] as [$operacion, $valor]) {
+            $this->patch('/admin/usuarios/'.$user->id_usuario, compact('operacion', 'valor'))->assertSessionHasNoErrors();
+        }
+        $this->assertTrue($user->refresh()->activo);
+        $this->assertFalse($user->esAdministrador());
+        $this->assertDatabaseCount('decision_usuario', 4);
+        $this->assertDatabaseHas('decision_usuario', ['id_actor' => $admin->id_usuario, 'id_usuario' => $user->id_usuario]);
+        $this->get('/admin/usuarios/'.$user->id_usuario.'/historial')->assertOk()->assertSee('Estado de cuenta');
+    }
+
+    public function test_admin_cannot_disable_self_or_remove_the_last_active_admin(): void
+    {
+        $admin = $this->admin();
+        $this->actingAs($admin)->patch('/admin/usuarios/'.$admin->id_usuario, ['operacion' => 'estado', 'valor' => false])
+            ->assertSessionHasErrors('cuenta');
+        $this->patch('/admin/usuarios/'.$admin->id_usuario, ['operacion' => 'administrador', 'valor' => false])
+            ->assertSessionHasErrors('cuenta');
+        $this->assertDatabaseCount('decision_usuario', 0);
+        $other = $this->admin();
+        $this->patch('/admin/usuarios/'.$admin->id_usuario, ['operacion' => 'administrador', 'valor' => false])->assertSessionHasNoErrors();
+        $this->getJson('/admin/usuarios')->assertForbidden();
+        $this->assertTrue($other->esAdministrador());
+    }
+
+    public function test_ordinary_users_cannot_change_roles_or_consult_audit_history(): void
+    {
+        $admin = $this->admin();
+        $ordinary = User::factory()->create();
+        $this->actingAs($ordinary)->patchJson('/admin/usuarios/'.$ordinary->id_usuario, ['operacion' => 'administrador', 'valor' => true])->assertForbidden();
+        $this->getJson('/admin/usuarios/'.$admin->id_usuario.'/historial')->assertForbidden();
+        $this->assertFalse($ordinary->esAdministrador());
+        $this->assertDatabaseCount('decision_usuario', 0);
+    }
 }
