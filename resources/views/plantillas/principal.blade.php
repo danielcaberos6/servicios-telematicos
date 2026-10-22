@@ -22,7 +22,13 @@
                         OFERTA. GANA.</small></span></a>
             <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="navigation">Menú ☰</button>
             <nav id="navigation" class="navigation" aria-label="Navegación principal">
-                @foreach ([['inicio', 'home', 'Inicio'], ['perfil.edit', 'user', 'Perfil'], ['subastas.index', 'search', 'Buscar'], ['subastas.mias', 'gavel', 'Mis Subastas'], ['notificaciones.index', 'bell', 'Notificaciones']] as [$route, $icon, $label])
+                @php
+                    $esAdministrador = auth()->user()?->esAdministrador() ?? false;
+                    $enlaces = $esAdministrador
+                        ? [['inicio', 'home', 'Inicio']]
+                        : [['inicio', 'home', 'Inicio'], ['perfil.edit', 'user', 'Perfil'], ['subastas.index', 'search', 'Buscar'], ['subastas.mias', 'gavel', 'Mis Subastas'], ['notificaciones.index', 'bell', 'Notificaciones']];
+                @endphp
+                @foreach ($enlaces as [$route, $icon, $label])
                     <a href="{{ route($route) }}" @class(['nav-link', 'active' => request()->routeIs($route)])
                         @if (request()->routeIs($route)) aria-current="page" @endif><x-icono
                             :nombre="$icon" />{{ $label }}@if (
@@ -33,7 +39,7 @@
                         @endif
                     </a>
                 @endforeach
-                @if (auth()->user()?->esAdministrador())
+                @if ($esAdministrador)
                     <a href="{{ route('reportes.subastas') }}" @class(['nav-link', 'active' => request()->routeIs('reportes.*')])
                         @if (request()->routeIs('reportes.*')) aria-current="page" @endif>Reportes</a>
                 @endif
