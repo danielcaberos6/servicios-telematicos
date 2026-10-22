@@ -18,7 +18,12 @@ class SubastaRequest extends FormRequest
         return [
             'titulo' => ['required', 'string', 'min:5', 'max:120'],
             'descripcion' => ['required', 'string', 'min:15', 'max:5000'],
-            'id_categoria' => ['required', 'integer', 'exists:categoria,id_categoria'],
+            'id_categoria' => ['required', 'integer', Rule::exists('categoria', 'id_categoria')->where(function ($query) {
+                $query->where('habilitada', true);
+                if ($this->route('subasta') instanceof Subasta) {
+                    $query->orWhere('id_categoria', $this->route('subasta')->id_categoria);
+                }
+            })],
             'estado_articulo' => ['required', Rule::in(Subasta::CONDITIONS)],
             'ubicacion' => ['required', 'string', 'min:5', 'max:250'],
             'latitud' => ['nullable', 'numeric', 'between:-90,90', 'required_with:longitud'],

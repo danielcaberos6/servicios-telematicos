@@ -39,7 +39,7 @@ class SubastaController extends Controller
 
     public function create()
     {
-        return view('subastas.formulario', ['subasta' => new Subasta, 'categorias' => $this->catalogoService->categorias()]);
+        return view('subastas.formulario', ['subasta' => new Subasta, 'categorias' => $this->catalogoService->categoriasPublicacion()]);
     }
 
     public function store(SubastaRequest $request)
@@ -83,7 +83,7 @@ class SubastaController extends Controller
         $this->checkOwner($request, $subasta);
         $this->checkEditable($subasta);
 
-        return view('subastas.formulario', ['subasta' => $subasta->load('imagenes'), 'categorias' => $this->catalogoService->categorias()]);
+        return view('subastas.formulario', ['subasta' => $subasta->load('imagenes'), 'categorias' => $this->catalogoService->categoriasPublicacion($subasta->id_categoria)]);
     }
 
     public function update(SubastaRequest $request, Subasta $subasta)

@@ -30,4 +30,10 @@ class CatalogoService
     {
         return Categoria::query()->fromRaw('listar_categorias() as categoria')->get();
     }
+
+    public function categoriasPublicacion(?int $actual = null)
+    {
+        return Categoria::where('habilitada', true)->when($actual, fn ($query) => $query->orWhere('id_categoria', $actual))
+            ->orderBy('nombre_categoria')->get();
+    }
 }

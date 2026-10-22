@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\AutenticacionController;
+use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\GestionUsuarioController;
+use App\Http\Controllers\IdentidadController;
 use App\Http\Controllers\ImagenController;
 use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\PerfilController;
@@ -13,6 +16,16 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [SubastaController::class, 'inicio'])->name('inicio');
 Route::get('/buscar', [SubastaController::class, 'index'])->name('subastas.index');
 Route::get('/imagenes/{imagen}', [ImagenController::class, 'show'])->name('imagenes.show');
+
+Route::middleware(['auth', SoloAdministrador::class])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/identidad', [IdentidadController::class, 'index'])->name('identidad.index');
+    Route::patch('/identidad/{verificacion}', [IdentidadController::class, 'resolver'])->name('identidad.resolver');
+    Route::resource('categorias', CategoriaController::class)->except('show', 'destroy');
+    Route::patch('/categorias/{categoria}/estado', [CategoriaController::class, 'estado'])->name('categorias.estado');
+    Route::get('/usuarios', [GestionUsuarioController::class, 'index'])->name('usuarios.index');
+    Route::patch('/usuarios/{usuario}', [GestionUsuarioController::class, 'update'])->name('usuarios.update');
+    Route::get('/usuarios/{usuario}/historial', [GestionUsuarioController::class, 'historial'])->name('usuarios.historial');
+});
 
 Route::middleware(['auth', SoloAdministrador::class])->prefix('reportes')->name('reportes.')->group(function () {
     Route::redirect('/', '/reportes/subastas')->name('index');
@@ -28,6 +41,9 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    Route::post('/perfil/identidad', [IdentidadController::class, 'store'])->middleware('throttle:5,1')->name('identidad.store');
+    Route::get('/identidad/{verificacion}', [IdentidadController::class, 'show'])->name('identidad.show');
+    Route::get('/identidad/{verificacion}/documento', [IdentidadController::class, 'documento'])->name('identidad.documento');
     Route::post('/cerrar-sesion', [AutenticacionController::class, 'cerrarSesion'])->name('cerrar-sesion');
     Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
     Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');

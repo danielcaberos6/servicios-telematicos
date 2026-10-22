@@ -15,6 +15,7 @@ class UsuarioService
     {
         $row = $this->ejecutar('select * from crear_usuario(?::jsonb)', [$this->json([
             'nombre' => $data['nombre'], 'correo' => $data['correo'], 'contrasena' => Hash::make($data['password']),
+            'nombres' => $data['nombres'], 'apellidos' => $data['apellidos'],
         ])], 'correo')[0];
 
         return (new User)->newFromBuilder((array) $row);

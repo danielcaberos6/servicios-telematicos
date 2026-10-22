@@ -30,6 +30,9 @@ trait EjecutaFuncionesSql
             if ($state === '23505' && $field === 'correo') {
                 throw ValidationException::withMessages(['correo' => 'Este correo ya está registrado.']);
             }
+            if ($state === '23505' && $field === 'categoria') {
+                throw ValidationException::withMessages(['nombre_categoria' => 'Ya existe una categoría con ese nombre.']);
+            }
             throw $e;
         }
     }

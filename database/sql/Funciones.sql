@@ -34,8 +34,8 @@ begin
     if length(trim(coalesce(p_datos->>'nombre',''))) = 0 or coalesce(p_datos->>'contrasena','') !~ '^\$2[ayb]\$' then
         raise exception 'Nombre y contraseña cifrada son obligatorios.';
     end if;
-    insert into usuario(nombre,correo,contrasena)
-    values(trim(p_datos->>'nombre'), lower(trim(p_datos->>'correo')), p_datos->>'contrasena') returning * into resultado;
+    insert into usuario(nombre,nombres,apellidos,correo,contrasena)
+    values(trim(p_datos->>'nombre'), p_datos->>'nombres', p_datos->>'apellidos', lower(trim(p_datos->>'correo')), p_datos->>'contrasena') returning * into resultado;
     return resultado;
 end;
 $$;
@@ -49,6 +49,8 @@ begin
     -- Una clave ausente conserva el valor actual; una clave con null lo borra.
     update usuario set
         nombre = case when p_datos ? 'nombre' then p_datos->>'nombre' else nombre end,
+        nombres = case when p_datos ? 'nombres' then p_datos->>'nombres' else nombres end,
+        apellidos = case when p_datos ? 'apellidos' then p_datos->>'apellidos' else apellidos end,
         correo = case when p_datos ? 'correo' then lower(trim(p_datos->>'correo')) else correo end,
         ciudad = case when p_datos ? 'ciudad' then p_datos->>'ciudad' else ciudad end,
         telefono = case when p_datos ? 'telefono' then p_datos->>'telefono' else telefono end,
@@ -318,8 +320,8 @@ $$;
 create or replace function exigir_administrador(p_actor bigint) returns void language plpgsql stable as $$
 begin
     if p_actor is null or not exists (
-        select 1 from usuario_rol ur join rol r on r.id_rol=ur.id_rol
-        where ur.id_usuario=p_actor and r.nombre_rol='Administrador'
+        select 1 from usuario_rol ur join rol r on r.id_rol=ur.id_rol join usuario u on u.id_usuario=ur.id_usuario
+        where ur.id_usuario=p_actor and u.activo and r.nombre_rol='Administrador'
     ) then raise exception 'Solo el administrador puede consultar los reportes.' using errcode='42501'; end if;
 end;
 $$;

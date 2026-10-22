@@ -1,0 +1,23 @@
+.gestion-page { padding-top: 40px; padding-bottom: 56px; }
+.gestion-page h1 { margin: 0 0 12px; }
+.gestion-filtros { display: flex; flex-wrap: wrap; align-items: end; gap: 16px; margin-bottom: 24px; }
+.gestion-filtros > div { flex: 1 1 220px; }
+.gestion-filtros label { display: block; margin-bottom: 8px; font-weight: 600; }
+.gestion-filtros input, .gestion-filtros select { width: 100%; }
+.gestion-filtros .text-link { padding: 12px 0; }
+.gestion-tabla-scroll { overflow-x: auto; }
+.gestion-tabla { min-width: 680px; }
+.gestion-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 240px; }
+.gestion-acciones .button { font-size: .8rem; padding: 8px 12px; }
+.gestion-tabla td:nth-child(2) { overflow-wrap: anywhere; }
+.gestion-estado { display: inline-block; border-radius: 20px; padding: 5px 10px; font-weight: 600; font-size: .8rem; }
+.gestion-activa { background: #e5f5e9; color: #246137; }
+.gestion-inactiva { background: #f2e9e9; color: #853636; }
+.gestion-vacio { padding: 32px !important; text-align: center; color: var(--muted); }
+.gestion-identidad-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 24px; margin: 24px 0; }
+.gestion-documento { display: block; width: 100%; max-height: 650px; object-fit: contain; }
+@media (max-width: 640px) {
+    .gestion-identidad-grid { grid-template-columns: 1fr; }
+    .gestion-filtros > div { flex-basis: 100%; }
+    .gestion-page { padding-top: 24px; }
+}

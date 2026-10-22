@@ -23,6 +23,8 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'activo' => 'boolean',
+            'identidad_verificada' => 'boolean',
             'fecha_registro' => 'datetime',
             'contrasena' => 'hashed',
         ];
