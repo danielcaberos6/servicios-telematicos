@@ -33,7 +33,7 @@ class AutenticacionController extends Controller
         if (RateLimiter::tooManyAttempts($key, 5)) {
             throw ValidationException::withMessages(['correo' => 'Demasiados intentos. Vuelve a intentar en '.RateLimiter::availableIn($key).' segundos.']);
         }
-        if (! Auth::attempt($data, $request->boolean('remember'))) {
+        if (! Auth::attempt([...$data, 'activo' => true], $request->boolean('remember'))) {
             RateLimiter::hit($key, 60);
             throw ValidationException::withMessages(['correo' => 'El correo o la contraseña no son correctos.']);
         }
