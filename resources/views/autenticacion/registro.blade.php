@@ -10,9 +10,10 @@
         <div class="panel auth-panel">
             <h2>Crea tu cuenta</h2>
             <p class="muted">El primer paso para encontrar algo especial.</p>
-            <form method="post" action="{{ route('registro') }}">@csrf<label for="nombre">Nombre completo</label><input
-                    id="nombre" name="nombre" value="{{ old('nombre') }}" required maxlength="100"
-                    autocomplete="name"><label for="correo">Correo electrónico</label><input id="correo" name="correo"
+            <form method="post" action="{{ route('registro') }}">@csrf
+                <label for="nombres">Nombres</label><input id="nombres" name="nombres" value="{{ old('nombres') }}" required maxlength="100" autocomplete="given-name">
+                <label for="apellidos">Apellidos</label><input id="apellidos" name="apellidos" value="{{ old('apellidos') }}" required maxlength="100" autocomplete="family-name">
+                <label for="correo">Correo electrónico</label><input id="correo" name="correo"
                     type="email" value="{{ old('correo') }}" required maxlength="254" autocomplete="email"><label
                     for="password">Contraseña</label><input id="password" name="password" type="password" required
                     minlength="8" maxlength="72" autocomplete="new-password"><small>Usa al menos 8

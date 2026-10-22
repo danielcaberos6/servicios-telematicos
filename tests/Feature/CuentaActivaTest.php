@@ -56,7 +56,7 @@ class CuentaActivaTest extends TestCase
     public function test_public_registration_cannot_set_account_state_or_admin_role(): void
     {
         $this->post('/registro', [
-            'nombre' => 'Cuenta de prueba', 'correo' => 'cuenta@example.test',
+            'nombres' => 'Cuenta', 'apellidos' => 'de prueba', 'correo' => 'cuenta@example.test',
             'password' => 'ClaveSegura123', 'password_confirmation' => 'ClaveSegura123',
             'activo' => false, 'rol' => 'Administrador',
             'id_rol' => DB::table('rol')->where('nombre_rol', 'Administrador')->value('id_rol'),

@@ -34,7 +34,7 @@ class PerfilController extends Controller
         try {
             DB::transaction(function () use ($request, $data, &$path, &$old) {
                 $user = User::whereKey($request->user()->id_usuario)->lockForUpdate()->firstOrFail();
-                $this->usuarioService->actualizar($user->id_usuario, collect($data)->only(['nombre', 'correo', 'biografia', 'ciudad', 'telefono', 'password'])->all());
+                $this->usuarioService->actualizar($user->id_usuario, collect($data)->only(['nombre', 'nombres', 'apellidos', 'correo', 'biografia', 'ciudad', 'telefono', 'password'])->all());
                 if ($request->hasFile('foto') || $request->boolean('quitar_foto')) {
                     $old = $user->imagen?->ruta;
                     if ($user->imagen) {

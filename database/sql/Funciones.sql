@@ -34,8 +34,8 @@ begin
     if length(trim(coalesce(p_datos->>'nombre',''))) = 0 or coalesce(p_datos->>'contrasena','') !~ '^\$2[ayb]\$' then
         raise exception 'Nombre y contraseña cifrada son obligatorios.';
     end if;
-    insert into usuario(nombre,correo,contrasena)
-    values(trim(p_datos->>'nombre'), lower(trim(p_datos->>'correo')), p_datos->>'contrasena') returning * into resultado;
+    insert into usuario(nombre,nombres,apellidos,correo,contrasena)
+    values(trim(p_datos->>'nombre'), p_datos->>'nombres', p_datos->>'apellidos', lower(trim(p_datos->>'correo')), p_datos->>'contrasena') returning * into resultado;
     return resultado;
 end;
 $$;
@@ -49,6 +49,8 @@ begin
     -- Una clave ausente conserva el valor actual; una clave con null lo borra.
     update usuario set
         nombre = case when p_datos ? 'nombre' then p_datos->>'nombre' else nombre end,
+        nombres = case when p_datos ? 'nombres' then p_datos->>'nombres' else nombres end,
+        apellidos = case when p_datos ? 'apellidos' then p_datos->>'apellidos' else apellidos end,
         correo = case when p_datos ? 'correo' then lower(trim(p_datos->>'correo')) else correo end,
         ciudad = case when p_datos ? 'ciudad' then p_datos->>'ciudad' else ciudad end,
         telefono = case when p_datos ? 'telefono' then p_datos->>'telefono' else telefono end,

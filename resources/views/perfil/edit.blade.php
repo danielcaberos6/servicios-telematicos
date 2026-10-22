@@ -44,9 +44,14 @@
             </aside>
             <div>
                 <form class="panel" method="post" action="{{ route('perfil.update') }}" enctype="multipart/form-data">
-                    @csrf @method('PUT')<h2>Información personal</h2><label for="nombre">Nombre completo
-                        *</label><input id="nombre" name="nombre" value="{{ old('nombre', $user->nombre) }}" required
-                        maxlength="100">
+                    @csrf @method('PUT')<h2>Información personal</h2>
+                    @if (!$user->nombres || !$user->apellidos)
+                        <p class="muted">Tu nombre registrado es {{ $user->nombre }}. Completa tus nombres y apellidos en los campos separados.</p>
+                    @endif
+                    <div class="form-grid">
+                        <div><label for="nombres">Nombres *</label><input id="nombres" name="nombres" value="{{ old('nombres', $user->nombres) }}" required maxlength="100" autocomplete="given-name"></div>
+                        <div><label for="apellidos">Apellidos *</label><input id="apellidos" name="apellidos" value="{{ old('apellidos', $user->apellidos) }}" required maxlength="100" autocomplete="family-name"></div>
+                    </div>
                     <div class="form-grid">
                         <div><label for="correo">Correo electrónico *</label><input id="correo" name="correo"
                                 type="email" value="{{ old('correo', $user->correo) }}" required maxlength="254"></div>

@@ -10,6 +10,9 @@ class PerfilRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge(['correo' => mb_strtolower(trim((string) $this->input('correo')))]);
+        if (is_string($this->input('nombres')) && is_string($this->input('apellidos'))) {
+            $this->merge(['nombre' => trim($this->input('nombres')).' '.trim($this->input('apellidos'))]);
+        }
     }
 
     public function rules(): array
@@ -17,7 +20,9 @@ class PerfilRequest extends FormRequest
         $usuario = $this->user();
 
         return [
-            'nombre' => ['required', 'string', 'max:100'],
+            'nombre' => ['required', 'string', 'max:201'],
+            'nombres' => ['nullable', 'required_with:apellidos', 'string', 'max:100'],
+            'apellidos' => ['nullable', 'required_with:nombres', 'string', 'max:100'],
             'correo' => ['required', 'email', 'max:254', Rule::unique('usuario', 'correo')->ignore($usuario->id_usuario, 'id_usuario')],
             'biografia' => ['nullable', 'string', 'max:1000'],
             'ciudad' => ['nullable', 'string', 'max:100'],
