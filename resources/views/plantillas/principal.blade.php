@@ -65,8 +65,11 @@
     </header>
     <main id="contenido">
         @if (session('status'))
-            <div class="container">
-                <div class="alert success" role="status"><x-icono nombre="check" />{{ session('status') }}</div>
+            <div class="container" data-aviso-exito>
+                <div class="alert success" role="status">
+                    <x-icono nombre="check" /><span class="alert-message">{{ session('status') }}</span>
+                    <button class="alert-close" type="button" aria-label="Cerrar aviso" hidden>&times;</button>
+                </div>
             </div>
         @endif
         @if ($errors->any())

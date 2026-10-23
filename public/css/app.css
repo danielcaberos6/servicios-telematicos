@@ -563,6 +563,34 @@ small {
     color: #933a32;
     border: 1px solid #f5d6d1;
 }
+.alert-message {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.alert-close {
+    flex-shrink: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 24px;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 4px;
+}
+.alert-close[hidden] {
+    display: none;
+}
+.alert-close:hover {
+    background: #155d4210;
+}
+.alert-close:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
 .error ul {
     margin: 8px 0 0;
     padding-left: 20px;
