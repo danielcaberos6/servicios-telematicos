@@ -8,14 +8,7 @@
     <p class="muted">Evalúa y resuelve las publicaciones enviadas por los vendedores antes de habilitarlas en el catálogo.</p>
 
     <form class="panel gestion-filtros" method="get" action="{{ route('admin.subastas.index') }}">
-        <div>
-            <label for="estado">Estado</label>
-            <select name="estado" id="estado">
-                @foreach (['En revisión', 'Aceptada', 'Rechazada', 'todos'] as $opcion)
-                    <option value="{{ $opcion }}" @selected($estado === $opcion)>{{ $opcion === 'todos' ? 'Todos los estados' : $opcion }}</option>
-                @endforeach
-            </select>
-        </div>
+        <input type="hidden" name="estado" value="{{ $estado }}">
         <div>
             <label for="busqueda">Búsqueda</label>
             <input type="search" name="q" id="busqueda" value="{{ request('q') }}" maxlength="120" placeholder="Título o descripción...">

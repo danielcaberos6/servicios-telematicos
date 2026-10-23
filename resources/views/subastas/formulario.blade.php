@@ -32,7 +32,7 @@
                     @method('PUT')
                 @endif
 
-                <section class="panel publish-section" aria-labelledby="article-heading">
+                <section class="panel publish-section" id="articulo" data-apartado aria-labelledby="article-heading">
                     <div class="publish-section-heading">
                         <span class="section-number" aria-hidden="true">01</span>
                         <div>
@@ -76,7 +76,7 @@
                     </div>
                 </section>
 
-                <section class="panel publish-section" aria-labelledby="photos-heading">
+                <section class="panel publish-section" id="fotografias" data-apartado aria-labelledby="photos-heading">
                     <div class="publish-section-heading">
                         <span class="section-number" aria-hidden="true">02</span>
                         <div>
@@ -108,7 +108,7 @@
                     <div id="image-preview" class="image-preview publish-photo-grid" aria-live="polite"></div>
                 </section>
 
-                <section class="panel publish-section" aria-labelledby="conditions-heading">
+                <section class="panel publish-section" id="condiciones" data-apartado aria-labelledby="conditions-heading">
                     <div class="publish-section-heading">
                         <span class="section-number" aria-hidden="true">03</span>
                         <div>
@@ -146,6 +146,11 @@
                                 </small>
                             </div>
                         </div>
+                    </div>
+                </section>
+                <section class="panel publish-section" id="encuentro" data-apartado aria-labelledby="encuentro-heading">
+                    <h2 id="encuentro-heading">Ubicación y punto de encuentro</h2>
+                    <div class="publish-fields">
                         <div class="publish-field">
                             <label for="ubicacion">Punto de encuentro <span class="required-mark">*</span></label>
                             <div class="location-group">

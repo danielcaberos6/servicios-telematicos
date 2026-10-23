@@ -9,8 +9,10 @@
     <title>@yield('title', 'Dale una nueva historia a lo que te gusta') · SubastaYA</title>
     <link rel="icon" href="{{ asset('imagenes/favicon.svg') }}" type="image/svg+xml">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/apartados.css') }}">
     @stack('styles')
     <script src="{{ asset('js/app.js') }}" defer></script>
+    <script src="{{ asset('js/apartados.js') }}" defer></script>
     @stack('scripts')
 </head>
 
@@ -103,7 +105,7 @@
                 </div>
             </div>
         @endif
-        @yield('content')
+        <x-espacio-seccion>@yield('content')</x-espacio-seccion>
     </main>
     <footer class="site-footer">
         <div class="container footer-content"><a class="brand footer-brand" href="{{ route($rutaPrincipal) }}"><x-icono
