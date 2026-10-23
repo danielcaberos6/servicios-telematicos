@@ -18,9 +18,16 @@ class SubastaYaTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Storage::fake('public');
+    }
+
     private function payload(array $overrides = []): array
     {
         return array_replace([
+            'imagenes' => [UploadedFile::fake()->image('articulo.jpg')],
             'titulo' => 'Cámara fotográfica de prueba',
             'descripcion' => 'Artículo en excelente estado con todos sus accesorios originales.',
             'id_categoria' => Categoria::firstOrCreate(['nombre_categoria' => 'Electrónica e informática'])->id_categoria,
@@ -34,7 +41,7 @@ class SubastaYaTest extends TestCase
     private function auction(?User $user = null, array $overrides = []): Subasta
     {
         return ($user ?? User::factory()->create())->subastas()->forceCreate([
-            ...$this->payload(), 'fecha_inicio' => now()->subDay(), 'estado_revision' => 'Aceptada', ...$overrides,
+            ...array_diff_key($this->payload(), ['imagenes' => true]), 'fecha_inicio' => now()->subDay(), 'estado_revision' => 'Aceptada', ...$overrides,
         ])->refresh();
     }
 
@@ -355,7 +362,7 @@ class SubastaYaTest extends TestCase
         $this->get('/perfil')->assertOk()->assertSee('Tu perfil fue actualizado.');
     }
 
-    public function test_user_without_phone_or_photo_can_publish_an_auction(): void
+    public function test_user_without_phone_or_profile_photo_can_publish_an_auction(): void
     {
         $user = User::factory()->create(['telefono' => null]);
         $this->assertNull($user->imagen);

@@ -8,15 +8,24 @@ use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class UbicacionSubastasTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Storage::fake('public');
+    }
+
     private function payload(array $overrides = []): array
     {
         return array_replace([
+            'imagenes' => [UploadedFile::fake()->image('articulo.jpg')],
             'titulo' => 'Bicicleta de montaña aro 29',
             'descripcion' => 'Bicicleta en buen estado, con frenos de disco y cambios revisados.',
             'id_categoria' => Categoria::firstOrCreate(['nombre_categoria' => 'Deportes'])->id_categoria,
@@ -30,7 +39,7 @@ class UbicacionSubastasTest extends TestCase
     private function auction(?User $user = null, array $overrides = []): Subasta
     {
         return ($user ?? User::factory()->create())->subastas()->forceCreate([
-            ...$this->payload(), 'fecha_inicio' => now()->subDay(), 'estado_revision' => 'Aceptada', ...$overrides,
+            ...array_diff_key($this->payload(), ['imagenes' => true]), 'fecha_inicio' => now()->subDay(), 'estado_revision' => 'Aceptada', ...$overrides,
         ])->refresh();
     }
 

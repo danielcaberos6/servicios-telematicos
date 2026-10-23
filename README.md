@@ -67,6 +67,8 @@ Las nuevas aprobaciones y rechazos registran el ID del administrador autenticado
 
 Cada subasta nueva se registra **En revisión**, asociada a su vendedor, y no se publica automáticamente. Las subastas que existían antes de esta función se conservaron como **Aceptadas**.
 
+Las nuevas solicitudes requieren entre **1 y 5 fotos del artículo** (JPG, PNG o WebP, hasta 5 MB por foto). Al editar o reenviar, el total de fotos conservadas y nuevas también debe quedar entre 1 y 5: no se permite eliminar la última sin reemplazarla. Las publicaciones anteriores se conservan; si se edita una que no tiene fotos, deberá añadirse al menos una. La foto del perfil sigue siendo independiente.
+
 - **Privacidad**: una solicitud En revisión o Rechazada no aparece en el inicio, en el catálogo ni en los reportes administrativos y no admite pujas. Su detalle y sus fotos responden 404 a terceros; solo los ven el propietario y los administradores. La base de datos también rechaza las pujas sobre subastas no aceptadas, y las solicitudes no publicadas no se finalizan.
 - **Edición**: editar los datos o las fotos de una subasta Aceptada o Rechazada la devuelve a En revisión (se borra el motivo de rechazo) y se vuelve a avisar al vendedor y a los administradores. Ningún cambio se publica sin una nueva decisión.
 - **Mis subastas**: cada publicación muestra En revisión, Aceptada o Rechazada; si fue rechazada, también el motivo (de 1 a 1000 caracteres, exigido por la base de datos).
