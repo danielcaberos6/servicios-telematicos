@@ -174,9 +174,37 @@ class GestionUsuariosTest extends TestCase
             ->assertSessionHasErrors('cuenta');
         $this->assertDatabaseCount('decision_usuario', 0);
         $other = $this->admin();
-        $this->patch('/admin/usuarios/'.$admin->id_usuario, ['operacion' => 'administrador', 'valor' => false])->assertSessionHasNoErrors();
-        $this->getJson('/admin/usuarios')->assertForbidden();
+        $this->patch('/admin/usuarios/'.$admin->id_usuario, ['operacion' => 'administrador', 'valor' => false])
+            ->assertSessionHasErrors('cuenta');
+        $this->assertTrue($admin->refresh()->esAdministrador());
+        $this->assertDatabaseCount('decision_usuario', 0);
+        $this->get('/admin/usuarios')->assertOk()
+            ->assertDontSee('action="'.route('admin.usuarios.update', $admin).'"', false)
+            ->assertSee('action="'.route('admin.usuarios.update', $other).'"', false);
+
+        // Otro administrador sí puede retirar el rol de una cuenta ajena.
+        $this->actingAs($other)->patch('/admin/usuarios/'.$admin->id_usuario, ['operacion' => 'administrador', 'valor' => false])
+            ->assertSessionHasNoErrors();
+        $this->actingAs($admin)->getJson('/admin/usuarios')->assertForbidden();
         $this->assertTrue($other->esAdministrador());
+    }
+
+    public function test_database_rejects_self_role_removal_with_another_active_admin(): void
+    {
+        $admin = $this->admin();
+        $this->admin();
+
+        try {
+            DB::transaction(fn () => DB::select('select gestionar_cuenta(?,?,?,?::boolean)', [
+                $admin->id_usuario, $admin->id_usuario, 'administrador', 'false',
+            ]));
+            $this->fail('El administrador no debe poder retirarse su propio rol.');
+        } catch (QueryException $exception) {
+            $this->assertStringContainsString('No puedes retirarte tu propio rol de administrador.', $exception->getMessage());
+        }
+
+        $this->assertTrue($admin->refresh()->esAdministrador());
+        $this->assertDatabaseCount('decision_usuario', 0);
     }
 
     public function test_ordinary_users_cannot_change_roles_or_consult_audit_history(): void

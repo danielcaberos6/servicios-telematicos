@@ -48,13 +48,13 @@
                                             <input type="hidden" name="valor" value="{{ $usuario['activo'] ? 0 : 1 }}">
                                             <button type="submit" class="button secondary">{{ $usuario['activo'] ? 'Desactivar' : 'Activar' }}</button>
                                         </form>
+                                        <form method="post" action="{{ route('admin.usuarios.update', $usuario['id_usuario']) }}">
+                                            @csrf @method('PATCH')
+                                            <input type="hidden" name="operacion" value="administrador">
+                                            <input type="hidden" name="valor" value="{{ $usuario['administrador'] ? 0 : 1 }}">
+                                            <button type="submit" class="button secondary">{{ $usuario['administrador'] ? 'Retirar administrador' : 'Hacer administrador' }}</button>
+                                        </form>
                                     @endif
-                                    <form method="post" action="{{ route('admin.usuarios.update', $usuario['id_usuario']) }}">
-                                        @csrf @method('PATCH')
-                                        <input type="hidden" name="operacion" value="administrador">
-                                        <input type="hidden" name="valor" value="{{ $usuario['administrador'] ? 0 : 1 }}">
-                                        <button type="submit" class="button secondary">{{ $usuario['administrador'] ? 'Retirar administrador' : 'Hacer administrador' }}</button>
-                                    </form>
                                     <a href="{{ route('admin.usuarios.historial', $usuario['id_usuario']) }}">Ver historial</a>
                                 </td>
                             </tr>

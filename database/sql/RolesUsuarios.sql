@@ -1,4 +1,4 @@
-create table decision_usuario (
+create table if not exists decision_usuario (
     id_decision bigint generated always as identity primary key,
     id_actor bigint not null references usuario(id_usuario),
     id_usuario bigint not null references usuario(id_usuario),
@@ -28,6 +28,9 @@ begin
     if anterior = p_valor then return; end if;
     if p_operacion='estado' and not p_valor and p_usuario=p_actor then
         raise exception 'No puedes desactivar tu propia cuenta administrativa.';
+    end if;
+    if p_operacion='administrador' and not p_valor and p_usuario=p_actor then
+        raise exception 'No puedes retirarte tu propio rol de administrador.';
     end if;
     if es_admin and cuenta.activo and not p_valor and not exists (
         select 1 from usuario u join usuario_rol ur on ur.id_usuario=u.id_usuario
