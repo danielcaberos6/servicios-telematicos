@@ -91,7 +91,7 @@
                                 <p class="info-note">Estás consultando esta publicación como administrador.</p>
                             @elseif (auth()->id() === $subasta->id_usuario)
                                 <div class="info-note">Esta es tu subasta. @if (!$subasta->pujas_count)
-                                        <a href="{{ route('subastas.edit', $subasta) }}">Editar publicación →</a>
+                                        <a href="{{ route('subastas.edit', $subasta) }}">Editar publicación</a>
                                     @else
                                         Recibiste ofertas; la edición está cerrada.
                                     @endif

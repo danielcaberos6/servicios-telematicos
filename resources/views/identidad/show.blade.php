@@ -4,7 +4,7 @@
 @section('content')
 <section class="container gestion-page">
     <a href="{{ route('perfil.edit') }}" class="text-link">← Mi perfil</a>
-    @if (auth()->user()->esAdministrador())<a href="{{ route('admin.identidad.index') }}" class="text-link">Volver a la bandeja de identidad →</a>@endif
+    @if (auth()->user()->esAdministrador())<a href="{{ route('admin.identidad.index') }}" class="text-link">Volver a la bandeja de identidad</a>@endif
     <h1>Solicitud de verificación de identidad</h1>
     <p><strong>{{ $verificacion->estado }}{{ !$verificacion->vigente ? ' · Sin vigencia' : '' }}</strong> · Enviada el {{ $verificacion->fecha_envio->timezone('America/La_Paz')->format('d/m/Y H:i') }}</p>
     @if ($verificacion->motivo)<div class="panel"><strong>Motivo de rechazo</strong><p>{{ $verificacion->motivo }}</p></div>@endif

@@ -232,11 +232,11 @@ class RevisionSubastasTest extends TestCase
             ->assertSee('Solicitud en revisión')
             ->assertSee('Enviaste «Mochila &lt;script&gt;alert(1)&lt;/script&gt;» a revisión.', false)
             ->assertDontSee('<script>alert(1)</script>', false)
-            ->assertSee('href="'.route('subastas.show', $auction).'">Ver solicitud →', false)
+            ->assertSee('href="'.route('subastas.show', $auction).'">Ver solicitud', false)
             ->assertDontSee('Nueva solicitud de publicación');
         $this->actingAs($admins[0])->get('/notificaciones')->assertOk()
             ->assertSee('Nueva solicitud de publicación')
-            ->assertSee('href="'.route('subastas.show', $auction).'">Ver solicitud →', false)
+            ->assertSee('href="'.route('subastas.show', $auction).'">Ver solicitud', false)
             ->assertDontSee('Solicitud en revisión');
         // El acceso del aviso funciona para su destinatario.
         $this->get(route('subastas.show', $auction))->assertOk()->assertSee('Mochila &lt;script&gt;', false);

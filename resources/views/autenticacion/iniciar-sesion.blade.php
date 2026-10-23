@@ -16,7 +16,7 @@
                     name="password" type="password" required autocomplete="current-password"><label
                     class="checkbox-label"><input type="checkbox" name="remember" value="1"
                         @checked(old('remember'))>Recordarme en este equipo</label><button
-                    class="button primary full-width" type="submit">Iniciar sesión <x-icono nombre="arrow" /></button>
+                    class="button primary full-width" type="submit">Iniciar sesión</button>
             </form>
             <p class="auth-switch">¿Aún no tienes cuenta? <a href="{{ route('registro') }}">Regístrate</a></p>
         </div>
