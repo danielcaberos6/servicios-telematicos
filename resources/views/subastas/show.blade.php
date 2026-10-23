@@ -62,6 +62,9 @@
                         @else
                             <p>Esta subasta todavía no es pública: solo la ven su propietario y los administradores.</p>
                         @endif
+                        @if (auth()->user()?->esAdministrador())
+                            <p style="margin-top:0.5rem;"><a href="{{ route('admin.subastas.show', $subasta) }}" class="button primary small">Revisar solicitud como administrador →</a></p>
+                        @endif
                     </div>
                 @endunless
                 <h1>{{ $subasta->titulo }}</h1>
