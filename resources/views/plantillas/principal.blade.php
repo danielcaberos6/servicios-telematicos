@@ -58,8 +58,23 @@
             </nav>
             <div class="account-nav">
                 @auth
-                    <a class="account-name" href="{{ route('perfil.edit') }}" aria-label="Mi perfil: {{ auth()->user()->nombre }}"><x-icono
-                            nombre="user" /><span>{{ Str::limit(auth()->user()->nombre, 16) }}</span></a>
+                    @php
+                        $cuenta = auth()->user();
+                        $partesNombre = preg_split('/\s+/u', trim($cuenta->nombres ?: $cuenta->nombre), -1, PREG_SPLIT_NO_EMPTY);
+                        $apellido = trim($cuenta->apellidos ?? '');
+                        $iniciales = mb_strtoupper(mb_substr($partesNombre[0] ?? '', 0, 1)
+                            . ($apellido !== '' ? mb_substr($apellido, 0, 1) : (count($partesNombre) > 1 ? mb_substr(end($partesNombre), 0, 1) : '')));
+                    @endphp
+                    <a class="account-name" href="{{ route('perfil.edit') }}" aria-label="Mi perfil: {{ $cuenta->nombre }}">
+                        <span class="account-avatar" aria-hidden="true">
+                            @if ($cuenta->imagen)
+                                <img src="{{ $cuenta->imagen->url }}" alt="" width="32" height="32">
+                            @else
+                                {{ $iniciales }}
+                            @endif
+                        </span>
+                        <span class="account-label">{{ Str::limit($cuenta->nombre, 16) }}</span>
+                    </a>
                     <form action="{{ route('cerrar-sesion') }}" method="post">@csrf<button class="logout"
                             type="submit">Salir</button></form>
                 @else
