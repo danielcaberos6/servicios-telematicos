@@ -44,6 +44,7 @@ class SubastaRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'fecha_fin.after' => 'La fecha y hora de cierre deben ser posteriores al momento actual (hora de Bolivia).',
             'imagenes.required' => 'Debes subir al menos una foto del artículo para enviar la subasta a revisión.',
             'imagenes.min' => 'Debes subir al menos una foto del artículo.',
             'imagenes.max' => 'La subasta puede tener como máximo 5 fotos.',

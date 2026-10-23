@@ -199,31 +199,59 @@ document.querySelectorAll("[data-carrusel]").forEach((carrusel) => {
     actualizar();
 });
 
+// Los campos representan hora de Bolivia, aunque el navegador use otra zona.
+const formatBoliviaDateTime = (date) => {
+    const parts = Object.fromEntries(new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/La_Paz", year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+    }).formatToParts(date).map(({ type, value }) => [type, value]));
+    return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
+};
+
+document.querySelectorAll("[data-cierre-subasta]").forEach((input) => {
+    const openedAt = performance.now();
+    const serverNow = Number(input.dataset.serverNow);
+    const error = document.getElementById("deadline-error");
+    let touched = false;
+    const update = (showError = touched) => {
+        // El mínimo avanza también si se deja el formulario abierto.
+        const now = serverNow + performance.now() - openedAt;
+        input.min = formatBoliviaDateTime(new Date((Math.floor(now / 60000) + 1) * 60000));
+        const message = input.value && input.value < input.min
+            ? "La fecha y hora de cierre deben ser posteriores al momento actual (hora de Bolivia)." : "";
+        input.setCustomValidity(message);
+        input.setAttribute("aria-invalid", String(Boolean(message)));
+        if (showError) error.textContent = message;
+    };
+    input.addEventListener("input", () => { touched = true; update(true); });
+    input.addEventListener("focus", () => update());
+    input.addEventListener("invalid", () => { touched = true; update(true); });
+    input.form.addEventListener("submit", (event) => {
+        update(true);
+        if (!input.checkValidity()) {
+            event.preventDefault();
+            input.reportValidity();
+        }
+    });
+    window.addEventListener("pageshow", () => update());
+    window.setInterval(() => update(), 1000);
+    update();
+});
+
 document.querySelectorAll("[data-duration-presets]").forEach((container) => {
     const targetInput = document.getElementById(container.dataset.target);
     if (!targetInput) return;
 
     const buttons = container.querySelectorAll("[data-days]");
-    const pad = (n) => String(n).padStart(2, "0");
-
-    const formatLocalDateTime = (date) => {
-        const y = date.getFullYear();
-        const m = pad(date.getMonth() + 1);
-        const d = pad(date.getDate());
-        const h = pad(date.getHours());
-        const min = pad(date.getMinutes());
-        return `${y}-${m}-${d}T${h}:${min}`;
-    };
 
     buttons.forEach((button) => {
         button.addEventListener("click", () => {
             const days = parseInt(button.dataset.days, 10);
             if (isNaN(days)) return;
 
-            const targetDate = new Date();
-            targetDate.setDate(targetDate.getDate() + days);
+            const targetDate = new Date(Date.now() + (days * 86400000));
 
-            targetInput.value = formatLocalDateTime(targetDate);
+            targetInput.value = formatBoliviaDateTime(targetDate);
             targetInput.dispatchEvent(new Event("input", { bubbles: true }));
             targetInput.dispatchEvent(new Event("change", { bubbles: true }));
 

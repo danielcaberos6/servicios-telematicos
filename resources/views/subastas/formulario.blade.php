@@ -136,9 +136,12 @@
                                 </div>
                                 <input id="fecha_fin" name="fecha_fin" type="datetime-local" required
                                     value="{{ old('fecha_fin', $subasta->fecha_fin?->format('Y-m-d\TH:i')) }}"
-                                    min="{{ now()->format('Y-m-d\TH:i') }}" max="{{ now()->addYear()->format('Y-m-d\TH:i') }}"
-                                    aria-describedby="deadline-help">
+                                    min="{{ now()->startOfMinute()->addMinute()->format('Y-m-d\TH:i') }}" max="{{ now()->addYear()->format('Y-m-d\TH:i') }}"
+                                    data-cierre-subasta data-server-now="{{ now()->getTimestampMs() }}"
+                                    aria-describedby="deadline-help deadline-error">
+                                <p id="deadline-error" class="publish-photo-error" role="status" aria-live="polite">@error('fecha_fin'){{ $message }}@enderror</p>
                                 <small id="deadline-help">Hora de Bolivia (UTC-4).
+                                    El cierre debe ser posterior a la fecha y hora actuales.
                                     @if ($subasta->exists && $subasta->publicada())
                                         Este es el cierre de la subasta publicada.
                                     @else

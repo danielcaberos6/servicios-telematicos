@@ -85,6 +85,43 @@ class RevisionSubastasTest extends TestCase
         $this->get('/')->assertDontSee('Mochila de excursión 40 litros');
     }
 
+    public function test_creation_rejects_past_and_current_closing_times_even_without_browser_validation(): void
+    {
+        $this->freezeTime();
+        $seller = User::factory()->create();
+        $notifications = DB::table('notificacion')->count();
+        $this->actingAs($seller);
+
+        foreach ([now()->subDay(), now()->subMinute(), now()->startOfMinute(), now()] as $date) {
+            $this->post('/subastas', $this->payload(['fecha_fin' => $date->toIso8601String()]))
+                ->assertSessionHasErrors([
+                    'fecha_fin' => 'La fecha y hora de cierre deben ser posteriores al momento actual (hora de Bolivia).',
+                ]);
+        }
+
+        $this->assertDatabaseCount('subasta', 0);
+        $this->assertDatabaseCount('imagen', 0);
+        $this->assertDatabaseCount('notificacion', $notifications);
+
+        // Una fecha futura sigue siendo válida dentro del mismo día.
+        $this->post('/subastas', $this->payload([
+            'fecha_fin' => now()->addMinutes(2)->format('Y-m-d\TH:i'),
+        ]))->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertDatabaseCount('subasta', 1);
+    }
+
+    public function test_editing_rejects_a_past_closing_time_without_changing_the_auction(): void
+    {
+        $auction = $this->auction('Aceptada');
+        $original = $auction->getAttributes();
+
+        $this->actingAs($auction->usuario)->put("/subastas/{$auction->id_subasta}", $this->payload([
+            'fecha_fin' => now()->subMinute()->format('Y-m-d\TH:i'),
+        ]))->assertSessionHasErrors('fecha_fin');
+
+        $this->assertSame($original, $auction->refresh()->getAttributes());
+    }
+
     public function test_seller_can_correct_expired_rejection_and_resubmit_with_history_and_notifications(): void
     {
         Storage::fake('public');
