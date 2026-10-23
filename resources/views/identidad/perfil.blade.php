@@ -7,11 +7,15 @@
         <p><strong>En revisión</strong>. Tu perfil mantiene la etiqueta No verificado hasta que se apruebe la solicitud.</p>
     @elseif (!$user->nombres || !$user->apellidos)
         <p>Completa y guarda tus nombres y apellidos en Información personal antes de enviar el carnet.</p>
+    @elseif (!$user->imagen)
+        <p>Para solicitar la verificación de identidad, primero sube y guarda una foto de perfil donde se vea claramente tu rostro.</p>
+        <a href="#foto">Subir foto de perfil</a>
     @else
         <form method="post" action="{{ route('identidad.store') }}" enctype="multipart/form-data">
             @csrf
             <input type="hidden" name="version_identidad" value="{{ $user->version_identidad }}">
             <p><strong>Nombres:</strong> {{ $user->nombres }}<br><strong>Apellidos:</strong> {{ $user->apellidos }}</p>
+            <p>El administrador comparará tus nombres y tu foto de perfil con el carnet. Tu rostro debe verse claramente en la foto de perfil.</p>
             <label for="carnet">Fotografía legible del carnet</label>
             <input id="carnet" name="carnet" type="file" accept="image/jpeg,image/png" required>
             <p class="muted">JPG o PNG de hasta 5 MB. Solo tú y los administradores activos pueden consultarlo. El documento no cambia tus datos de perfil.</p>

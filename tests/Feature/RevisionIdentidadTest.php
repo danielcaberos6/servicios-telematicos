@@ -30,6 +30,7 @@ class RevisionIdentidadTest extends TestCase
         Storage::fake('identidad');
         $user = User::factory()->create();
         $user->forceFill(['nombres' => 'Juan José', 'apellidos' => 'Pérez Soto'])->save();
+        $user->imagen()->create(['ruta' => 'perfiles/prueba.png', 'tamano' => 100]);
         $id = app(IdentidadService::class)->solicitar($user->id_usuario, $user->refresh()->version_identidad, UploadedFile::fake()->image('carnet.png'));
 
         return VerificacionIdentidad::findOrFail($id);
