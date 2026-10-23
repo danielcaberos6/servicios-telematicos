@@ -23,7 +23,7 @@ Al arrancar, el contenedor instala dependencias, aplica las migraciones, carga l
 | `demo@subastaya.test` | Usuario | `SubastaYA2026!` |
 | `vendedor@subastaya.test` | Usuario | `SubastaYA2026!` |
 
-No hace falta cargar estas cuentas manualmente. Los reinicios conservan las contraseñas, los datos, el estado y los roles de las cuentas existentes. En otros entornos no se crean cuentas de demostración. La carga sucede al iniciar el contenedor con `docker compose up`, no al construir solamente la imagen.
+También se cargan automáticamente 7 subastas publicadas, una solicitud en revisión y otra rechazada mediante `subastas:cargar-demo`. No hace falta cargar estos ejemplos manualmente. Los reinicios conservan las contraseñas, el estado y los roles de las cuentas existentes y no duplican las subastas ni renuevan sus plazos. En otros entornos no se cargan ejemplos. La carga sucede cuando arranca el contenedor; `docker compose up -d` no la repite si el contenedor ya está funcionando.
 
 El servicio `scheduler` finaliza cada minuto las subastas vencidas.
 
@@ -39,7 +39,7 @@ Crea publicaciones, ofertas y valoraciones de ejemplo. Usuario: `demo@subastaya.
 
 ## Administración: HU-08 y HU-09
 
-La cuenta administrativa ya se crea al arrancar Docker en local. Para agregar también las subastas básicas de demostración:
+Las cuentas y las subastas básicas ya se crean al arrancar Docker en local. Para volver a cargar los ejemplos que falten manualmente:
 
 ```sh
 docker compose exec laravel php artisan db:seed --class=DemoSeeder

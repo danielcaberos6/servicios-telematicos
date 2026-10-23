@@ -4,6 +4,14 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
 
+Artisan::command('subastas:cargar-demo', function () {
+    if (! app()->environment(['local', 'testing'])) {
+        return;
+    }
+
+    return $this->call('db:seed', ['--class' => \Database\Seeders\DemoSeeder::class, '--force' => true]);
+})->purpose('Carga cuentas y subastas de demostración faltantes en local');
+
 Artisan::command('subastas:instalar-funciones', function () {
     DB::transaction(function () {
         DB::unprepared(file_get_contents(database_path('sql/Funciones.sql')));
