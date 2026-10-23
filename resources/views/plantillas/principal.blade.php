@@ -33,8 +33,8 @@
                     $enlaces = $esAdministrador
                         ? [['admin.subastas.index', 'gavel', 'Subastas'], ['admin.usuarios.index', 'user', 'Usuarios'], ['admin.categorias.index', 'box', 'Categorías'], ['admin.identidad.index', 'shield', 'Identidad'], ['notificaciones.index', 'bell', 'Notificaciones']]
                         : (auth()->check()
-                            ? [['inicio', 'home', 'Inicio'], ['perfil.edit', 'user', 'Perfil'], ['subastas.index', 'search', 'Subastas'], ['subastas.mias', 'gavel', 'Mis Subastas'], ['notificaciones.index', 'bell', 'Notificaciones']]
-                            : [['inicio', 'home', 'Inicio'], ['subastas.index', 'search', 'Subastas'], ['como-funciona', 'book', 'Cómo funciona']]);
+                            ? [['inicio', 'home', 'Inicio'], ['perfil.edit', 'user', 'Perfil'], ['subastas.index', 'search', 'Explorar subastas'], ['subastas.mias', 'gavel', 'Mis subastas'], ['notificaciones.index', 'bell', 'Notificaciones']]
+                            : [['inicio', 'home', 'Inicio'], ['subastas.index', 'search', 'Explorar subastas'], ['como-funciona', 'book', 'Cómo funciona']]);
                 @endphp
                 @foreach ($enlaces as [$route, $icon, $label])
                     @php

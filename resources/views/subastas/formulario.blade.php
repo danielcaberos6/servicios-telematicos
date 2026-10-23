@@ -5,7 +5,7 @@
 @endpush
 @section('content')
     <div class="container section publish-page">
-        <a class="breadcrumb" href="{{ route('subastas.mias') }}">← Mis Subastas</a>
+        <a class="breadcrumb" href="{{ route('subastas.mias') }}">← Mis subastas</a>
         <header class="publish-heading">
             <div>
                 <p class="eyebrow">DALE UNA NUEVA OPORTUNIDAD</p>
@@ -194,7 +194,7 @@
                 <div class="panel publish-actions">
                     <p><x-icono nombre="shield" /> Revisa los datos antes de {{ $subasta->exists ? 'guardar los cambios' : 'publicar' }}.</p>
                     @if ($subasta->exists && $subasta->estado_revision !== 'En revisión')
-                        <p class="muted">Al guardar, la subasta vuelve a revisión y deja de mostrarse en Buscar hasta que un administrador la acepte.</p>
+                        <p class="muted">Al guardar, la subasta vuelve a revisión y deja de mostrarse en Explorar subastas hasta que un administrador la acepte.</p>
                     @endif
                     <div class="form-footer">
                         <a class="button secondary" href="{{ $subasta->exists ? route('subastas.show', $subasta) : route('subastas.mias') }}">Cancelar</a>
