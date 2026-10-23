@@ -52,9 +52,9 @@
         <aside class="section-sidebar">
             <nav aria-label="Apartados de {{ $titulo }}" class="section-nav">
                 <p class="section-nav-caption">{{ $titulo }}</p>
-                <button class="section-menu-toggle" type="button" aria-expanded="false" aria-controls="apartados-seccion" hidden>
+                <button class="section-menu-toggle" type="button" aria-label="Apartados de {{ $titulo }}" aria-expanded="false" aria-controls="apartados-seccion" hidden>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
-                    <span class="section-menu-label">Apartados de {{ $titulo }}</span>
+                    <span class="section-menu-label"><span class="section-menu-full">Apartados de {{ $titulo }}</span><span class="section-menu-short" aria-hidden="true">Apartados</span></span>
                     <span class="section-menu-action" aria-hidden="true">Abrir</span>
                 </button>
                 <ul class="section-links" id="apartados-seccion">

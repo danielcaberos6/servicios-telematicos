@@ -12,6 +12,36 @@ document.querySelectorAll('[data-espacio-seccion]').forEach((espacio) => {
     toggle.addEventListener('click', () => {
         cambiarEstado(toggle.getAttribute('aria-expanded') !== 'true');
     });
+    nav.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+            cambiarEstado(false);
+            toggle.focus({ preventScroll: true });
+        }
+    });
+    document.addEventListener('click', (event) => {
+        if (!nav.contains(event.target)) cambiarEstado(false);
+    });
+    nav.addEventListener('focusout', (event) => {
+        if (!nav.contains(event.relatedTarget)) cambiarEstado(false);
+    });
+    nav.querySelectorAll('a').forEach((enlace) => enlace.addEventListener('click', () => cambiarEstado(false)));
+
+    const lateral = espacio.querySelector('.section-sidebar');
+    const pantallaMovil = window.matchMedia('(max-width: 900px)');
+    const ajustarApartados = () => {
+        const alturaCabecera = document.querySelector('.site-header')?.getBoundingClientRect().height || 0;
+        lateral.classList.toggle('is-compact', pantallaMovil.matches && espacio.getBoundingClientRect().top < alturaCabecera - 24);
+        document.documentElement.style.setProperty('--section-nav-height', pantallaMovil.matches ? `${toggle.getBoundingClientRect().height + 20}px` : '0px');
+    };
+    let ajustePendiente = false;
+    window.addEventListener('scroll', () => {
+        if (ajustePendiente) return;
+        ajustePendiente = true;
+        window.requestAnimationFrame(() => { ajustarApartados(); ajustePendiente = false; });
+    }, { passive: true });
+    window.addEventListener('resize', ajustarApartados);
+    if ('ResizeObserver' in window) new ResizeObserver(ajustarApartados).observe(document.querySelector('.site-header'));
+    ajustarApartados();
     if (!espacio.hasAttribute('data-navegacion-local')) return;
     const paneles = [...espacio.querySelectorAll('[data-apartado]')];
     const enlaces = [...nav.querySelectorAll('a[href^="#"]')];

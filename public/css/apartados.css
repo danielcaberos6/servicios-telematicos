@@ -42,6 +42,7 @@
 .section-menu-toggle:active { box-shadow:inset 0 2px 4px #0003; }
 .section-menu-toggle > svg { width:20px; height:20px; flex-shrink:0; }
 .section-menu-label { flex:1; min-width:0; }
+.section-menu-short { display:none; }
 .section-menu-action { padding:4px 9px; border:1px solid #ffffff50; border-radius:5px; background:#ffffff18; font-size:.8rem; font-weight:600; }
 .section-content h2 { scroll-margin-top:16px; }
 @media(min-width:901px) { .section-menu-toggle { display:none; } }
@@ -64,4 +65,12 @@
     .section-content .profile-form input,.section-content .profile-form textarea { font-size:16px; }
     .section-content .profile-form .form-footer .button { width:100%; justify-content:center; }
     .section-menu-toggle { gap:10px; padding-inline:12px; }
+}
+@media(max-width:900px) {
+    .section-sidebar:has(.section-nav.is-enhanced) { position:sticky; top:var(--header-height); z-index:30; padding:8px 0 12px; background:white; }
+    .section-nav.is-enhanced { position:relative; }
+    .section-nav.is-enhanced .section-links { position:absolute; top:100%; left:0; right:0; margin:4px 0 0; padding:8px; max-height:min(50dvh,calc(100dvh - var(--header-height) - 100px)); overflow-y:auto; overscroll-behavior:contain; background:white; border:1px solid var(--line); border-radius:8px; box-shadow:0 8px 20px #06294324; }
+    .section-sidebar.is-compact .section-menu-toggle { min-height:44px; padding-block:8px; }
+    .section-sidebar.is-compact .section-menu-full { display:none; }
+    .section-sidebar.is-compact .section-menu-short { display:inline; }
 }
