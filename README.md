@@ -45,6 +45,8 @@ Los carnets se guardan en `storage/app/identidad`, fuera del almacenamiento púb
 
 ## Revisión de publicaciones
 
+Una solicitud rechazada permite **Corregir y reenviar** desde Mis subastas o su detalle. El formulario muestra el motivo y exige un cierre futuro. **Guardar y reenviar a revisión** guarda datos e imágenes en una transacción, devuelve la solicitud a En revisión y avisa al vendedor y a los administradores activos. El plazo de referencia se calcula desde este nuevo envío y comienza íntegro al aprobarse. El historial conserva las decisiones previas, sus motivos, responsables y fechas, visibles solo para el propietario y los administradores. Las decisiones anteriores sin responsable conocido también se conservan sin inventar datos. Un formulario de reenvío que ya fue procesado exige recargar antes de continuar.
+
 Las nuevas aprobaciones y rechazos registran el ID del administrador autenticado y la fecha de decisión en PostgreSQL, dentro de la misma operación que cambia el estado y notifica al vendedor. El detalle administrativo muestra el responsable y la hora de Bolivia. Las decisiones anteriores conservan estos campos vacíos, sin atribuirles un responsable o una fecha que no se conocen.
 
 Cada subasta nueva se registra **En revisión**, asociada a su vendedor, y no se publica automáticamente. Las subastas que existían antes de esta función se conservaron como **Aceptadas**.

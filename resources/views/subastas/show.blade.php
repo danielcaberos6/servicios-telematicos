@@ -59,6 +59,9 @@
                         <p>Solicitud <x-estado-revision :subasta="$subasta" /></p>
                         @if ($subasta->estado_revision === 'Rechazada')
                             <p><strong>Motivo del rechazo:</strong> {{ $subasta->motivo_rechazo }}</p>
+                            @if (auth()->id() === $subasta->id_usuario && $subasta->editable() && ! $subasta->pujas_count)
+                                <a class="button primary small" href="{{ route('subastas.edit', $subasta) }}">Corregir y reenviar</a>
+                            @endif
                         @else
                             <p>Esta subasta todavía no es pública: solo la ven su propietario y los administradores.</p>
                         @endif
@@ -68,6 +71,7 @@
                     </div>
                 @endunless
                 <h1>{{ $subasta->titulo }}</h1>
+                <x-historial-subasta :subasta="$subasta" />
                 <p class="muted">{{ $subasta->estado_articulo }} · {{ $subasta->publicada() ? 'Publicada' : 'Enviada' }} el
                     {{ $subasta->fecha_inicio->format('d/m/Y H:i') }}</p>
                 <div class="panel bid-panel">

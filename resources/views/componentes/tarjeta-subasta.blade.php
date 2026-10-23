@@ -35,9 +35,9 @@
                     nombre="arrow" /></a></div>
         @if ($gestionar)
             <div class="card-actions">
-                @if (!$subasta->pujas_count && $subasta->estado === 'Activa')
+                @if (!$subasta->pujas_count && $subasta->editable())
                     <a class="text-link" href="{{ route('subastas.edit', $subasta) }}"><x-icono
-                            nombre="edit" />Editar</a>
+                            nombre="edit" />{{ $subasta->estado_revision === 'Rechazada' ? 'Corregir y reenviar' : 'Editar' }}</a>
                 @endif
                 @if (!$subasta->pujas_count)
                     <form method="post" action="{{ route('subastas.destroy', $subasta) }}"

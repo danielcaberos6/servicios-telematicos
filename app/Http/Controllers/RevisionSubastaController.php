@@ -32,7 +32,7 @@ class RevisionSubastaController extends Controller
 
     public function show(Subasta $subasta)
     {
-        $subasta->load(['imagenes', 'categoria', 'usuario.imagen', 'revisor'])->loadCount('pujas')->loadMax('pujas', 'monto');
+        $subasta->load(['imagenes', 'categoria', 'usuario.imagen', 'revisor', 'decisiones.revisor'])->loadCount('pujas')->loadMax('pujas', 'monto');
 
         return response()
             ->view('admin.subastas.show', compact('subasta'))

@@ -49,6 +49,16 @@ class Subasta extends Model
         return $this->estado_revision === 'Aceptada';
     }
 
+    public function editable(): bool
+    {
+        return $this->estado_subasta === 'Activa' && (! $this->publicada() || $this->estado === 'Activa');
+    }
+
+    public function decisiones()
+    {
+        return $this->hasMany(DecisionSubasta::class, 'id_subasta')->orderByDesc('id_decision');
+    }
+
     // Una solicitud En revisión o Rechazada solo la ven su propietario y el Administrador.
     public function visiblePara(?User $user): bool
     {

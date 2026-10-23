@@ -77,6 +77,80 @@ class RevisionSubastasTest extends TestCase
         $this->get('/')->assertDontSee('Mochila de excursión 40 litros');
     }
 
+    public function test_seller_can_correct_expired_rejection_and_resubmit_with_history_and_notifications(): void
+    {
+        Storage::fake('public');
+        $admin = $this->admin();
+        $auction = $this->auction('En revisión', [
+            'fecha_inicio' => now()->subDays(5), 'fecha_fin' => now()->subDays(2),
+        ]);
+        $seller = $auction->usuario;
+        $this->actingAs($admin)->patch("/admin/subastas/{$auction->id_subasta}", [
+            'decision' => 'Rechazada', 'motivo' => 'Necesitamos fotografías más claras.',
+        ])->assertSessionHasNoErrors();
+        $decision = $auction->decisiones()->sole();
+        $this->assertEquals($admin->id_usuario, $decision->id_revisor);
+        $this->actingAs($seller)->get("/subastas/{$auction->id_subasta}/editar")
+            ->assertOk()->assertSee('Guardar y reenviar a revisión')->assertSee($decision->motivo);
+
+        $payload = $this->payload([
+            'reenviar' => '1', 'titulo' => 'Mochila corregida con fotografías nuevas',
+            'imagenes' => [UploadedFile::fake()->image('corregida.jpg')],
+        ]);
+        $this->actingAs($seller)->put("/subastas/{$auction->id_subasta}", $payload)
+            ->assertSessionHasNoErrors()->assertSessionHas('status', 'Correcciones guardadas. Tu subasta fue reenviada a revisión.');
+        $auction->refresh();
+        $this->assertSame('En revisión', $auction->estado_revision);
+        $this->assertNull($auction->motivo_rechazo);
+        $this->assertNull($auction->id_revisor);
+        $this->assertNull($auction->fecha_decision);
+        $this->assertTrue($auction->fecha_inicio->greaterThan(now()->subMinute()));
+        $this->assertSame(1, $auction->imagenes()->count());
+        $this->assertSame(1, $auction->decisiones()->count());
+        $this->assertSame($decision->motivo, $auction->decisiones()->sole()->motivo);
+        $this->assertSame(1, $admin->notificaciones()->where('id_subasta', $auction->id_subasta)
+            ->where('titulo', 'Solicitud corregida para revisión')->count());
+        $this->assertSame(1, $seller->notificaciones()->where('id_subasta', $auction->id_subasta)
+            ->where('titulo', 'Solicitud reenviada a revisión')->count());
+        $this->actingAs($seller)->get("/subastas/{$auction->id_subasta}")->assertOk()->assertSee($decision->motivo);
+        $this->actingAs($admin)->get('/admin/subastas')->assertSee($payload['titulo']);
+        $this->get('/buscar')->assertDontSee($payload['titulo']);
+        $this->actingAs(User::factory()->create())->get("/subastas/{$auction->id_subasta}")->assertNotFound();
+
+        $this->actingAs($seller)->put("/subastas/{$auction->id_subasta}", $payload)->assertSessionHasErrors();
+        $this->assertSame(1, $auction->imagenes()->count());
+        $duration = $auction->fecha_inicio->diffInSeconds($auction->fecha_fin);
+        $this->actingAs($admin)->patch("/admin/subastas/{$auction->id_subasta}", ['decision' => 'Aceptada'])
+            ->assertSessionHasNoErrors();
+        $auction->refresh();
+        $this->assertSame(2, $auction->decisiones()->count());
+        $this->assertEqualsWithDelta($duration, $auction->fecha_inicio->diffInSeconds($auction->fecha_fin), 0.000001);
+        $this->get('/buscar')->assertSee($payload['titulo']);
+        $this->actingAs(User::factory()->create())->get("/subastas/{$auction->id_subasta}")
+            ->assertOk()->assertDontSee('Historial de revisiones')->assertDontSee($decision->motivo);
+    }
+
+    public function test_resubmission_requires_owner_and_valid_data_and_preserves_rejection_on_failure(): void
+    {
+        $admin = $this->admin();
+        $auction = $this->auction('En revisión');
+        $this->actingAs($admin)->patch("/admin/subastas/{$auction->id_subasta}", [
+            'decision' => 'Rechazada', 'motivo' => 'Corrige la descripción.',
+        ])->assertSessionHasNoErrors();
+        $payload = $this->payload(['reenviar' => '1']);
+        $this->actingAs(User::factory()->create())->put("/subastas/{$auction->id_subasta}", $payload)->assertForbidden();
+        $this->actingAs($auction->usuario)->put("/subastas/{$auction->id_subasta}", [
+            ...$payload, 'fecha_fin' => now()->subDay()->toDateTimeString(),
+        ])->assertSessionHasErrors('fecha_fin');
+        Categoria::whereKey($payload['id_categoria'])->update(['habilitada' => false]);
+        $this->actingAs($auction->usuario)->put("/subastas/{$auction->id_subasta}", $payload)->assertSessionHasErrors();
+        $this->assertSame('Rechazada', $auction->refresh()->estado_revision);
+        $this->assertSame('Corrige la descripción.', $auction->motivo_rechazo);
+        $this->assertEquals($admin->id_usuario, $auction->id_revisor);
+        $this->assertSame(1, $auction->decisiones()->count());
+        $this->assertSame(0, $admin->notificaciones()->where('titulo', 'Solicitud corregida para revisión')->count());
+    }
+
     public function test_inactive_seller_cannot_submit_a_request(): void
     {
         $seller = User::factory()->create();

@@ -23,6 +23,7 @@
         </div>
     @endif
 
+    <x-historial-subasta :subasta="$subasta" />
     <div class="detail-grid">
         <div>
             <div class="detail-image">
