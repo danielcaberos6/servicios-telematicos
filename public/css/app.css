@@ -33,6 +33,8 @@
 .auction-deadline .icon { margin-top: 4px; flex-shrink: 0; }
 .auction-ended { background: #e8f5ef; border-color: #84bea5; border-left-color: var(--green); }
 .ranking-scroll { overflow-x: auto; }
+#historial-ofertas { scroll-margin-top: calc(max(var(--header-height, 80px), 80px) + 24px); }
+#historial-ofertas time { white-space: nowrap; }
 .ranking-table { width: 100%; border-collapse: collapse; text-align: left; font-size: .9rem; }
 .ranking-table th, .ranking-table td { padding: 12px 8px; border-bottom: 1px solid var(--line); }
 .ranking-table thead th { color: var(--muted); font-size: .8rem; }

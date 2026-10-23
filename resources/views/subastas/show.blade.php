@@ -31,6 +31,29 @@
                     <p class="preserve-lines">{{ $subasta->descripcion }}</p>
                 </div>
                 @if ($canViewRanking)
+                    <section class="panel description-panel" id="historial-ofertas" aria-labelledby="historial-ofertas-title">
+                        <h2 id="historial-ofertas-title">Historial de ofertas</h2>
+                        <p class="muted">Todas las ofertas, de mayor a menor monto. Solo el vendedor y quienes ofertaron pueden consultarlas.</p>
+                        @if ($historialOfertas->isNotEmpty())
+                            <div class="ranking-scroll" role="region" aria-label="Ofertas registradas" tabindex="0">
+                                <table class="ranking-table">
+                                    <thead><tr><th scope="col">Monto ofertado</th><th scope="col">Fecha y hora (Bolivia)</th><th scope="col">Participación</th></tr></thead>
+                                    <tbody>
+                                        @foreach ($historialOfertas as $oferta)
+                                            <tr>
+                                                <th scope="row">Bs {{ number_format($oferta->monto, 2, ',', '.') }}</th>
+                                                <td><time datetime="{{ $oferta->fecha_puja->toIso8601String() }}">{{ $oferta->fecha_puja->timezone('America/La_Paz')->format('d/m/Y H:i:s') }}</time></td>
+                                                <td>{{ $oferta->id_usuario === auth()->id() ? 'Tu oferta' : 'Otro participante' }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            <x-paginacion :elementos="$historialOfertas" />
+                        @else
+                            <p>Todavía no hay ofertas. Aquí aparecerán los montos y las fechas cuando alguien participe.</p>
+                        @endif
+                    </section>
                     <section class="panel description-panel" aria-labelledby="ranking-title">
                         <h2 id="ranking-title">Ranking de participantes</h2>
                         <p class="muted">La mejor oferta de cada usuario. {{ count($ranking) }} participantes.</p>
