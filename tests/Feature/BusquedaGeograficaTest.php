@@ -209,6 +209,21 @@ class BusquedaGeograficaTest extends TestCase
         $this->assertSame(['Con punto <b>negrita</b>'], array_column($this->puntos($respuesta), 'titulo'));
     }
 
+    public function test_demo_data_includes_mapped_and_legacy_publications(): void
+    {
+        $this->seed(\Database\Seeders\DemoSeeder::class);
+        $this->seed(\Database\Seeders\DemoSeeder::class);
+
+        $this->assertSame(7, Subasta::count());
+        $this->assertSame(6, Subasta::whereNotNull('latitud')->count());
+        $this->assertNull(Subasta::where('titulo', 'Colección de libros')->value('latitud'));
+
+        // Santa Cruz, Plaza 24 de Septiembre: solo la bicicleta está a 10 km o menos.
+        $this->buscar(['lat' => -17.7834, 'lng' => -63.1821, 'radio' => 10])
+            ->assertSee('Bicicleta para paseos y deporte')->assertDontSee('Cámara fotográfica digital')->assertDontSee('Colección de libros');
+        $this->buscar()->assertSee('Colección de libros');
+    }
+
     public function test_reinstalling_sql_functions_keeps_the_radius_filter(): void
     {
         $this->auction('Cercana tras reinstalar', 1);
