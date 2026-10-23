@@ -7,33 +7,40 @@
     <div class="container section guide-page">
         <header class="guide-intro">
             <p class="eyebrow">TUS PRIMEROS PASOS</p>
-            <h1>Encuentra. Oferta. Gana.</h1>
-            <p>Descubre cómo participar en SubastaYA y darle una nueva oportunidad a cada artículo.</p>
-            <div class="button-row">
-                <a class="button primary" href="{{ route('subastas.index') }}">Explorar subastas <x-icono nombre="arrow" /></a>
-                @guest<a class="button secondary" href="{{ route('registro') }}">Crear una cuenta</a>@endguest
+            <h1>Así se participa<br>en SubastaYA.</h1>
+            <div class="guide-intro-bottom">
+                <p>De tu primera oferta a la entrega del artículo. Conoce los pasos antes de empezar.</p>
+                <div class="guide-actions">
+                    <a class="button primary" href="{{ route('subastas.index') }}">Ver subastas</a>
+                    @guest<a class="guide-register" href="{{ route('registro') }}">Crear una cuenta</a>@endguest
+                </div>
             </div>
         </header>
 
-        <section aria-labelledby="comprar-titulo" class="guide-section">
-            <h2 id="comprar-titulo">¿Buscas algo especial?</h2>
-            <ol class="guide-steps">
-                <li class="panel"><span class="guide-number" aria-hidden="true">01</span><h3>Explora y compara</h3><p>Consulta las subastas sin crear una cuenta. Busca por categoría, revisa las fotos, la descripción, el monto y el lugar de encuentro.</p></li>
-                <li class="panel"><span class="guide-number" aria-hidden="true">02</span><h3>Crea tu cuenta y oferta</h3><p>Inicia sesión para participar. Comprueba cuánto falta para el cierre y confirma el monto: las ofertas registradas no pueden retirarse.</p></li>
-                <li class="panel"><span class="guide-number" aria-hidden="true">03</span><h3>Consulta el resultado</h3><p>Al finalizar, la oferta más alta registrada gana. Si ganas, consulta los datos de contacto disponibles en el detalle para coordinar con el vendedor.</p></li>
-            </ol>
-        </section>
+        <div class="guide-paths">
+            <section aria-labelledby="comprar-titulo" class="guide-section">
+                <p class="eyebrow">PARA COMPRAR</p>
+                <h2 id="comprar-titulo">Encuentra lo que buscas.</h2>
+                <ol class="guide-steps">
+                    <li class="panel"><span class="guide-number" aria-hidden="true">01</span><h3>Explora y compara</h3><p>Consulta las subastas sin crear una cuenta. Busca por categoría, revisa las fotos, la descripción, el monto y el lugar de encuentro.</p></li>
+                    <li class="panel"><span class="guide-number" aria-hidden="true">02</span><h3>Crea tu cuenta y oferta</h3><p>Inicia sesión para participar. Comprueba cuánto falta para el cierre y confirma el monto: las ofertas registradas no pueden retirarse.</p></li>
+                    <li class="panel"><span class="guide-number" aria-hidden="true">03</span><h3>Consulta el resultado</h3><p>Al finalizar, la oferta más alta registrada gana. Si ganas, consulta los datos de contacto disponibles en el detalle para coordinar con el vendedor.</p></li>
+                </ol>
+            </section>
 
-        <section aria-labelledby="vender-titulo" class="guide-section">
-            <h2 id="vender-titulo">¿Tienes algo para vender?</h2>
-            <ol class="guide-steps">
-                <li class="panel"><span class="guide-number" aria-hidden="true">01</span><h3>Prepara tu publicación</h3><p>Con tu sesión iniciada, entra a Mis subastas y elige Crear subasta. Agrega fotos claras, una descripción fiel, la categoría, el monto inicial y la fecha de cierre.</p></li>
-                <li class="panel"><span class="guide-number" aria-hidden="true">02</span><h3>Espera la revisión</h3><p>La solicitud queda En revisión antes de publicarse. Consulta su estado en Mis subastas. Si es rechazada, revisa el motivo y corrige lo necesario.</p></li>
-                <li class="panel"><span class="guide-number" aria-hidden="true">03</span><h3>Coordina la entrega</h3><p>Sigue las ofertas hasta el cierre. Si hay un ganador, acuerden la entrega y el pago. Si no hay ofertas, la subasta termina sin ganador.</p></li>
-            </ol>
-        </section>
+            <section aria-labelledby="vender-titulo" class="guide-section">
+                <p class="eyebrow">PARA VENDER</p>
+                <h2 id="vender-titulo">Dale otra oportunidad.</h2>
+                <ol class="guide-steps">
+                    <li class="panel"><span class="guide-number" aria-hidden="true">01</span><h3>Prepara tu publicación</h3><p>Con tu sesión iniciada, entra a Mis subastas y elige Crear subasta. Agrega fotos claras, una descripción fiel, la categoría, el monto inicial y la fecha de cierre.</p></li>
+                    <li class="panel"><span class="guide-number" aria-hidden="true">02</span><h3>Espera la revisión</h3><p>La solicitud queda En revisión antes de publicarse. Consulta su estado en Mis subastas. Si es rechazada, revisa el motivo y corrige lo necesario.</p></li>
+                    <li class="panel"><span class="guide-number" aria-hidden="true">03</span><h3>Coordina la entrega</h3><p>Sigue las ofertas hasta el cierre. Si hay un ganador, acuerden la entrega y el pago. Si no hay ofertas, la subasta termina sin ganador.</p></li>
+                </ol>
+            </section>
 
-        <section class="panel guide-safety guide-section" aria-labelledby="seguridad-titulo">
+        </div>
+
+        <section class="guide-safety guide-section" aria-labelledby="seguridad-titulo">
             <x-icono nombre="shield" />
             <div><h2 id="seguridad-titulo">Participa con cuidado</h2>
                 <ul>
