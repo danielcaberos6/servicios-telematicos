@@ -110,10 +110,11 @@ class SubastaController extends Controller
                     throw ValidationException::withMessages(['imagenes' => 'La subasta puede tener como máximo 5 imágenes.']);
                 }
                 $removed = $images->pluck('ruta')->all();
+                // Primero los datos: el aviso de reenvío a revisión muestra el título nuevo.
+                $this->subastaService->actualizar($request->user()->id_usuario, $locked->id_subasta, $request->safe()->except(['imagenes', 'eliminar_imagenes']));
                 foreach ($ids as $imageId) {
                     $this->imagenService->eliminar($request->user()->id_usuario, $imageId);
                 }
-                $this->subastaService->actualizar($request->user()->id_usuario, $locked->id_subasta, $request->safe()->except(['imagenes', 'eliminar_imagenes']));
                 $this->saveImages($locked, $request, $paths);
             });
         } catch (\Throwable $exception) {
@@ -122,7 +123,7 @@ class SubastaController extends Controller
         }
         Storage::disk('public')->delete($removed);
 
-        return redirect()->route('subastas.show', $subasta)->with('status', 'Subasta actualizada.');
+        return redirect()->route('subastas.show', $subasta)->with('status', 'Subasta actualizada. Quedó En revisión hasta que un administrador la acepte.');
     }
 
     public function destroy(Request $request, Subasta $subasta)

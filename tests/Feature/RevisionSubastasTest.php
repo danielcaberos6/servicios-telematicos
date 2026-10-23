@@ -307,6 +307,78 @@ class RevisionSubastasTest extends TestCase
             ->assertSee('Escritorio de madera con cajones')->assertSee('La descripción no indica la marca ni el modelo.');
     }
 
+    public function test_editing_an_accepted_auction_sends_it_back_to_review(): void
+    {
+        Storage::fake('public');
+        $admin = $this->admin();
+        $auction = $this->auction('Aceptada');
+        $this->actingAs($auction->usuario)->get("/subastas/{$auction->id_subasta}/editar")->assertOk()
+            ->assertSee('Al guardar, la subasta vuelve a revisión');
+
+        $this->put("/subastas/{$auction->id_subasta}", $this->payload([
+            'titulo' => 'Contenido sin revisar',
+            'imagenes' => [UploadedFile::fake()->image('nueva.jpg')],
+        ]))->assertSessionHasNoErrors()
+            ->assertSessionHas('status', 'Subasta actualizada. Quedó En revisión hasta que un administrador la acepte.');
+
+        $this->assertSame('En revisión', $auction->refresh()->estado_revision);
+        $this->assertCount(1, $auction->imagenes);
+        $this->assertSame(1, $auction->usuario->notificaciones()->where('titulo', 'Solicitud en revisión')->count());
+        $this->assertSame(1, $admin->notificaciones()->where('titulo', 'Nueva solicitud de publicación')
+            ->where('contenido', 'like', '%Contenido sin revisar%')->count());
+        auth()->logout();
+        $this->get('/buscar')->assertDontSee('Contenido sin revisar');
+        $this->get("/subastas/{$auction->id_subasta}")->assertNotFound();
+    }
+
+    public function test_editing_a_rejected_auction_resubmits_it_without_the_old_reason(): void
+    {
+        $auction = $this->auction('Rechazada');
+        $this->actingAs($auction->usuario)->put("/subastas/{$auction->id_subasta}", $this->payload(['titulo' => 'Corregida por el vendedor']))
+            ->assertSessionHasNoErrors();
+
+        $auction->refresh();
+        $this->assertSame('En revisión', $auction->estado_revision);
+        $this->assertNull($auction->motivo_rechazo);
+        $this->get('/mis-subastas')->assertSee('Corregida por el vendedor')->assertDontSee('Las fotos no muestran el artículo.');
+    }
+
+    public function test_changing_only_the_photos_of_an_accepted_auction_sends_it_back_to_review(): void
+    {
+        Storage::fake('public');
+        $auction = $this->auction('Aceptada');
+        Storage::disk('public')->put("subastas/{$auction->id_subasta}/foto.jpg", 'imagen');
+        $image = $auction->imagenes()->create(['ruta' => "subastas/{$auction->id_subasta}/foto.jpg", 'tamano' => 6]);
+
+        DB::select('select eliminar_imagen(?,?)', [$auction->id_usuario, $image->id_imagen]);
+        $this->assertSame('En revisión', $auction->refresh()->estado_revision);
+
+        DB::table('subasta')->where('id_subasta', $auction->id_subasta)->update(['estado_revision' => 'Aceptada']);
+        DB::select('select * from guardar_imagen(?,?,?,?)', [$auction->id_usuario, $auction->id_subasta, 'subastas/x.jpg', 10]);
+        $this->assertSame('En revisión', $auction->refresh()->estado_revision);
+    }
+
+    public function test_editing_a_request_in_review_does_not_repeat_the_notices(): void
+    {
+        $admin = $this->admin();
+        $auction = $this->auction('En revisión');
+        $before = DB::table('notificacion')->count();
+        $this->actingAs($auction->usuario)->put("/subastas/{$auction->id_subasta}", $this->payload())->assertSessionHasNoErrors();
+
+        $this->assertSame('En revisión', $auction->refresh()->estado_revision);
+        $this->assertSame($before, DB::table('notificacion')->count());
+        $this->assertSame(1, $admin->notificaciones()->where('titulo', 'Nueva solicitud de publicación')->count());
+    }
+
+    public function test_reinstalling_sql_functions_keeps_editing_behind_review(): void
+    {
+        $this->artisan('subastas:instalar-funciones')->assertSuccessful();
+        $auction = $this->auction('Aceptada');
+        $this->actingAs($auction->usuario)->put("/subastas/{$auction->id_subasta}", $this->payload())->assertSessionHasNoErrors();
+
+        $this->assertSame('En revisión', $auction->refresh()->estado_revision);
+    }
+
     public function test_reinstalling_sql_functions_keeps_requests_unpublished(): void
     {
         $this->auction('En revisión');
