@@ -2,10 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Models\Categoria;
 use App\Models\User;
+use App\Services\PujaService;
+use Database\Seeders\ReportesDemoSeeder;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class GestionUsuariosTest extends TestCase
@@ -93,6 +97,72 @@ class GestionUsuariosTest extends TestCase
         $this->assertDatabaseCount('decision_usuario', 4);
         $this->assertDatabaseHas('decision_usuario', ['id_actor' => $admin->id_usuario, 'id_usuario' => $user->id_usuario]);
         $this->get('/admin/usuarios/'.$user->id_usuario.'/historial')->assertOk()->assertSee('Estado de cuenta');
+    }
+
+    public function test_demo_accounts_show_their_existing_auctions_and_bids_without_administrative_decisions(): void
+    {
+        Storage::fake('public');
+        $this->seed(ReportesDemoSeeder::class);
+        $admin = User::where('correo', 'admin@subastaya.test')->sole();
+        $user = User::where('correo', 'comunidad1@subastaya.test')->sole();
+
+        $response = $this->actingAs($admin)->get('/admin/usuarios/'.$user->id_usuario.'/historial')
+            ->assertOk()->assertSee('Camila Torres')->assertSee('Subastas de este usuario')
+            ->assertSee('Pujas realizadas')->assertSee('No hay decisiones registradas para esta cuenta.')
+            ->assertViewHas('subastas', fn ($p) => $p->total() === 4 && $p->every(fn ($s) => $s->id_usuario === $user->id_usuario))
+            ->assertViewHas('pujas', fn ($p) => $p->total() === 10 && $p->every(fn ($bid) => $bid->id_usuario === $user->id_usuario));
+        $subasta = $response->viewData('subastas')->first();
+        $puja = $response->viewData('pujas')->first();
+        $response->assertSee($subasta->titulo)->assertSee(route('admin.subastas.show', $subasta), false)
+            ->assertSee($puja->subasta->titulo)->assertSee('Bs '.number_format($puja->monto, 2, ',', '.'));
+
+        $bidder = User::where('correo', 'participante1@subastaya.test')->sole();
+        $this->get('/admin/usuarios/'.$bidder->id_usuario.'/historial')
+            ->assertOk()->assertViewHas('subastas', fn ($p) => $p->total() === 0)
+            ->assertViewHas('pujas', fn ($p) => $p->total() === 2);
+    }
+
+    public function test_activity_pages_are_independent_scoped_and_include_unpublished_auctions(): void
+    {
+        $admin = $this->admin();
+        $user = User::factory()->create();
+        $other = User::factory()->create();
+        $category = Categoria::firstOrCreate(['nombre_categoria' => 'Pruebas']);
+        $create = fn (User $seller, string $title, string $state = 'Aceptada') => $seller->subastas()->forceCreate([
+            'titulo' => $title, 'descripcion' => 'Artículo usado para probar el historial.',
+            'ubicacion' => 'La Paz', 'estado_articulo' => 'Usado', 'monto_inicial' => 100,
+            'id_categoria' => $category->id_categoria, 'fecha_inicio' => now()->subHour(),
+            'fecha_fin' => now()->addDays(2), 'estado_revision' => $state,
+        ]);
+        for ($i = 0; $i < 16; $i++) {
+            $create($user, 'Publicación propia '.$i, $i === 0 ? 'En revisión' : 'Aceptada');
+        }
+        $auction = $create($other, 'Subasta donde oferta el usuario');
+        for ($i = 0; $i < 16; $i++) {
+            app(PujaService::class)->registrar($user->id_usuario, $auction->id_subasta, (string) (100 + $i));
+        }
+        app(PujaService::class)->registrar($other->id_usuario, $user->subastas()->where('estado_revision', 'Aceptada')->first()->id_subasta, '100');
+
+        $url = '/admin/usuarios/'.$user->id_usuario.'/historial';
+        $this->actingAs($admin)->get($url.'?publicaciones=2&ofertas=1')->assertOk()
+            ->assertViewHas('subastas', fn ($p) => $p->total() === 16 && $p->count() === 1 && $p->currentPage() === 2)
+            ->assertViewHas('pujas', fn ($p) => $p->total() === 16 && $p->count() === 15 && $p->currentPage() === 1)
+            ->assertSee('En revisión')->assertSee('publicaciones=2&amp;ofertas=2#pujas-usuario', false);
+        $this->get($url.'?publicaciones=1&ofertas=2')->assertOk()
+            ->assertViewHas('subastas', fn ($p) => $p->count() === 15 && $p->currentPage() === 1)
+            ->assertViewHas('pujas', fn ($p) => $p->count() === 1 && $p->first()->monto === '100.00');
+    }
+
+    public function test_empty_history_is_explicit_and_invalid_page_numbers_are_rejected(): void
+    {
+        $user = User::factory()->create();
+        $url = '/admin/usuarios/'.$user->id_usuario.'/historial';
+        $this->actingAs($this->admin())->get($url)->assertOk()
+            ->assertSee('Este usuario todavía no tiene subastas registradas.')
+            ->assertSee('Este usuario todavía no ha realizado pujas.')
+            ->assertSee('No hay decisiones registradas para esta cuenta.');
+        $this->getJson($url.'?publicaciones=0&ofertas=abc')->assertUnprocessable()
+            ->assertJsonValidationErrors(['publicaciones', 'ofertas']);
     }
 
     public function test_admin_cannot_disable_self_or_remove_the_last_active_admin(): void

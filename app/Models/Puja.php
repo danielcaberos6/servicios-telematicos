@@ -23,4 +23,9 @@ class Puja extends Model
     {
         return $this->belongsTo(User::class, 'id_usuario');
     }
+
+    public function subasta()
+    {
+        return $this->belongsTo(Subasta::class, 'id_subasta');
+    }
 }

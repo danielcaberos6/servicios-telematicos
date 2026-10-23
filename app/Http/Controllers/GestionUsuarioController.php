@@ -19,9 +19,14 @@ class GestionUsuarioController extends Controller
 
     public function historial(Request $request, User $usuario, GestionUsuarioService $gestion)
     {
+        $request->validate([
+            'publicaciones' => ['sometimes', 'integer', 'min:1'],
+            'ofertas' => ['sometimes', 'integer', 'min:1'],
+        ]);
         $decisiones = $gestion->historial($request->user()->id_usuario, $usuario->id_usuario);
+        $actividad = $gestion->actividad($request->user()->id_usuario, $usuario->id_usuario);
 
-        return view('admin.usuarios.historial', compact('usuario', 'decisiones'));
+        return view('admin.usuarios.historial', [...compact('usuario', 'decisiones'), ...$actividad]);
     }
 
     public function index(FiltroUsuariosRequest $request, GestionUsuarioService $gestion)

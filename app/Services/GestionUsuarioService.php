@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Puja;
+use App\Models\Subasta;
 use App\Services\Concerns\EjecutaFuncionesSql;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
@@ -18,6 +20,20 @@ class GestionUsuarioService
     public function historial(int $actor, int $usuario): array
     {
         return $this->ejecutar('select * from historial_cuenta(?,?)', [$actor, $usuario], 'cuenta');
+    }
+
+    public function actividad(int $actor, int $usuario): array
+    {
+        $this->ejecutar('select exigir_administrador(?)', [$actor], 'cuenta');
+
+        return [
+            'subastas' => Subasta::where('id_usuario', $usuario)->withCount('pujas')
+                ->orderByDesc('fecha_inicio')->orderByDesc('id_subasta')
+                ->paginate(15, ['*'], 'publicaciones')->withQueryString()->fragment('subastas-usuario'),
+            'pujas' => Puja::where('id_usuario', $usuario)->with('subasta')
+                ->orderByDesc('fecha_puja')->orderByDesc('id_puja')
+                ->paginate(15, ['*'], 'ofertas')->withQueryString()->fragment('pujas-usuario'),
+        ];
     }
 
     public function listar(int $actor, array $filtros): LengthAwarePaginator

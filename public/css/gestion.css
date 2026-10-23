@@ -10,6 +10,7 @@
 .gestion-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 240px; }
 .gestion-acciones .button { font-size: .8rem; padding: 8px 12px; }
 .gestion-tabla td:nth-child(2) { overflow-wrap: anywhere; }
+.gestion-historial .gestion-tabla td:nth-child(2) { overflow-wrap: normal; white-space: nowrap; }
 .gestion-estado { display: inline-block; border-radius: 20px; padding: 5px 10px; font-weight: 600; font-size: .8rem; }
 .gestion-activa { background: #e5f5e9; color: #246137; }
 .gestion-inactiva { background: #f2e9e9; color: #853636; }
