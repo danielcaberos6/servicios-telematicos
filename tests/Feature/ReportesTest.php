@@ -183,10 +183,18 @@ class ReportesTest extends TestCase
         $this->assertSame($counts, [User::count(), Subasta::count(), DB::table('puja')->count(), DB::table('resenas')->count()]);
         $this->assertSame(47, Subasta::where('estado_revision', 'Aceptada')->count());
         $this->assertSame(49, Subasta::count());
+        $this->assertSame(0, Subasta::doesntHave('imagenes')->count());
         $this->assertSame(0, User::where('nombre', 'like', '%Demo%')->count());
         $this->assertGreaterThanOrEqual(9, User::distinct('ciudad')->count('ciudad'));
         $admin = User::where('correo', 'admin@subastaya.test')->firstOrFail();
         $this->assertTrue($admin->esAdministrador());
         $this->assertFalse(User::where('correo', 'demo@subastaya.test')->firstOrFail()->esAdministrador());
+
+        $subasta = Subasta::where('titulo', 'like', '% · lote %')->firstOrFail();
+        $datos = $subasta->getAttributes();
+        $subasta->imagenes()->delete();
+        $this->seed(ReportesDemoSeeder::class);
+        $this->assertTrue($subasta->imagenes()->exists());
+        $this->assertSame($datos, $subasta->refresh()->getAttributes());
     }
 }

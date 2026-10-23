@@ -148,12 +148,19 @@ class OperacionesSqlTest extends TestCase
         $this->seed(ActividadDemoSeeder::class);
         // 7 publicaciones aceptadas y 2 solicitudes del usuario demo (En revisión y Rechazada).
         $this->assertDatabaseCount('subasta', 9);
-        $this->assertDatabaseCount('imagen', 7);
+        $this->assertDatabaseCount('imagen', 9);
         $this->assertDatabaseCount('resenas', 5);
         $this->assertDatabaseCount('puja', 5);
         foreach (Imagen::all() as $image) {
             Storage::disk('public')->assertExists($image->ruta);
-            $this->get('/imagenes/'.$image->id_imagen)->assertOk();
+            $subasta = Subasta::findOrFail($image->id_subasta);
+            if ($subasta->publicada()) {
+                $this->get('/imagenes/'.$image->id_imagen)->assertOk();
+            } else {
+                $this->get('/imagenes/'.$image->id_imagen)->assertNotFound();
+                $this->actingAs($subasta->usuario)->get('/imagenes/'.$image->id_imagen)->assertOk();
+                auth()->logout();
+            }
         }
     }
 }

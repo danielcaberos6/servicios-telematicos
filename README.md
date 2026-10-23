@@ -31,6 +31,8 @@ Los visitantes ven Inicio, Subastas (el catálogo con búsqueda y filtros) y **C
 
 ## Datos de demostración
 
+Todas las subastas de demostración incluyen al menos una foto, también las pendientes, rechazadas e históricas. Volver a ejecutar sus seeders completa las fotos faltantes sin reemplazar imágenes existentes ni cambiar los estados de las subastas. Las nuevas fotografías son ilustrativas; sus autores, fuentes y licencias están en [Créditos de fotos de ejemplo](public/imagenes/ejemplos/CREDITOS.md).
+
 ```sh
 docker compose exec laravel php artisan db:seed --class=ActividadDemoSeeder
 ```

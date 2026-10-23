@@ -4,12 +4,14 @@ namespace Database\Seeders;
 
 use App\Models\Categoria;
 use App\Models\User;
+use Database\Seeders\Concerns\CargaFotosDemo;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class ReportesDemoSeeder extends Seeder
 {
+    use CargaFotosDemo;
+
     public function run(): void
     {
         if (! app()->environment(['local', 'testing'])) {
@@ -47,17 +49,17 @@ class ReportesDemoSeeder extends Seeder
                 $people->push($person);
             }
             $items = [
-                ['Vehículos', 'Motocicleta urbana 150 cc', 6500, null],
+                ['Vehículos', 'Motocicleta urbana 150 cc', 6500, 'motocicleta.jpg'],
                 ['Antigüedades y coleccionables', 'Camiseta firmada de colección', 320, 'camiseta-firmada.jpg'],
                 ['Electrónica e informática', 'Cámara fotográfica con accesorios', 1450, 'camara.jpg'],
-                ['Muebles', 'Escritorio de madera restaurado', 580, null],
-                ['Juguetes y juegos', 'Ajedrez con piezas de madera', 120, null],
-                ['Ropa, calzado y accesorios', 'Chaqueta de invierno', 180, null],
+                ['Muebles', 'Escritorio de madera restaurado', 580, 'escritorio.jpg'],
+                ['Juguetes y juegos', 'Ajedrez con piezas de madera', 120, 'ajedrez.jpg'],
+                ['Ropa, calzado y accesorios', 'Chaqueta de invierno', 180, 'chaqueta.jpg'],
                 ['Instrumentos musicales', 'Guitarra para estudio musical', 700, 'guitarra-firmada.jpg'],
                 ['Deporte', 'Bicicleta para paseos urbanos', 850, 'bicicleta.png'],
                 ['Videojuegos', 'Consola con control inalámbrico', 2100, 'consola.jpg'],
                 ['Libros, películas y música', 'Selección de novelas y cuentos', 160, 'libros.png'],
-                ['Varios', 'Kit de herramientas para el hogar', 230, null],
+                ['Varios', 'Kit de herramientas para el hogar', 230, 'herramientas.jpg'],
                 ['Electrónica e informática', 'Laptop para trabajo y estudio', 2800, 'laptop.png'],
             ];
             $number = 0;
@@ -75,6 +77,8 @@ class ReportesDemoSeeder extends Seeder
                     }
                     $auction = $owner->subastas()->firstOrNew(['titulo' => $title.' · lote '.($number + 1).' / '.$base->format('Y-m')]);
                     if ($auction->exists) {
+                        $this->asegurarFoto($auction, $image);
+
                         continue;
                     }
                     // Lotes históricos ya revisados: se insertan aceptados y con su estado final.
@@ -84,12 +88,7 @@ class ReportesDemoSeeder extends Seeder
                         'estado_articulo' => $number % 3 === 0 ? 'Nuevo' : 'Usado', 'monto_inicial' => $price + ($number % 5) * 20,
                         'fecha_inicio' => $published, 'fecha_fin' => $end, 'estado_revision' => 'Aceptada', 'estado_subasta' => $state,
                     ])->save();
-                    if ($image) {
-                        $path = 'subastas/'.$auction->id_subasta.'/'.$image;
-                        $contents = file_get_contents(public_path('imagenes/ejemplos/'.$image));
-                        Storage::disk('public')->put($path, $contents);
-                        $auction->imagenes()->create(['ruta' => $path, 'tamano' => strlen($contents)]);
-                    }
+                    $this->asegurarFoto($auction, $image);
                     if ($state === 'Activa') {
                         $bidders = $eligible->reject(fn ($person) => $person->id_usuario === $owner->id_usuario)->values();
                         for ($bid = 0; $bid < 2 + intdiv($number, 4) % 4; $bid++) {

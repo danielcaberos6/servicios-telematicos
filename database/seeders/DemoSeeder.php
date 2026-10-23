@@ -4,11 +4,13 @@ namespace Database\Seeders;
 
 use App\Models\Categoria;
 use App\Models\User;
+use Database\Seeders\Concerns\CargaFotosDemo;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Storage;
 
 class DemoSeeder extends Seeder
 {
+    use CargaFotosDemo;
+
     public function run(): void
     {
         if (! app()->environment(['local', 'testing'])) {
@@ -32,12 +34,7 @@ class DemoSeeder extends Seeder
             if ($coords && is_null($auction->latitud) && ! $auction->pujas()->exists()) {
                 $auction->update(['latitud' => $coords[0], 'longitud' => $coords[1]]);
             }
-            if (! $auction->imagenes()->exists()) {
-                $contents = file_get_contents(public_path('imagenes/ejemplos/'.$image));
-                $path = 'subastas/'.$auction->id_subasta.'/'.$image;
-                Storage::disk('public')->put($path, $contents);
-                $auction->imagenes()->create(['ruta' => $path, 'tamano' => strlen($contents)]);
-            }
+            $this->asegurarFoto($auction, $image);
         }
         $this->solicitudes($demo);
     }
@@ -58,6 +55,7 @@ class DemoSeeder extends Seeder
             if (! $auction->exists) {
                 $auction->forceFill(['descripcion' => $description, 'id_categoria' => Categoria::where('nombre_categoria', $category)->value('id_categoria'), 'estado_articulo' => $condition, 'monto_inicial' => $price, 'ubicacion' => $location, 'fecha_inicio' => now()->subHours(3), 'fecha_fin' => now()->addDays(6), 'estado_revision' => $revision, 'motivo_rechazo' => $reason])->save();
             }
+            $this->asegurarFoto($auction, $category === 'Muebles' ? 'escritorio.jpg' : 'reloj.jpg');
         }
     }
 

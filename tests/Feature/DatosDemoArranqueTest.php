@@ -20,6 +20,7 @@ class DatosDemoArranqueTest extends TestCase
         $this->artisan('subastas:cargar-demo')->assertSuccessful();
         $this->assertDatabaseCount('usuario', 3);
         $this->assertDatabaseCount('subasta', 9);
+        $this->assertSame(0, Subasta::doesntHave('imagenes')->count());
         $this->assertSame(7, Subasta::where('estado_revision', 'Aceptada')->count());
 
         $admin = User::where('correo', 'admin@subastaya.test')->sole();
