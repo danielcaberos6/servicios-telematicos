@@ -9,6 +9,8 @@ class Subasta extends Model
 {
     public const CONDITIONS = ['Nuevo', 'Usado'];
 
+    public const REVISIONES = ['En revisión', 'Aceptada', 'Rechazada'];
+
     protected $table = 'subasta';
 
     protected $primaryKey = 'id_subasta';
@@ -37,6 +39,17 @@ class Subasta extends Model
         }
 
         return $this->fecha_inicio->isFuture() ? 'Programada' : 'Activa';
+    }
+
+    public function publicada(): bool
+    {
+        return $this->estado_revision === 'Aceptada';
+    }
+
+    // Una solicitud En revisión o Rechazada solo la ven su propietario y el Administrador.
+    public function visiblePara(?User $user): bool
+    {
+        return $this->publicada() || ($user && ($user->id_usuario === $this->id_usuario || $user->esAdministrador()));
     }
 
     public function usuario()

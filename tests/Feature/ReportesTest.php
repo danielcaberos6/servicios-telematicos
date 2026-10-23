@@ -27,10 +27,10 @@ class ReportesTest extends TestCase
 
     private function auction(User $owner, array $data = []): Subasta
     {
-        return $owner->subastas()->create(array_replace([
+        return $owner->subastas()->forceCreate(array_replace([
             'titulo' => 'Publicación para reportes', 'descripcion' => 'Descripción del artículo para probar reportes.',
             'ubicacion' => 'Tarija, plaza principal', 'id_categoria' => Categoria::where('nombre_categoria', 'Deporte')->value('id_categoria'),
-            'estado_articulo' => 'Usado', 'monto_inicial' => '100.50', 'fecha_inicio' => '2025-06-15 10:00:00-04', 'fecha_fin' => now()->addDays(5),
+            'estado_articulo' => 'Usado', 'monto_inicial' => '100.50', 'fecha_inicio' => '2025-06-15 10:00:00-04', 'fecha_fin' => now()->addDays(5), 'estado_revision' => 'Aceptada',
         ], $data));
     }
 
@@ -148,7 +148,8 @@ class ReportesTest extends TestCase
         $counts = [User::count(), Subasta::count(), DB::table('puja')->count(), DB::table('resenas')->count()];
         $this->seed(ReportesDemoSeeder::class);
         $this->assertSame($counts, [User::count(), Subasta::count(), DB::table('puja')->count(), DB::table('resenas')->count()]);
-        $this->assertSame(47, Subasta::count());
+        $this->assertSame(47, Subasta::where('estado_revision', 'Aceptada')->count());
+        $this->assertSame(49, Subasta::count());
         $this->assertSame(0, User::where('nombre', 'like', '%Demo%')->count());
         $this->assertGreaterThanOrEqual(9, User::distinct('ciudad')->count('ciudad'));
         $admin = User::where('correo', 'admin@subastaya.test')->firstOrFail();

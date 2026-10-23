@@ -29,8 +29,8 @@ class UbicacionSubastasTest extends TestCase
 
     private function auction(?User $user = null, array $overrides = []): Subasta
     {
-        return ($user ?? User::factory()->create())->subastas()->create([
-            ...$this->payload(), 'fecha_inicio' => now()->subDay(), ...$overrides,
+        return ($user ?? User::factory()->create())->subastas()->forceCreate([
+            ...$this->payload(), 'fecha_inicio' => now()->subDay(), 'estado_revision' => 'Aceptada', ...$overrides,
         ])->refresh();
     }
 

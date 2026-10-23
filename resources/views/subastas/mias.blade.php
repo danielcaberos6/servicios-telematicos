@@ -9,8 +9,8 @@
                 <p>Administra tus artículos y sigue las ofertas que recibes.</p>
             </div><a class="button primary" href="{{ route('subastas.create') }}"><x-icono nombre="plus" />Crear subasta</a>
         </div>
-        <p class="muted">{{ $subastas->total() }} publicaciones · Puedes editar o eliminar las que aún no recibieron
-            ofertas.</p>
+        <p class="muted">{{ $subastas->total() }} publicaciones · Cada solicitud queda En revisión hasta que un
+            administrador la acepte o la rechace. Puedes editar o eliminar las que aún no recibieron ofertas.</p>
         <div class="auction-grid">
             @forelse($subastas as $subasta)
             <x-tarjeta-subasta :subasta="$subasta" :gestionar="true" />@empty<div class="empty-state"><x-icono

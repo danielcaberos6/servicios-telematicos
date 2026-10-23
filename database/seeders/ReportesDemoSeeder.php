@@ -73,16 +73,17 @@ class ReportesDemoSeeder extends Seeder
                     if ($end->lte($published)) {
                         $published = $end->copy()->subDay();
                     }
-                    $auction = $owner->subastas()->firstOrCreate(['titulo' => $title.' · lote '.($number + 1).' / '.$base->format('Y-m')], [
+                    $auction = $owner->subastas()->firstOrNew(['titulo' => $title.' · lote '.($number + 1).' / '.$base->format('Y-m')]);
+                    if ($auction->exists) {
+                        continue;
+                    }
+                    // Lotes históricos ya revisados: se insertan aceptados y con su estado final.
+                    $auction->forceFill([
                         'descripcion' => 'Artículo disponible para revisar al coordinar la entrega. Publicación de ejemplo para explorar los reportes del sistema.',
                         'ubicacion' => $owner->ciudad.', plaza principal', 'id_categoria' => Categoria::where('nombre_categoria', $category)->value('id_categoria'),
                         'estado_articulo' => $number % 3 === 0 ? 'Nuevo' : 'Usado', 'monto_inicial' => $price + ($number % 5) * 20,
-                        'fecha_inicio' => $published, 'fecha_fin' => $end,
-                    ]);
-                    if (! $auction->wasRecentlyCreated) {
-                        continue;
-                    }
-                    $auction->forceFill(['estado_subasta' => $state])->save();
+                        'fecha_inicio' => $published, 'fecha_fin' => $end, 'estado_revision' => 'Aceptada', 'estado_subasta' => $state,
+                    ])->save();
                     if ($image) {
                         $path = 'subastas/'.$auction->id_subasta.'/'.$image;
                         $contents = file_get_contents(public_path('imagenes/ejemplos/'.$image));

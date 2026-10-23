@@ -23,11 +23,15 @@ class OperacionesSqlTest extends TestCase
 
     private function auction(User $owner): Subasta
     {
-        return app(SubastaService::class)->crear($owner->id_usuario, [
+        $auction = app(SubastaService::class)->crear($owner->id_usuario, [
             'titulo' => 'Subasta para comprobar funciones', 'descripcion' => 'Descripción de prueba con suficiente detalle.',
             'ubicacion' => 'La Paz, Plaza Abaroa', 'estado_articulo' => 'Usado', 'monto_inicial' => '100.00',
             'id_categoria' => Categoria::first()->id_categoria, 'fecha_fin' => now()->addDays(2)->toIso8601String(),
         ]);
+        // Simula la aceptación del Administrador para poder pujar.
+        DB::table('subasta')->where('id_subasta', $auction->id_subasta)->update(['estado_revision' => 'Aceptada']);
+
+        return $auction->refresh();
     }
 
     public function test_script_installs_exact_default_categories_and_can_reseed_without_duplicates(): void
@@ -142,7 +146,8 @@ class OperacionesSqlTest extends TestCase
         Storage::fake('public');
         $this->seed(ActividadDemoSeeder::class);
         $this->seed(ActividadDemoSeeder::class);
-        $this->assertDatabaseCount('subasta', 7);
+        // 7 publicaciones aceptadas y 2 solicitudes del usuario demo (En revisión y Rechazada).
+        $this->assertDatabaseCount('subasta', 9);
         $this->assertDatabaseCount('imagen', 7);
         $this->assertDatabaseCount('resenas', 5);
         $this->assertDatabaseCount('puja', 5);

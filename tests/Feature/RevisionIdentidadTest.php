@@ -112,6 +112,7 @@ class RevisionIdentidadTest extends TestCase
             'ubicacion' => 'La Paz, Plaza Abaroa', 'id_categoria' => Categoria::first()->id_categoria,
             'estado_articulo' => 'Usado', 'monto_inicial' => 100, 'fecha_fin' => now()->addDays(3)->toDateTimeString(),
         ]);
+        $auction->forceFill(['estado_revision' => 'Aceptada'])->save();
         $this->get('/subastas/'.$auction->id_subasta)->assertOk()->assertSee('✓ Verificado')
             ->assertDontSee($solicitud->ruta_documento)->assertDontSee(route('identidad.documento', $solicitud));
         $solicitud->usuario->forceFill(['nombres' => 'Nombre actualizado'])->save();

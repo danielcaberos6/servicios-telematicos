@@ -20,7 +20,7 @@ class BusquedaGeograficaTest extends TestCase
 
     private function auction(string $titulo, ?float $kmAlNorte, array $overrides = []): Subasta
     {
-        return User::factory()->create()->subastas()->create([
+        return User::factory()->create()->subastas()->forceCreate([
             'titulo' => $titulo,
             'descripcion' => 'Artículo de prueba para la búsqueda por cercanía.',
             'id_categoria' => Categoria::firstOrCreate(['nombre_categoria' => 'Hogar'])->id_categoria,
@@ -31,6 +31,7 @@ class BusquedaGeograficaTest extends TestCase
             'fecha_fin' => now()->addDays(3),
             'latitud' => is_null($kmAlNorte) ? null : round(self::CENTRO['lat'] + $kmAlNorte / self::KM_POR_GRADO, 6),
             'longitud' => is_null($kmAlNorte) ? null : self::CENTRO['lng'],
+            'estado_revision' => 'Aceptada',
             ...$overrides,
         ])->refresh();
     }
@@ -216,8 +217,8 @@ class BusquedaGeograficaTest extends TestCase
         $this->seed(\Database\Seeders\DemoSeeder::class);
         $this->seed(\Database\Seeders\DemoSeeder::class);
 
-        $this->assertSame(7, Subasta::count());
-        $this->assertSame(6, Subasta::whereNotNull('latitud')->count());
+        $this->assertSame(7, Subasta::where('estado_revision', 'Aceptada')->count());
+        $this->assertSame(6, Subasta::where('estado_revision', 'Aceptada')->whereNotNull('latitud')->count());
         $this->assertNull(Subasta::where('titulo', 'Colección de libros')->value('latitud'));
 
         // Santa Cruz, Plaza 24 de Septiembre: solo la bicicleta está a 10 km o menos.

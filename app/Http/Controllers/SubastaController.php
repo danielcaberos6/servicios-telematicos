@@ -61,11 +61,13 @@ class SubastaController extends Controller
             throw $exception;
         }
 
-        return redirect()->route('subastas.show', $subasta)->with('status', 'Tu subasta se publicó correctamente y ya aparece en Buscar.');
+        return redirect()->route('subastas.show', $subasta)->with('status', 'Enviaste tu subasta a revisión. Se publicará cuando un administrador la acepte.');
     }
 
     public function show(Request $request, Subasta $subasta)
     {
+        // 404 en vez de 403 para no revelar a terceros que la solicitud existe.
+        abort_unless($subasta->visiblePara($request->user()), 404);
         $subasta->load(['imagenes', 'categoria', 'usuario'])->loadCount('pujas')->loadMax('pujas', 'monto');
         $ganadora = $subasta->pujas()->with('usuario')->orderByDesc('monto')->first();
 

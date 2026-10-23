@@ -32,7 +32,11 @@ class DemoSeeder extends Seeder
         $items = $this->articulos();
         foreach ($items as $index => [$title, $category, $condition, $price, $location, $image, $hours, $description, $coords]) {
             $owner = $index === 0 ? $demo : $seller;
-            $auction = $owner->subastas()->firstOrCreate(['titulo' => $title], ['descripcion' => $description, 'id_categoria' => Categoria::where('nombre_categoria', $category)->value('id_categoria'), 'estado_articulo' => $condition, 'monto_inicial' => $price, 'ubicacion' => $location, 'latitud' => $coords[0] ?? null, 'longitud' => $coords[1] ?? null, 'fecha_inicio' => now()->subDays($index % 4)->subMinutes(15), 'fecha_fin' => now()->addHours($hours)]);
+            // Las demostraciones se insertan ya aceptadas: representan publicaciones revisadas.
+            $auction = $owner->subastas()->firstOrNew(['titulo' => $title]);
+            if (! $auction->exists) {
+                $auction->forceFill(['descripcion' => $description, 'id_categoria' => Categoria::where('nombre_categoria', $category)->value('id_categoria'), 'estado_articulo' => $condition, 'monto_inicial' => $price, 'ubicacion' => $location, 'latitud' => $coords[0] ?? null, 'longitud' => $coords[1] ?? null, 'fecha_inicio' => now()->subDays($index % 4)->subMinutes(15), 'fecha_fin' => now()->addHours($hours), 'estado_revision' => 'Aceptada'])->save();
+            }
             // Completa el mapa de demostraciones anteriores; las que ya tienen pujas no admiten cambios.
             if ($coords && is_null($auction->latitud) && ! $auction->pujas()->exists()) {
                 $auction->update(['latitud' => $coords[0], 'longitud' => $coords[1]]);
@@ -42,6 +46,26 @@ class DemoSeeder extends Seeder
                 $path = 'subastas/'.$auction->id_subasta.'/'.$image;
                 Storage::disk('public')->put($path, $contents);
                 $auction->imagenes()->create(['ruta' => $path, 'tamano' => strlen($contents)]);
+            }
+        }
+        $this->solicitudes($demo);
+    }
+
+    // Solicitudes del usuario demo para ver En revisión y Rechazada en Mis subastas.
+    // Las pendientes avisan al vendedor y a los administradores al insertarse.
+    private function solicitudes(User $demo): void
+    {
+        $items = [
+            ['Escritorio de madera con cajones', 'Muebles', 'Usado', 520, 'La Paz, Plaza Abaroa', 'En revisión', null,
+                'Escritorio de demostración pendiente de revisión. Todavía no aparece en el catálogo.'],
+            ['Reloj de pulsera de colección', 'Ropa, calzado y accesorios', 'Usado', 900, 'La Paz, Plaza España', 'Rechazada',
+                'La descripción no indica la marca ni el modelo. Completa esos datos y agrega fotos propias del reloj.',
+                'Reloj de demostración rechazado para mostrar el motivo que ve el vendedor.'],
+        ];
+        foreach ($items as [$title, $category, $condition, $price, $location, $revision, $reason, $description]) {
+            $auction = $demo->subastas()->firstOrNew(['titulo' => $title]);
+            if (! $auction->exists) {
+                $auction->forceFill(['descripcion' => $description, 'id_categoria' => Categoria::where('nombre_categoria', $category)->value('id_categoria'), 'estado_articulo' => $condition, 'monto_inicial' => $price, 'ubicacion' => $location, 'fecha_inicio' => now()->subHours(3), 'fecha_fin' => now()->addDays(6), 'estado_revision' => $revision, 'motivo_rechazo' => $reason])->save();
             }
         }
     }

@@ -7,10 +7,18 @@
         @endif
         <span class="condition">{{ $subasta->estado_articulo }}</span>
         @if ($gestionar)
-            <span class="auction-state">{{ $subasta->estado }}</span>
+            <span class="auction-state">{{ $subasta->publicada() ? $subasta->estado : 'Sin publicar' }}</span>
         @endif
     </a>
     <div class="card-body">
+        @if ($gestionar)
+            <p class="revision-status">Solicitud: <x-estado-revision :subasta="$subasta" /></p>
+            @if ($subasta->estado_revision === 'Rechazada')
+                <p class="revision-reason"><strong>Motivo del rechazo:</strong> {{ $subasta->motivo_rechazo }}</p>
+            @elseif ($subasta->estado_revision === 'En revisión')
+                <p class="revision-reason">Un administrador revisará tu solicitud. Mientras tanto no aparece en Buscar.</p>
+            @endif
+        @endif
         <p class="eyebrow">{{ $subasta->categoria?->nombre_categoria ?? 'Sin categoría' }}</p>
         <h3><a href="{{ route('subastas.show', $subasta) }}">{{ $subasta->titulo }}</a></h3>
         <p class="card-description">{{ Str::limit($subasta->descripcion, 75) }}</p>
