@@ -15,7 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [CuentaActiva::class]);
         $middleware->redirectGuestsTo('/iniciar-sesion');
-        $middleware->redirectUsersTo('/');
+        $middleware->redirectUsersTo(fn (Request $request) => $request->user()?->esAdministrador() ? '/admin/usuarios' : '/');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

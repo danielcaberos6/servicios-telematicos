@@ -361,7 +361,8 @@ begin
             case when s.estado_subasta='Activa' and s.fecha_fin <= statement_timestamp() then 'Finalizada' else s.estado_subasta end as estado,
             (select count(*) from puja p where p.id_subasta=s.id_subasta) as pujas
         from subasta s join usuario u on u.id_usuario=s.id_usuario left join categoria c on c.id_categoria=s.id_categoria
-        where s.fecha_inicio >= t_inicio and s.fecha_inicio < t_fin
+        -- Las solicitudes En revisión o Rechazadas no son publicaciones.
+        where s.estado_revision = 'Aceptada' and s.fecha_inicio >= t_inicio and s.fecha_inicio < t_fin
     ), filtradas as materialized (
         select * from base b where
             (nullif(p_filtros->>'categoria','') is null or b.id_categoria=(p_filtros->>'categoria')::bigint)
@@ -401,7 +402,7 @@ begin
     t_anterior := (d_inicio-(d_fin-d_inicio+1))::timestamp at time zone 'America/La_Paz';
     with base as (
         select u.id_usuario,u.nombre,coalesce(nullif(trim(u.ciudad),''),'Sin ciudad') as ciudad,u.fecha_registro,
-            (select count(*) from subasta s where s.id_usuario=u.id_usuario and s.fecha_inicio<t_fin) as publicaciones,
+            (select count(*) from subasta s where s.id_usuario=u.id_usuario and s.estado_revision='Aceptada' and s.fecha_inicio<t_fin) as publicaciones,
             (select count(*) from puja p where p.id_usuario=u.id_usuario and p.fecha_puja<t_fin) as pujas,
             (select avg(r.calificacion) from resenas r where r.id_usuario_resenado=u.id_usuario and r.fecha_creacion<t_fin) as valoracion
         from usuario u where u.fecha_registro<t_fin

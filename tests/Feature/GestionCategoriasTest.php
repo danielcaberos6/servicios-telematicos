@@ -33,7 +33,7 @@ class GestionCategoriasTest extends TestCase
         $this->patch('/admin/categorias/'.$category->id_categoria.'/estado', ['habilitada' => false])->assertSessionHasNoErrors();
         $this->assertDatabaseHas('categoria', ['id_categoria' => $category->id_categoria, 'nombre_categoria' => 'Arte moderno', 'habilitada' => false]);
         $this->patch('/admin/categorias/'.$category->id_categoria.'/estado', ['habilitada' => true])->assertSessionHasNoErrors();
-        $this->get('/subastas/crear')->assertSee('Arte moderno');
+        $this->actingAs(User::factory()->create())->get('/subastas/crear')->assertOk()->assertSee('Arte moderno');
     }
 
     public function test_invalid_names_and_ordinary_users_cannot_modify_categories(): void

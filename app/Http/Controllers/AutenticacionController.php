@@ -40,7 +40,7 @@ class AutenticacionController extends Controller
         RateLimiter::clear($key);
         $request->session()->regenerate();
 
-        return redirect()->intended(route('inicio'));
+        return redirect()->intended(route($request->user()->esAdministrador() ? 'admin.usuarios.index' : 'inicio'));
     }
 
     public function cerrarSesion(Request $request)

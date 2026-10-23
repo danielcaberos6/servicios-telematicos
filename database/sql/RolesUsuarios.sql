@@ -8,14 +8,7 @@ create table decision_usuario (
     fecha timestamptz not null default clock_timestamp()
 );
 
-create or replace function exigir_administrador(p_actor bigint) returns void language plpgsql stable as $$
-begin
-    if not exists (select 1 from usuario u join usuario_rol ur on ur.id_usuario=u.id_usuario
-        join rol r on r.id_rol=ur.id_rol where u.id_usuario=p_actor and u.activo and r.nombre_rol='Administrador') then
-        raise exception 'Solo los administradores activos pueden acceder a esta sección.' using errcode='42501';
-    end if;
-end;
-$$;
+-- exigir_administrador vive en Funciones.sql (sección de reportes administrativos).
 
 create or replace function gestionar_cuenta(p_actor bigint, p_usuario bigint, p_operacion text, p_valor boolean)
 returns void language plpgsql as $$

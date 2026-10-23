@@ -30,6 +30,7 @@ class ConcurrenciaAdministrativaTest extends TestCase
             DB::table('decision_usuario')->whereIn('id_usuario', $this->usuarios)->delete();
             DB::table('subasta')->whereIn('id_usuario', $this->usuarios)->delete();
             DB::table('usuario_rol')->whereIn('id_usuario', $this->usuarios)->delete();
+            DB::table('imagen')->whereIn('id_usuario', $this->usuarios)->delete();
             DB::table('usuario')->whereIn('id_usuario', $this->usuarios)->delete();
         } finally {
             parent::tearDown();
@@ -115,6 +116,7 @@ class ConcurrenciaAdministrativaTest extends TestCase
         $dos = $this->cuenta(true);
         $titular = $this->cuenta();
         $titular->forceFill(['nombres' => 'Usuario', 'apellidos' => 'Prueba'])->save();
+        $titular->imagen()->create(['ruta' => 'perfiles/prueba.png', 'tamano' => 100]);
         $id = app(IdentidadService::class)->solicitar($titular->id_usuario, $titular->refresh()->version_identidad, UploadedFile::fake()->image('carnet.png'));
         $resultados = $this->competir('select resolver_verificacion(?,?,?,?)', [
             [$uno->id_usuario, $id, 'Aprobada', null], [$dos->id_usuario, $id, 'Rechazada', 'No coincide'],

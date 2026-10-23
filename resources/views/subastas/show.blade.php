@@ -3,7 +3,11 @@
 @section('content')
 
     <div class="container section">
-        <a class="breadcrumb" href="{{ route('subastas.index') }}">← Volver al catálogo</a>
+        @if (auth()->user()?->esAdministrador())
+            <a class="breadcrumb" href="{{ route('admin.usuarios.index') }}">← Volver a administración</a>
+        @else
+            <a class="breadcrumb" href="{{ route('subastas.index') }}">← Volver al catálogo</a>
+        @endif
         <div class="detail-grid">
             <div>
                 <div class="detail-image">
@@ -89,11 +93,13 @@
                             @if ($subasta->estado === 'Finalizada')<small>{{ $ganadora ? 'La oferta ganadora está confirmada.' : 'La subasta terminó sin ofertas.' }}</small>@endif
                         </div>
                     </div>
-                    @if ($subasta->estado === 'Activa' && $subasta->publicada())
+                    @if ($subasta->estado === 'Activa' && $subasta->publicada() && $subasta->usuario->activo)
                         @auth
-                            @if (auth()->id() === $subasta->id_usuario)
+                            @if (auth()->user()->esAdministrador())
+                                <p class="info-note">Estás consultando esta publicación como administrador.</p>
+                            @elseif (auth()->id() === $subasta->id_usuario)
                                 <div class="info-note">Esta es tu subasta. @if (!$subasta->pujas_count)
-                                        <a href="{{ route('subastas.edit', $subasta) }}">Editar publicación →</a>
+                                        <a href="{{ route('subastas.edit', $subasta) }}">Editar publicación</a>
                                     @else
                                         Recibiste ofertas; la edición está cerrada.
                                     @endif
@@ -108,9 +114,9 @@
                                             required><button class="button primary" type="submit">Hacer oferta</button></div>
                                 </form>
                             @endif
-                        @else<a class="button primary full-width" href="{{ route('iniciar-sesion') }}">Inicia sesión para
+                        @else<a class="button primary full-width" href="{{ route('subastas.participar', $subasta) }}">Inicia sesión para
                             ofertar</a>@endauth
-                    @else<p>{{ $subasta->publicada() ? 'Esta subasta ya no admite ofertas.' : 'Esta solicitud no está publicada y no admite ofertas.' }}</p>
+                    @else<p>{{ ! $subasta->publicada() ? 'Esta solicitud no está publicada y no admite ofertas.' : ($subasta->estado === 'Activa' ? 'El vendedor no está disponible; esta subasta no admite ofertas.' : 'Esta subasta ya no admite ofertas.') }}</p>
                     @endif
                 </div>
                 <div class="panel meeting-panel">

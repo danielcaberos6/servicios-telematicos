@@ -15,16 +15,19 @@
 </head>
 
 <body>
+    @php
+        $esAdministrador = auth()->user()?->esAdministrador() ?? false;
+        $rutaPrincipal = $esAdministrador ? 'admin.usuarios.index' : 'inicio';
+    @endphp
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
     <header class="site-header">
         <div class="nav-wrap">
-            <a class="brand" href="{{ route('inicio') }}" aria-label="SubastaYA, inicio"><span class="brand-icon"><x-icono
+            <a class="brand" href="{{ route($rutaPrincipal) }}" aria-label="{{ $esAdministrador ? 'SubastaYA, administración' : 'SubastaYA, inicio' }}"><span class="brand-icon"><x-icono
                         nombre="gavel" /></span><span>subasta<span class="brand-accent">YA</span><small>ENCUENTRA.
                         OFERTA. GANA.</small></span></a>
             <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="navigation">Menú ☰</button>
             <nav id="navigation" class="navigation" aria-label="Navegación principal">
                 @php
-                    $esAdministrador = auth()->user()?->esAdministrador() ?? false;
                     $enlaces = $esAdministrador
                         ? [['inicio', 'home', 'Inicio'], ['admin.subastas.index', 'gavel', 'Subastas'], ['admin.usuarios.index', 'user', 'Usuarios'], ['admin.categorias.index', 'box', 'Categorías'], ['admin.identidad.index', 'shield', 'Identidad'], ['notificaciones.index', 'bell', 'Notificaciones']]
                         : [['inicio', 'home', 'Inicio'], ['perfil.edit', 'user', 'Perfil'], ['subastas.index', 'search', 'Buscar'], ['subastas.mias', 'gavel', 'Mis Subastas'], ['notificaciones.index', 'bell', 'Notificaciones']];
@@ -53,8 +56,23 @@
             </nav>
             <div class="account-nav">
                 @auth
-                    <a class="account-name" href="{{ route('perfil.edit') }}" aria-label="Mi perfil: {{ auth()->user()->nombre }}"><x-icono
-                            nombre="user" /><span>{{ Str::limit(auth()->user()->nombre, 16) }}</span></a>
+                    @php
+                        $cuenta = auth()->user();
+                        $partesNombre = preg_split('/\s+/u', trim($cuenta->nombres ?: $cuenta->nombre), -1, PREG_SPLIT_NO_EMPTY);
+                        $apellido = trim($cuenta->apellidos ?? '');
+                        $iniciales = mb_strtoupper(mb_substr($partesNombre[0] ?? '', 0, 1)
+                            . ($apellido !== '' ? mb_substr($apellido, 0, 1) : (count($partesNombre) > 1 ? mb_substr(end($partesNombre), 0, 1) : '')));
+                    @endphp
+                    <a class="account-name" href="{{ route('perfil.edit') }}" aria-label="Mi perfil: {{ $cuenta->nombre }}">
+                        <span class="account-avatar" aria-hidden="true">
+                            @if ($cuenta->imagen)
+                                <img src="{{ $cuenta->imagen->url }}" alt="" width="32" height="32">
+                            @else
+                                {{ $iniciales }}
+                            @endif
+                        </span>
+                        <span class="account-label">{{ Str::limit($cuenta->nombre, 16) }}</span>
+                    </a>
                     <form action="{{ route('cerrar-sesion') }}" method="post">@csrf<button class="logout"
                             type="submit">Salir</button></form>
                 @else
@@ -65,8 +83,11 @@
     </header>
     <main id="contenido">
         @if (session('status'))
-            <div class="container">
-                <div class="alert success" role="status"><x-icono nombre="check" />{{ session('status') }}</div>
+            <div class="container" data-aviso-exito>
+                <div class="alert success" role="status">
+                    <x-icono nombre="check" /><span class="alert-message">{{ session('status') }}</span>
+                    <button class="alert-close" type="button" aria-label="Cerrar aviso" hidden>&times;</button>
+                </div>
             </div>
         @endif
         @if ($errors->any())
@@ -83,7 +104,7 @@
         @yield('content')
     </main>
     <footer class="site-footer">
-        <div class="container footer-content"><a class="brand footer-brand" href="{{ route('inicio') }}"><x-icono
+        <div class="container footer-content"><a class="brand footer-brand" href="{{ route($rutaPrincipal) }}"><x-icono
                     nombre="gavel" /><span>subasta<span>YA</span></span></a>
             <p>Una nueva oportunidad para cada artículo.</p><span>© {{ date('Y') }} SubastaYA · Bolivia</span>
         </div>

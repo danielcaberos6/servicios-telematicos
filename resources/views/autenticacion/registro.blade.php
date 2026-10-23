@@ -20,7 +20,7 @@
                     caracteres.</small><label for="password_confirmation">Repetir contraseña</label><input
                     id="password_confirmation" name="password_confirmation" type="password" required minlength="8"
                     maxlength="72" autocomplete="new-password"><button class="button primary full-width"
-                    type="submit">Crear mi cuenta <x-icono nombre="arrow" /></button></form>
+                    type="submit">Crear mi cuenta</button></form>
             <p class="auth-switch">¿Ya tienes una cuenta? <a href="{{ route('iniciar-sesion') }}">Inicia sesión</a></p>
         </div>
     </div>

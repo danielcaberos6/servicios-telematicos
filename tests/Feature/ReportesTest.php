@@ -46,7 +46,7 @@ class ReportesTest extends TestCase
             $this->get('/reportes/'.$type.'?actor='.$admin->id_usuario)->assertRedirect('/');
             $this->getJson('/reportes/'.$type)->assertForbidden();
         }
-        $this->actingAs($admin)->get('/')->assertSee('Reportes</a>', false);
+        $this->actingAs($admin)->get('/admin/usuarios')->assertSee('Reportes</a>', false);
         $this->get('/reportes/subastas')->assertOk()->assertSee('Reporte de Subastas');
         $this->get('/reportes/usuarios')->assertOk()->assertSee('Reporte de Usuarios');
         DB::table('usuario_rol')->where('id_usuario', $admin->id_usuario)->where('id_rol', DB::table('rol')->where('nombre_rol', 'Administrador')->value('id_rol'))->delete();
@@ -64,6 +64,23 @@ class ReportesTest extends TestCase
                 $this->assertSame('42501', $e->errorInfo[0]);
             }
         }
+    }
+
+    public function test_administrator_check_rejects_missing_inactive_or_ordinary_actors(): void
+    {
+        $admin = $this->admin();
+        $inactive = $this->admin();
+        $inactive->forceFill(['activo' => false])->save();
+        foreach ([null, User::factory()->create()->id_usuario, $inactive->id_usuario] as $actor) {
+            try {
+                DB::transaction(fn () => DB::select('select exigir_administrador(?)', [$actor]));
+                $this->fail('exigir_administrador aceptó un actor sin permisos.');
+            } catch (QueryException $exception) {
+                $this->assertSame('42501', $exception->errorInfo[0]);
+            }
+        }
+        DB::select('select exigir_administrador(?)', [$admin->id_usuario]);
+        $this->assertSame(1, DB::selectOne("select count(*) as total from pg_proc where proname = 'exigir_administrador'")->total);
     }
 
     public function test_auction_report_uses_inclusive_bolivia_dates_and_effective_state(): void
@@ -117,6 +134,22 @@ class ReportesTest extends TestCase
             ->assertJsonPath('indicadores.valoracion', 3.67)->assertJsonPath('valoraciones.4.cantidad', 2)->assertJsonPath('valoraciones.0.cantidad', 1)
             ->assertJsonPath('detalle.0.id_usuario', $people[0]->id_usuario)->assertJsonPath('detalle.0.publicaciones', 2);
         $this->getJson('/reportes/usuarios?desde=2025-06-01&hasta=2025-06-30&ciudad=Tarija&actividad=publicadores&valoracion=4')->assertJsonPath('total', 1);
+    }
+
+    public function test_reports_ignore_requests_in_review_or_rejected(): void
+    {
+        $admin = $this->admin();
+        $seller = User::factory()->create(['nombre' => 'Vendedor solo con solicitudes', 'fecha_registro' => '2025-06-01', 'ciudad' => 'Sucre']);
+        $this->auction($seller, ['estado_revision' => 'En revisión']);
+        $this->auction($seller, ['estado_revision' => 'Rechazada', 'motivo_rechazo' => 'Fotos borrosas.']);
+        $this->auction(User::factory()->create(), ['titulo' => 'Publicación aceptada']);
+
+        $this->actingAs($admin)->getJson('/reportes/subastas?desde=2025-06-01&hasta=2025-06-30')->assertOk()
+            ->assertJsonPath('indicadores.total', 1)->assertJsonPath('indicadores.activas', 1)
+            ->assertJsonCount(1, 'detalle')->assertJsonPath('detalle.0.titulo', 'Publicación aceptada');
+        $this->getJson('/reportes/usuarios?desde=2025-06-01&hasta=2025-06-30&ciudad=Sucre')->assertOk()
+            ->assertJsonPath('indicadores.publicadores', 0)->assertJsonPath('detalle.0.publicaciones', 0);
+        $this->getJson('/reportes/usuarios?desde=2025-06-01&hasta=2025-06-30&ciudad=Sucre&actividad=publicadores')->assertJsonPath('total', 0);
     }
 
     public function test_no_new_users_produces_flat_cumulative_line_and_empty_reports_are_safe(): void

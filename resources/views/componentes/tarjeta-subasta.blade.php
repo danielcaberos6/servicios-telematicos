@@ -31,8 +31,7 @@
         </div>
         <div class="card-bottom"><span><x-icono
                     nombre="clock" />{{ $subasta->estado === 'Activa' ? 'Cierra ' . $subasta->fecha_fin->diffForHumans() : $subasta->estado }}</span><a
-                href="{{ route('subastas.show', $subasta) }}" aria-label="Ver {{ $subasta->titulo }}"><x-icono
-                    nombre="arrow" /></a></div>
+                href="{{ route('subastas.show', $subasta) }}" aria-label="Ver {{ $subasta->titulo }}">Ver detalle</a></div>
         @if ($gestionar)
             <div class="card-actions">
                 @if (!$subasta->pujas_count && $subasta->editable())

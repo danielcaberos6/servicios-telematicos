@@ -333,7 +333,33 @@ small {
 }
 .account-name {
     max-width: 160px;
+    min-height: 44px;
     overflow: hidden;
+}
+.account-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: 50%;
+    background: #dceafb;
+    color: var(--navy);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
+.account-avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.account-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .logout {
     background: transparent;
@@ -515,12 +541,15 @@ small {
     height: 14px;
 }
 .card-bottom > a {
-    display: grid;
-    place-items: center;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    background: #edf3fa;
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 4px 0 4px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--blue);
+    text-decoration: underline;
+    text-underline-offset: 3px;
 }
 .site-footer {
     border-top: 1px solid var(--line);
@@ -562,6 +591,34 @@ small {
     background: #fff1ee;
     color: #933a32;
     border: 1px solid #f5d6d1;
+}
+.alert-message {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.alert-close {
+    flex-shrink: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 24px;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 4px;
+}
+.alert-close[hidden] {
+    display: none;
+}
+.alert-close:hover {
+    background: #155d4210;
+}
+.alert-close:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
 }
 .error ul {
     margin: 8px 0 0;
@@ -1494,7 +1551,7 @@ form small {
         margin-left: 0;
         font-size: 11px;
     }
-    .account-name span {
+    .account-name .account-label {
         display: none;
     }
     .login-link .icon {

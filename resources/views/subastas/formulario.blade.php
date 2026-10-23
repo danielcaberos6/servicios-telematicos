@@ -188,6 +188,9 @@
 
                 <div class="panel publish-actions">
                     <p><x-icono nombre="shield" /> Revisa los datos antes de {{ $subasta->exists ? 'guardar los cambios' : 'publicar' }}.</p>
+                    @if ($subasta->exists && $subasta->estado_revision !== 'En revisión')
+                        <p class="muted">Al guardar, la subasta vuelve a revisión y deja de mostrarse en Buscar hasta que un administrador la acepte.</p>
+                    @endif
                     <div class="form-footer">
                         <a class="button secondary" href="{{ $subasta->exists ? route('subastas.show', $subasta) : route('subastas.mias') }}">Cancelar</a>
                         <button class="button primary" type="submit"><x-icono nombre="gavel" />

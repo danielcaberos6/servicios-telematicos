@@ -55,6 +55,7 @@ class IdentidadController extends Controller
     public function documento(Request $request, VerificacionIdentidad $verificacion)
     {
         $this->autorizar($request, $verificacion);
+        abort_unless(Storage::disk('identidad')->exists($verificacion->ruta_documento), 404);
 
         return Storage::disk('identidad')->response($verificacion->ruta_documento, null, [
             'Cache-Control' => 'private, no-store', 'X-Content-Type-Options' => 'nosniff',
