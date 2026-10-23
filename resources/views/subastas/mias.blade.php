@@ -15,8 +15,8 @@
             @forelse($subastas as $subasta)
             <x-tarjeta-subasta :subasta="$subasta" :gestionar="true" />@empty<div class="empty-state"><x-icono
                         nombre="gavel" />
-                    <h2>Tu primera subasta empieza aquí</h2>
-                    <p>Publica ese artículo que merece una nueva historia.</p><a class="button primary"
+                    <h2>{{ request('apartado') ? 'No hay publicaciones en este apartado' : 'Tu primera subasta empieza aquí' }}</h2>
+                    <p>{{ request('apartado') ? 'Puedes consultar tus otras publicaciones desde el menú lateral.' : 'Publica ese artículo que merece una nueva historia.' }}</p><a class="button primary"
                         href="{{ route('subastas.create') }}">Crear subasta</a>
                 </div>
             @endforelse

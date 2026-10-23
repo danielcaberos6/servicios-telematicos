@@ -82,7 +82,8 @@ class SubastaController extends Controller
 
     public function misSubastas(Request $request)
     {
-        $subastas = $this->subastaService->misSubastas($request->user()->id_usuario);
+        $filtros = $request->validate(['apartado' => ['nullable', 'in:revision,publicadas,rechazadas,finalizadas']]);
+        $subastas = $this->subastaService->misSubastas($request->user()->id_usuario, $filtros['apartado'] ?? null);
 
         return view('subastas.mias', compact('subastas'));
     }
