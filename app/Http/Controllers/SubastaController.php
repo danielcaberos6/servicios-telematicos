@@ -132,7 +132,7 @@ class SubastaController extends Controller
         Storage::disk('public')->delete($removed);
 
         return redirect()->route('subastas.show', $subasta)->with('status', $request->boolean('reenviar')
-            ? 'Correcciones guardadas. Tu subasta fue reenviada a revisión.' : 'Subasta actualizada.');
+            ? 'Correcciones guardadas. Tu subasta fue reenviada a revisión.' : 'Subasta actualizada. Quedó En revisión hasta que un administrador la acepte.');
     }
 
     public function destroy(Request $request, Subasta $subasta)

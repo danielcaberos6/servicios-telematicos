@@ -4,8 +4,8 @@
 @section('content')
 <section class="container gestion-page">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
-        <a href="{{ route('admin.subastas.index') }}" class="text-link">← Volver a la bandeja de subastas</a>
-        <a href="{{ route('subastas.show', $subasta) }}" class="text-link" target="_blank">Ver vista de catálogo ↗</a>
+        <a href="{{ route('admin.subastas.index') }}" class="text-link">Volver a la bandeja de subastas</a>
+        <a href="{{ route('subastas.show', $subasta) }}" class="text-link" target="_blank">Ver vista de catálogo (abre en otra pestaña)</a>
     </div>
 
     <p class="eyebrow">REVISIÓN ADMINISTRATIVA</p>

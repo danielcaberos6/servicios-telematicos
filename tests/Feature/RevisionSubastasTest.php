@@ -126,7 +126,7 @@ class RevisionSubastasTest extends TestCase
         $auction->refresh();
         $this->assertSame(2, $auction->decisiones()->count());
         $this->assertEqualsWithDelta($duration, $auction->fecha_inicio->diffInSeconds($auction->fecha_fin), 0.000001);
-        $this->get('/buscar')->assertSee($payload['titulo']);
+        $this->actingAs($seller)->get('/buscar')->assertOk()->assertSee($payload['titulo']);
         $this->actingAs(User::factory()->create())->get("/subastas/{$auction->id_subasta}")
             ->assertOk()->assertDontSee('Historial de revisiones')->assertDontSee($decision->motivo);
     }
@@ -406,10 +406,35 @@ class RevisionSubastasTest extends TestCase
         $this->get("/subastas/{$auction->id_subasta}")->assertNotFound();
     }
 
+    public function test_editing_a_reviewed_auction_preserves_history_and_requires_another_approval(): void
+    {
+        $admin = $this->admin();
+        $auction = $this->auction('En revisión');
+        $this->actingAs($admin)->patch("/admin/subastas/{$auction->id_subasta}", [
+            'decision' => 'Aceptada',
+        ])->assertSessionHasNoErrors();
+        $this->assertSame($admin->id_usuario, $auction->refresh()->id_revisor);
+        $avisosAntes = $admin->notificaciones()->where('titulo', 'Nueva solicitud de publicación')->count();
+
+        $this->actingAs($auction->usuario)->put("/subastas/{$auction->id_subasta}", $this->payload())
+            ->assertSessionHasNoErrors();
+        $this->assertSame('En revisión', $auction->refresh()->estado_revision);
+        $this->assertNull($auction->id_revisor);
+        $this->assertNull($auction->fecha_decision);
+        $this->assertSame($admin->id_usuario, $auction->decisiones()->sole()->id_revisor);
+        $this->assertSame($avisosAntes + 1, $admin->notificaciones()->where('titulo', 'Nueva solicitud de publicación')->count());
+
+        $this->actingAs($admin)->patch("/admin/subastas/{$auction->id_subasta}", [
+            'decision' => 'Aceptada',
+        ])->assertSessionHasNoErrors();
+        $this->assertSame('Aceptada', $auction->refresh()->estado_revision);
+        $this->assertSame(2, $auction->decisiones()->count());
+    }
+
     public function test_editing_a_rejected_auction_resubmits_it_without_the_old_reason(): void
     {
         $auction = $this->auction('Rechazada');
-        $this->actingAs($auction->usuario)->put("/subastas/{$auction->id_subasta}", $this->payload(['titulo' => 'Corregida por el vendedor']))
+        $this->actingAs($auction->usuario)->put("/subastas/{$auction->id_subasta}", $this->payload(['titulo' => 'Corregida por el vendedor', 'reenviar' => '1']))
             ->assertSessionHasNoErrors();
 
         $auction->refresh();

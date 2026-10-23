@@ -123,7 +123,9 @@ begin
         motivo_rechazo=case when reenviar then null else motivo_rechazo end,
         id_revisor=case when reenviar then null else id_revisor end,
         fecha_decision=case when reenviar then null else fecha_decision end
-    where id_subasta=p_id returning * into resultado;
+    where id_subasta=p_id;
+    perform reenviar_a_revision(p_id);
+    select * into resultado from subasta where id_subasta=p_id;
     return resultado;
 end;
 $$;
@@ -155,7 +157,8 @@ $$;
 create or replace function reenviar_a_revision(p_id bigint) returns void language plpgsql as $$
 declare articulo subasta;
 begin
-    update subasta set estado_revision = 'En revisión', motivo_rechazo = null
+    update subasta set estado_revision = 'En revisión', motivo_rechazo = null,
+        id_revisor = null, fecha_decision = null
     where id_subasta = p_id and estado_revision <> 'En revisión' returning * into articulo;
     if not found then return; end if;
     insert into notificacion (id_usuario,id_subasta,titulo,contenido)
@@ -166,23 +169,6 @@ begin
         'La subasta «' || articulo.titulo || '» fue editada y espera tu revisión.'
     from usuario u join usuario_rol ur on ur.id_usuario=u.id_usuario join rol r on r.id_rol=ur.id_rol
     where u.activo and r.nombre_rol='Administrador' and u.id_usuario<>articulo.id_usuario;
-end;
-$$;
-
-create or replace function actualizar_subasta(p_actor bigint, p_id bigint, p_datos jsonb) returns subasta language plpgsql as $$
-declare resultado subasta;
-begin
-    perform exigir_subasta_propia(p_actor,p_id);
-    if (p_datos->>'fecha_fin')::timestamptz <= clock_timestamp() then raise exception 'El cierre debe estar en el futuro.'; end if;
-    update subasta set titulo = p_datos->>'titulo', descripcion = p_datos->>'descripcion', ubicacion = p_datos->>'ubicacion',
-        estado_articulo = p_datos->>'estado_articulo', monto_inicial = (p_datos->>'monto_inicial')::numeric,
-        fecha_fin = (p_datos->>'fecha_fin')::timestamptz, id_categoria = (p_datos->>'id_categoria')::bigint,
-        latitud = case when p_datos ? 'latitud' then (p_datos->>'latitud')::numeric else latitud end,
-        longitud = case when p_datos ? 'longitud' then (p_datos->>'longitud')::numeric else longitud end
-    where id_subasta = p_id;
-    perform reenviar_a_revision(p_id);
-    select * into resultado from subasta where id_subasta = p_id;
-    return resultado;
 end;
 $$;
 

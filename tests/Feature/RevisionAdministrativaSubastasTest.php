@@ -142,7 +142,7 @@ class RevisionAdministrativaSubastasTest extends TestCase
         $this->assertNull($auction->motivo_rechazo);
 
         // Ahora es visible en catálogo
-        $this->get('/buscar')->assertSee('Laptop Gamer Asus');
+        $this->actingAs($seller)->get('/buscar')->assertOk()->assertSee('Laptop Gamer Asus');
 
         // Notificación al vendedor
         $notif = $seller->notificaciones()->where('id_subasta', $auction->id_subasta)->where('titulo', 'Subasta publicada')->first();
@@ -184,7 +184,7 @@ class RevisionAdministrativaSubastasTest extends TestCase
         $this->assertSame($motivo, $auction->motivo_rechazo);
 
         // No aparece en catálogo público
-        $this->get('/buscar')->assertDontSee('Consola PlayStation 5');
+        $this->actingAs($seller)->get('/buscar')->assertOk()->assertDontSee('Consola PlayStation 5');
 
         // Vendedor recibe notificación con el motivo
         $notif = $seller->notificaciones()->where('id_subasta', $auction->id_subasta)->where('titulo', 'Subasta rechazada')->first();
@@ -217,7 +217,7 @@ class RevisionAdministrativaSubastasTest extends TestCase
             $this->assertTrue($auction->fecha_inicio->greaterThanOrEqualTo($before));
             $this->assertSame($duration, $auction->fecha_fin->getTimestamp() - $auction->fecha_inicio->getTimestamp());
             $this->assertTrue($auction->fecha_fin->isFuture());
-            $this->get('/buscar')->assertSee($auction->titulo);
+            $this->actingAs($auction->usuario)->get('/buscar')->assertOk()->assertSee($auction->titulo);
             $this->assertSame(1, $auction->usuario->notificaciones()
                 ->where('id_subasta', $auction->id_subasta)->where('titulo', 'Subasta publicada')->count());
 
