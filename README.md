@@ -15,7 +15,17 @@ docker compose up -d --build
 
 Abre **http://localhost:8000**.
 
-Al arrancar, el contenedor instala dependencias, aplica las migraciones, carga las categorías y crea la base de pruebas `subastaya_test`. El servicio `scheduler` finaliza cada minuto las subastas vencidas.
+Al arrancar, el contenedor instala dependencias, aplica las migraciones, carga las categorías y crea la base de pruebas `subastaya_test`. En `APP_ENV=local` o `testing`, también crea automáticamente las cuentas de demostración que falten:
+
+| Correo | Rol | Contraseña inicial |
+|---|---|---|
+| `admin@subastaya.test` | Administrador | `Admin2026!` |
+| `demo@subastaya.test` | Usuario | `SubastaYA2026!` |
+| `vendedor@subastaya.test` | Usuario | `SubastaYA2026!` |
+
+No hace falta cargar estas cuentas manualmente. Los reinicios conservan las contraseñas, los datos, el estado y los roles de las cuentas existentes. En otros entornos no se crean cuentas de demostración. La carga sucede al iniciar el contenedor con `docker compose up`, no al construir solamente la imagen.
+
+El servicio `scheduler` finaliza cada minuto las subastas vencidas.
 
 ## Datos de demostración
 
@@ -27,7 +37,7 @@ Crea publicaciones, ofertas y valoraciones de ejemplo. Usuario: `demo@subastaya.
 
 ## Administración: HU-08 y HU-09
 
-Para cargar la cuenta administrativa y las subastas básicas de demostración:
+La cuenta administrativa ya se crea al arrancar Docker en local. Para agregar también las subastas básicas de demostración:
 
 ```sh
 docker compose exec laravel php artisan db:seed --class=DemoSeeder

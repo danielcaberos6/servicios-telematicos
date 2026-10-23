@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Categoria;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class DemoSeeder extends Seeder
@@ -17,18 +16,10 @@ class DemoSeeder extends Seeder
             throw new \RuntimeException('Los datos de demostración solo se cargan en entornos locales o de pruebas.');
         }
         $this->call(DatabaseSeeder::class);
-        $demo = User::firstOrCreate(['correo' => 'demo@subastaya.test'], ['nombre' => 'Rodrigo Vargas', 'contrasena' => 'SubastaYA2026!', 'ciudad' => 'La Paz', 'biografia' => 'Me gusta encontrar nuevas oportunidades y dar otra vida a mis artículos.']);
+        $this->call(CuentasDemoSeeder::class);
+        $demo = User::where('correo', 'demo@subastaya.test')->firstOrFail();
         User::whereKey($demo->id_usuario)->where('nombre', 'Rodrigo Demo')->update(['nombre' => 'Rodrigo Vargas']);
-        $seller = User::firstOrCreate(['correo' => 'vendedor@subastaya.test'], ['nombre' => 'Lucía Mendoza', 'contrasena' => 'SubastaYA2026!', 'ciudad' => 'Cochabamba']);
-        $admin = User::firstOrCreate(['correo' => 'admin@subastaya.test'], ['nombre' => 'Administrador', 'contrasena' => 'Admin2026!', 'ciudad' => 'La Paz']);
-
-        $role = DB::table('rol')->where('nombre_rol', 'Usuario')->value('id_rol');
-        $roleAdmin = DB::table('rol')->where('nombre_rol', 'Administrador')->value('id_rol');
-
-        foreach ([$demo, $seller] as $user) {
-            DB::table('usuario_rol')->insertOrIgnore(['id_usuario' => $user->id_usuario, 'id_rol' => $role]);
-        }
-        DB::table('usuario_rol')->insertOrIgnore(['id_usuario' => $admin->id_usuario, 'id_rol' => $roleAdmin]);
+        $seller = User::where('correo', 'vendedor@subastaya.test')->firstOrFail();
         $items = $this->articulos();
         foreach ($items as $index => [$title, $category, $condition, $price, $location, $image, $hours, $description, $coords]) {
             $owner = $index === 0 ? $demo : $seller;
