@@ -29,8 +29,10 @@
             <nav id="navigation" class="navigation" aria-label="Navegación principal">
                 @php
                     $enlaces = $esAdministrador
-                        ? [['inicio', 'home', 'Inicio'], ['admin.subastas.index', 'gavel', 'Subastas'], ['admin.usuarios.index', 'user', 'Usuarios'], ['admin.categorias.index', 'box', 'Categorías'], ['admin.identidad.index', 'shield', 'Identidad'], ['notificaciones.index', 'bell', 'Notificaciones']]
-                        : [['inicio', 'home', 'Inicio'], ['perfil.edit', 'user', 'Perfil'], ['subastas.index', 'search', 'Buscar'], ['subastas.mias', 'gavel', 'Mis Subastas'], ['notificaciones.index', 'bell', 'Notificaciones']];
+                        ? [['admin.subastas.index', 'gavel', 'Subastas'], ['admin.usuarios.index', 'user', 'Usuarios'], ['admin.categorias.index', 'box', 'Categorías'], ['admin.identidad.index', 'shield', 'Identidad'], ['notificaciones.index', 'bell', 'Notificaciones']]
+                        : (auth()->check()
+                            ? [['inicio', 'home', 'Inicio'], ['perfil.edit', 'user', 'Perfil'], ['subastas.index', 'search', 'Subastas'], ['subastas.mias', 'gavel', 'Mis Subastas'], ['notificaciones.index', 'bell', 'Notificaciones']]
+                            : [['inicio', 'home', 'Inicio'], ['subastas.index', 'search', 'Subastas'], ['como-funciona', 'book', 'Cómo funciona']]);
                 @endphp
                 @foreach ($enlaces as [$route, $icon, $label])
                     @php
