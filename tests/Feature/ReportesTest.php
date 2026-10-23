@@ -119,6 +119,22 @@ class ReportesTest extends TestCase
         $this->getJson('/reportes/usuarios?desde=2025-06-01&hasta=2025-06-30&ciudad=Tarija&actividad=publicadores&valoracion=4')->assertJsonPath('total', 1);
     }
 
+    public function test_reports_ignore_requests_in_review_or_rejected(): void
+    {
+        $admin = $this->admin();
+        $seller = User::factory()->create(['nombre' => 'Vendedor solo con solicitudes', 'fecha_registro' => '2025-06-01', 'ciudad' => 'Sucre']);
+        $this->auction($seller, ['estado_revision' => 'En revisión']);
+        $this->auction($seller, ['estado_revision' => 'Rechazada', 'motivo_rechazo' => 'Fotos borrosas.']);
+        $this->auction(User::factory()->create(), ['titulo' => 'Publicación aceptada']);
+
+        $this->actingAs($admin)->getJson('/reportes/subastas?desde=2025-06-01&hasta=2025-06-30')->assertOk()
+            ->assertJsonPath('indicadores.total', 1)->assertJsonPath('indicadores.activas', 1)
+            ->assertJsonCount(1, 'detalle')->assertJsonPath('detalle.0.titulo', 'Publicación aceptada');
+        $this->getJson('/reportes/usuarios?desde=2025-06-01&hasta=2025-06-30&ciudad=Sucre')->assertOk()
+            ->assertJsonPath('indicadores.publicadores', 0)->assertJsonPath('detalle.0.publicaciones', 0);
+        $this->getJson('/reportes/usuarios?desde=2025-06-01&hasta=2025-06-30&ciudad=Sucre&actividad=publicadores')->assertJsonPath('total', 0);
+    }
+
     public function test_no_new_users_produces_flat_cumulative_line_and_empty_reports_are_safe(): void
     {
         $admin = $this->admin();
