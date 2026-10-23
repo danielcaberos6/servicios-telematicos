@@ -1,5 +1,7 @@
 #!/bin/sh
 set -eu
+export GIT_CONFIG_GLOBAL="${GIT_CONFIG_GLOBAL:-/tmp/subastaya.gitconfig}"
+git config --global --add safe.directory /app
 test -f .env || cp .env.example .env
 composer install --no-interaction --prefer-dist
 if ! grep -q '^APP_KEY=base64:' .env; then
