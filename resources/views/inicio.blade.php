@@ -26,7 +26,7 @@
                 <p class="ini-hero-text">Descubre artículos únicos, haz tu mejor oferta y dale una nueva vida a lo que
                     alguien más ya no necesita.</p>
                 <div class="button-row">
-                    <a class="button ini-btn-dark" href="{{ route('subastas.index') }}">Explorar subastas <x-icono nombre="arrow" /></a>
+                    <a class="button ini-btn-dark" href="{{ route('subastas.index') }}">Explorar subastas</a>
                     @auth
                         <a class="button ini-btn-light" href="{{ route('subastas.create') }}"><x-icono nombre="plus" />Crear subasta</a>
                     @else
@@ -47,7 +47,7 @@
                     <div class="ini-card-media"><x-icono nombre="gavel" /></div>
                     <span class="ini-card-kicker">LO QUE BUSCAS, TE ESTÁ ESPERANDO</span>
                     <strong>Que gane tu mejor oferta.</strong>
-                    <div class="ini-card-foot"><span>Descubre algo especial</span><span class="ini-round"><x-icono nombre="arrow" /></span></div>
+                    <div class="ini-card-foot"><span>Descubre algo especial</span></div>
                 </div>
                 <div class="ini-tag ini-tag-bottom"><x-icono nombre="check" /> Encuentra. Oferta. Gana.</div>
             </div>
@@ -60,7 +60,7 @@
                 <p class="eyebrow">ENCUENTRA LO QUE TE MUEVE</p>
                 <h2>Un mundo de posibilidades</h2>
             </div>
-            <a href="{{ route('subastas.index') }}" class="text-link">Ver todas las categorías <x-icono nombre="arrow" /></a>
+            <a href="{{ route('subastas.index') }}" class="text-link">Ver todas las categorías</a>
         </div>
         <div class="ini-categories">
             @foreach ($categorias as $categoria)
@@ -76,7 +76,7 @@
                 </a>
             @endforeach
             <a class="ini-category ini-category-all" href="{{ route('subastas.index') }}">
-                <strong>Explorar todo</strong><span>Todas las subastas activas</span><x-icono nombre="arrow" />
+                <strong>Explorar todo</strong><span>Todas las subastas activas</span>
             </a>
         </div>
     </section>
@@ -87,7 +87,7 @@
                 <p class="eyebrow"><span class="live-dot"></span> {{ $totalActivas }} SUBASTAS ACTIVAS</p>
                 <h2>Subastas destacadas</h2>
             </div>
-            <a href="{{ route('subastas.index', ['orden' => 'finalizan']) }}" class="text-link">Ver todas <x-icono nombre="arrow" /></a>
+            <a href="{{ route('subastas.index', ['orden' => 'finalizan']) }}" class="text-link">Ver todas</a>
         </div>
         @if ($subastas->isNotEmpty())
             <div class="ini-carousel" data-carrusel>
@@ -123,19 +123,16 @@
                 <a class="ini-band-card" href="{{ route('subastas.index', ['orden' => 'finalizan']) }}">
                     <span class="ini-band-icon"><x-icono nombre="search" /></span>
                     <span><strong>Explorar subastas para empezar tu primera puja.</strong><small>Ordenadas por las que cierran primero</small></span>
-                    <x-icono nombre="arrow" />
                 </a>
                 @auth
                     <a class="ini-band-card" href="{{ route('subastas.create') }}">
                         <span class="ini-band-icon"><x-icono nombre="plus" /></span>
                         <span><strong>¿Tienes algo que alguien más va a querer?</strong><small>Crear subasta con fotos y monto inicial</small></span>
-                        <x-icono nombre="arrow" />
                     </a>
                 @else
                     <a class="ini-band-card" href="{{ route('registro') }}">
                         <span class="ini-band-icon"><x-icono nombre="user" /></span>
                         <span><strong>¿Tienes algo que alguien más va a querer?</strong><small>Únete a SubastaYA y publica tu artículo</small></span>
-                        <x-icono nombre="arrow" />
                     </a>
                 @endauth
             </div>

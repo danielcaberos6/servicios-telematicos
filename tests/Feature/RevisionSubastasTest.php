@@ -232,22 +232,22 @@ class RevisionSubastasTest extends TestCase
             ->assertSee('Solicitud en revisión')
             ->assertSee('Enviaste «Mochila &lt;script&gt;alert(1)&lt;/script&gt;» a revisión.', false)
             ->assertDontSee('<script>alert(1)</script>', false)
-            ->assertSee('href="'.route('subastas.show', $auction).'">Ver solicitud →', false)
+            ->assertSee('href="'.route('subastas.show', $auction).'">Ver solicitud', false)
             ->assertDontSee('Nueva solicitud de publicación');
         $this->actingAs($admins[0])->get('/notificaciones')->assertOk()
             ->assertSee('Nueva solicitud de publicación')
-            ->assertSee('href="'.route('subastas.show', $auction).'">Ver solicitud →', false)
+            ->assertSee('href="'.route('subastas.show', $auction).'">Ver solicitud', false)
             ->assertDontSee('Solicitud en revisión');
         // El acceso del aviso funciona para su destinatario.
         $this->get(route('subastas.show', $auction))->assertOk()->assertSee('Mochila &lt;script&gt;', false);
     }
 
-    public function test_administrator_who_submits_gets_only_the_seller_notice(): void
+    public function test_administrator_cannot_submit_or_generate_publication_notices(): void
     {
         $admin = $this->admin();
-        $this->actingAs($admin)->post('/subastas', $this->payload())->assertSessionHasNoErrors();
+        $this->actingAs($admin)->post('/subastas', $this->payload())->assertForbidden();
 
-        $this->assertSame(['Solicitud en revisión'], $admin->notificaciones()->where('titulo', '<>', '¡Bienvenido a SubastaYA!')->pluck('titulo')->all());
+        $this->assertSame([], $admin->notificaciones()->where('titulo', '<>', '¡Bienvenido a SubastaYA!')->pluck('titulo')->all());
     }
 
     public function test_only_each_recipient_can_read_or_mark_their_notices(): void

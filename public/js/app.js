@@ -1,3 +1,30 @@
+document.querySelectorAll("[data-aviso-exito]").forEach((aviso) => {
+    const cerrar = aviso.querySelector(".alert-close");
+    let temporizador;
+    const pausar = () => window.clearTimeout(temporizador);
+    const programar = () => {
+        pausar();
+        if (!aviso.matches(":hover") && !aviso.contains(document.activeElement)) {
+            temporizador = window.setTimeout(() => aviso.remove(), 6000);
+        }
+    };
+    cerrar.hidden = false;
+    cerrar.addEventListener("click", () => {
+        pausar();
+        aviso.remove();
+    });
+    aviso.addEventListener("mouseenter", pausar);
+    aviso.addEventListener("mouseleave", programar);
+    aviso.addEventListener("focusin", pausar);
+    aviso.addEventListener("focusout", (event) => {
+        if (!aviso.contains(event.relatedTarget)) {
+            // El navegador actualiza el foco después de este evento.
+            window.setTimeout(programar, 0);
+        }
+    });
+    programar();
+});
+
 document.querySelector(".menu-toggle")?.addEventListener("click", function () {
     const expanded = this.getAttribute("aria-expanded") === "true";
     this.setAttribute("aria-expanded", String(!expanded));

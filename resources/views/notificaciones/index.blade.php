@@ -27,8 +27,8 @@
                         @endunless
                     </h2>
                     <p>{{ $item->contenido }}</p>
-                    @if ($item->id_subasta)<p><a href="{{ route('subastas.show', $item->id_subasta) }}">{{ in_array($item->titulo, ['Solicitud en revisión', 'Nueva solicitud de publicación'], true) ? 'Ver solicitud' : 'Ver subasta' }} →</a></p>@endif
-                    @if ($item->id_verificacion)<p><a href="{{ route('identidad.show', $item->id_verificacion) }}">Ver solicitud de identidad →</a></p>@endif
+                    @if ($item->id_subasta)<p><a href="{{ route('subastas.show', $item->id_subasta) }}">{{ in_array($item->titulo, ['Solicitud en revisión', 'Nueva solicitud de publicación'], true) ? 'Ver solicitud' : 'Ver subasta' }}</a></p>@endif
+                    @if ($item->id_verificacion)<p><a href="{{ route('identidad.show', $item->id_verificacion) }}">Ver solicitud de identidad</a></p>@endif
                     <time
                         datetime="{{ $item->fecha_notificacion->toIso8601String() }}">{{ $item->fecha_notificacion->diffForHumans() }}</time>
                 </div>

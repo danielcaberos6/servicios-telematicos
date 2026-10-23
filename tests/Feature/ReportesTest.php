@@ -46,7 +46,7 @@ class ReportesTest extends TestCase
             $this->get('/reportes/'.$type.'?actor='.$admin->id_usuario)->assertRedirect('/');
             $this->getJson('/reportes/'.$type)->assertForbidden();
         }
-        $this->actingAs($admin)->get('/')->assertSee('Reportes</a>', false);
+        $this->actingAs($admin)->get('/admin/usuarios')->assertSee('Reportes</a>', false);
         $this->get('/reportes/subastas')->assertOk()->assertSee('Reporte de Subastas');
         $this->get('/reportes/usuarios')->assertOk()->assertSee('Reporte de Usuarios');
         DB::table('usuario_rol')->where('id_usuario', $admin->id_usuario)->where('id_rol', DB::table('rol')->where('nombre_rol', 'Administrador')->value('id_rol'))->delete();
