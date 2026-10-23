@@ -11,6 +11,7 @@ declare
     articulo subasta%rowtype;
     v_decision text;
     v_motivo text;
+    v_publicacion timestamptz;
 begin
     -- 1. Bloqueo para evitar decisiones simultáneas sobre revisiones
     perform pg_advisory_xact_lock(8009, 1);
@@ -50,10 +51,17 @@ begin
         raise exception 'Esta subasta ya fue resuelta previamente.';
     end if;
 
-    -- 7. Actualizar estado y motivo en subasta
+    -- El plazo solicitado se conserva completo, aunque la revisión tarde más que él.
+    -- Usar un único instante evita diferencias entre inicio y cierre.
+    v_publicacion := clock_timestamp();
+
+    -- 7. Actualizar estado, fechas de publicación y motivo en una sola operación.
     update subasta
     set estado_revision = v_decision,
-        motivo_rechazo = v_motivo
+        motivo_rechazo = v_motivo,
+        fecha_inicio = case when v_decision = 'Aceptada' then v_publicacion else fecha_inicio end,
+        fecha_fin = case when v_decision = 'Aceptada'
+            then v_publicacion + (articulo.fecha_fin - articulo.fecha_inicio) else fecha_fin end
     where id_subasta = p_id_subasta;
 
     -- 8. Notificar al vendedor de la resolución

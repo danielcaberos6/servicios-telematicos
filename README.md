@@ -47,6 +47,8 @@ Los carnets se guardan en `storage/app/identidad`, fuera del almacenamiento púb
 
 Cada subasta nueva se registra **En revisión**, asociada a su vendedor, y no se publica automáticamente. Las subastas que existían antes de esta función se conservaron como **Aceptadas**.
 
+El cierre indicado al enviar la solicitud define un plazo de referencia respecto de su fecha de inicio. Al aprobarla, PostgreSQL fija el inicio en el instante de aprobación y desplaza el cierre conservando íntegramente ese plazo. La espera administrativa no consume tiempo de exposición, incluso si el cierre de referencia ya pasó. Rechazar no cambia las fechas y una segunda decisión no vuelve a desplazar el plazo. Las publicaciones ya aceptadas conservan sus fechas.
+
 - **Privacidad**: una solicitud En revisión o Rechazada no aparece en el inicio ni en el catálogo y no admite pujas. Su detalle y sus fotos responden 404 a terceros; solo los ven el propietario y los administradores. La base de datos también rechaza las pujas sobre subastas no aceptadas, y las solicitudes no publicadas no se finalizan.
 - **Mis subastas**: cada publicación muestra En revisión, Aceptada o Rechazada; si fue rechazada, también el motivo (de 1 a 1000 caracteres, exigido por la base de datos).
 - **Avisos**: al registrar la solicitud, el vendedor recibe "Solicitud en revisión" y cada administrador activo recibe "Nueva solicitud de publicación", ambos con enlace a la solicitud. Solo el destinatario puede consultar, marcar o eliminar su aviso. Los administradores tienen **Notificaciones** en su menú.

@@ -197,6 +197,53 @@ class RevisionAdministrativaSubastasTest extends TestCase
             ->assertSee($motivo);
     }
 
+    public function test_approval_preserves_full_duration_even_when_reference_deadline_has_passed(): void
+    {
+        $admin = $this->admin();
+        foreach ([now()->subDays(5), now()->subHour()] as $inicio) {
+            $auction = $this->auction('En revisión', [
+                'fecha_inicio' => $inicio,
+                'fecha_fin' => $inicio->copy()->addDays(3),
+            ]);
+            $duration = $auction->fecha_fin->getTimestamp() - $auction->fecha_inicio->getTimestamp();
+            $this->assertSame('En revisión', $auction->estado);
+            $before = DB::selectOne('select clock_timestamp() as instante')->instante;
+
+            $this->actingAs($admin)->patch("/admin/subastas/{$auction->id_subasta}", [
+                'decision' => 'Aceptada',
+            ])->assertSessionHasNoErrors();
+
+            $auction->refresh();
+            $this->assertTrue($auction->fecha_inicio->greaterThanOrEqualTo($before));
+            $this->assertSame($duration, $auction->fecha_fin->getTimestamp() - $auction->fecha_inicio->getTimestamp());
+            $this->assertTrue($auction->fecha_fin->isFuture());
+            $this->get('/buscar')->assertSee($auction->titulo);
+            $this->assertSame(1, $auction->usuario->notificaciones()
+                ->where('id_subasta', $auction->id_subasta)->where('titulo', 'Subasta publicada')->count());
+
+            $start = $auction->fecha_inicio->toISOString();
+            $end = $auction->fecha_fin->toISOString();
+            $this->actingAs($admin)->patch("/admin/subastas/{$auction->id_subasta}", [
+                'decision' => 'Aceptada',
+            ])->assertSessionHasErrors('decision');
+            $this->assertSame($start, $auction->refresh()->fecha_inicio->toISOString());
+            $this->assertSame($end, $auction->fecha_fin->toISOString());
+        }
+    }
+
+    public function test_rejection_preserves_reference_dates(): void
+    {
+        $admin = $this->admin();
+        $auction = $this->auction();
+        $start = $auction->fecha_inicio->toISOString();
+        $end = $auction->fecha_fin->toISOString();
+        $this->actingAs($admin)->patch("/admin/subastas/{$auction->id_subasta}", [
+            'decision' => 'Rechazada', 'motivo' => 'Fotos poco claras.',
+        ])->assertSessionHasNoErrors();
+        $this->assertSame($start, $auction->refresh()->fecha_inicio->toISOString());
+        $this->assertSame($end, $auction->fecha_fin->toISOString());
+    }
+
     public function test_cannot_resolve_already_resolved_auction(): void
     {
         $admin = $this->admin();
