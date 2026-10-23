@@ -66,6 +66,23 @@ class ReportesTest extends TestCase
         }
     }
 
+    public function test_administrator_check_rejects_missing_inactive_or_ordinary_actors(): void
+    {
+        $admin = $this->admin();
+        $inactive = $this->admin();
+        $inactive->forceFill(['activo' => false])->save();
+        foreach ([null, User::factory()->create()->id_usuario, $inactive->id_usuario] as $actor) {
+            try {
+                DB::transaction(fn () => DB::select('select exigir_administrador(?)', [$actor]));
+                $this->fail('exigir_administrador aceptó un actor sin permisos.');
+            } catch (QueryException $exception) {
+                $this->assertSame('42501', $exception->errorInfo[0]);
+            }
+        }
+        DB::select('select exigir_administrador(?)', [$admin->id_usuario]);
+        $this->assertSame(1, DB::selectOne("select count(*) as total from pg_proc where proname = 'exigir_administrador'")->total);
+    }
+
     public function test_auction_report_uses_inclusive_bolivia_dates_and_effective_state(): void
     {
         $admin = $this->admin();
