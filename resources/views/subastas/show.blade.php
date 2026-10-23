@@ -51,10 +51,21 @@
                 @endif
             </div>
             <div class="detail-info">
-                <div class="detail-badges"><span class="tag">{{ $subasta->categoria?->nombre_categoria }}</span><span
-                        class="tag {{ $subasta->estado === 'Activa' ? 'green' : '' }}">{{ $subasta->estado }}</span></div>
+                <div class="detail-badges"><span class="tag">{{ $subasta->categoria?->nombre_categoria }}</span>@if ($subasta->publicada())<span
+                        class="tag {{ $subasta->estado === 'Activa' ? 'green' : '' }}">{{ $subasta->estado }}</span>@endif</div>
+                @unless ($subasta->publicada())
+                    {{-- Solo llegan aquí el propietario y el Administrador. --}}
+                    <div class="review-banner" role="status">
+                        <p>Solicitud <x-estado-revision :subasta="$subasta" /></p>
+                        @if ($subasta->estado_revision === 'Rechazada')
+                            <p><strong>Motivo del rechazo:</strong> {{ $subasta->motivo_rechazo }}</p>
+                        @else
+                            <p>Esta subasta todavía no es pública: solo la ven su propietario y los administradores.</p>
+                        @endif
+                    </div>
+                @endunless
                 <h1>{{ $subasta->titulo }}</h1>
-                <p class="muted">{{ $subasta->estado_articulo }} · Publicada el
+                <p class="muted">{{ $subasta->estado_articulo }} · {{ $subasta->publicada() ? 'Publicada' : 'Enviada' }} el
                     {{ $subasta->fecha_inicio->format('d/m/Y H:i') }}</p>
                 <div class="panel bid-panel">
                     <small>{{ $subasta->pujas_count ? 'Oferta actual' : 'Monto inicial' }}</small><strong

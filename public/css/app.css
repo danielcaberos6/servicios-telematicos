@@ -1821,3 +1821,44 @@ form small {
         transition: none !important;
     }
 }
+.tag.pending {
+    background: #fff4dc;
+    color: #8a5a00;
+}
+.tag.danger {
+    background: #fdecea;
+    color: #b3261e;
+}
+.revision-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 8px;
+    font-size: 12px;
+    color: var(--muted);
+}
+.revision-reason {
+    margin: 0 0 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: var(--paper);
+    font-size: 12px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+.review-banner {
+    margin: 0 0 18px;
+    padding: 14px 16px;
+    border: 1px solid #f0d9a8;
+    border-radius: 8px;
+    background: #fff8e8;
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+.review-banner p {
+    margin: 0;
+}
+.review-banner p + p {
+    margin-top: 6px;
+}

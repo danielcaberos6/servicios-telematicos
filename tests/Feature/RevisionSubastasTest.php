@@ -163,6 +163,53 @@ class RevisionSubastasTest extends TestCase
         $this->assertSame('Rechazada', $auction->refresh()->estado_revision);
     }
 
+    public function test_my_auctions_show_each_review_state_and_the_rejection_reason(): void
+    {
+        $seller = User::factory()->create();
+        foreach (['En revisión', 'Aceptada', 'Rechazada'] as $revision) {
+            $seller->subastas()->forceCreate([
+                ...$this->auction($revision)->only(['descripcion', 'id_categoria', 'estado_articulo', 'ubicacion', 'monto_inicial', 'fecha_inicio', 'fecha_fin']),
+                'titulo' => "Mi solicitud {$revision}",
+                'estado_revision' => $revision,
+                'motivo_rechazo' => $revision === 'Rechazada' ? 'La descripción no coincide con <b>las fotos</b>.' : null,
+            ]);
+        }
+
+        $response = $this->actingAs($seller)->get('/mis-subastas')->assertOk()
+            ->assertSee('Mi solicitud En revisión')->assertSee('Mi solicitud Aceptada')->assertSee('Mi solicitud Rechazada')
+            ->assertSee('<span class="tag revision-tag pending">En revisión</span>', false)
+            ->assertSee('<span class="tag revision-tag green">Aceptada</span>', false)
+            ->assertSee('<span class="tag revision-tag danger">Rechazada</span>', false)
+            ->assertSee('Motivo del rechazo:')
+            ->assertSee('La descripción no coincide con &lt;b&gt;las fotos&lt;/b&gt;.', false)
+            ->assertDontSee('<b>las fotos</b>', false)
+            ->assertSee('Un administrador revisará tu solicitud.');
+        $this->assertSame(2, substr_count($response->getContent(), 'Sin publicar'));
+
+        $this->actingAs(User::factory()->create())->get('/mis-subastas')->assertOk()
+            ->assertDontSee('Mi solicitud')->assertDontSee('La descripción no coincide');
+    }
+
+    public function test_detail_tells_owner_and_administrator_the_state_and_reason(): void
+    {
+        $rejected = $this->auction('Rechazada');
+        $pending = $this->auction('En revisión');
+        $accepted = $this->auction('Aceptada');
+        $admin = $this->admin();
+
+        foreach ([$rejected->usuario, $admin] as $viewer) {
+            $this->actingAs($viewer)->get("/subastas/{$rejected->id_subasta}")->assertOk()
+                ->assertSee('<span class="tag revision-tag danger">Rechazada</span>', false)
+                ->assertSee('Las fotos no muestran el artículo.');
+        }
+        $this->actingAs($pending->usuario)->get("/subastas/{$pending->id_subasta}")->assertOk()
+            ->assertSee('Esta subasta todavía no es pública: solo la ven su propietario y los administradores.')
+            ->assertSee('Usado · Enviada el')->assertDontSee('<span class="tag green">Activa</span>', false);
+        $this->actingAs($accepted->usuario)->get("/subastas/{$accepted->id_subasta}")->assertOk()
+            ->assertDontSee('review-banner', false)
+            ->assertSee('Usado · Publicada el')->assertSee('green">Activa</span>', false);
+    }
+
     public function test_reinstalling_sql_functions_keeps_requests_unpublished(): void
     {
         $this->auction('En revisión');
