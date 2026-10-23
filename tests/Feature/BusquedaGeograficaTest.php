@@ -154,7 +154,59 @@ class BusquedaGeograficaTest extends TestCase
             ->assertOk()
             ->assertSee('Catálogo de subastas')
             ->assertSee('El radio de búsqueda debe ser mayor que cero.')
-            ->assertSee('id="radio" name="radio" type="number"', false);
+            ->assertSee('id="radio" name="radio" form="filtros" type="number"', false)
+            ->assertSee('placeholder="Ej. 5" value="0"', false);
+    }
+
+    private function puntos($response): array
+    {
+        preg_match('/data-puntos="([^"]*)"/', $response->getContent(), $match);
+
+        return json_decode(html_entity_decode($match[1]), true, 512, JSON_THROW_ON_ERROR);
+    }
+
+    public function test_catalog_map_keeps_center_radius_and_order_and_plots_the_page_results(): void
+    {
+        for ($i = 1; $i <= 13; $i++) {
+            $this->auction("Lámpara {$i}", $i * 0.2);
+        }
+        $this->auction('Lámpara sin mapa', null);
+        $params = ['q' => 'lámpara', ...self::CENTRO, 'radio' => 8, 'orden' => 'cercanas'];
+
+        $primera = $this->buscar($params)->assertOk()
+            ->assertSee('data-mapa-catalogo', false)
+            ->assertSee('id="filtro-lat" name="lat" form="filtros" value="-16.4955"', false)
+            ->assertSee('id="filtro-lng" name="lng" form="filtros" value="-68.1336"', false)
+            ->assertSee('name="radio" form="filtros"', false)
+            ->assertSee('value="8"', false)
+            ->assertSee('<option value="cercanas" selected>', false)
+            ->assertSee('Centro elegido: -16.4955, -68.1336')
+            ->assertSee('12 de 12 en el mapa');
+        $this->assertSame(array_map(fn ($i) => "Lámpara {$i}", range(1, 12)), array_column($this->puntos($primera), 'titulo'));
+
+        // La barra de búsqueda de texto conserva el filtro geográfico y el orden.
+        foreach (['lat' => '-16.4955', 'lng' => '-68.1336', 'radio' => '8', 'orden' => 'cercanas'] as $name => $value) {
+            $primera->assertSee('<input type="hidden" name="'.$name.'" value="'.$value.'">', false);
+        }
+
+        $segunda = $this->buscar([...$params, 'page' => 2])->assertOk()->assertSee('1 de 1 en el mapa');
+        $punto = $this->puntos($segunda)[0];
+        $this->assertSame('Lámpara 13', $punto['titulo']);
+        $this->assertEqualsWithDelta(self::CENTRO['lat'] + 2.6 / self::KM_POR_GRADO, $punto['lat'], 1e-6);
+        $this->assertStringEndsWith('/subastas/'.Subasta::where('titulo', 'Lámpara 13')->value('id_subasta'), $punto['url']);
+    }
+
+    public function test_catalog_map_without_radius_plots_only_results_with_coordinates(): void
+    {
+        $this->auction('Con punto <b>negrita</b>', 1);
+        $this->auction('Sin punto antiguo', null);
+
+        $respuesta = $this->buscar()->assertOk()
+            ->assertSee('1 de 2 en el mapa')
+            ->assertSee('Todavía no elegiste un centro.')
+            ->assertSee('id="filtro-lat" name="lat" form="filtros" value=""', false)
+            ->assertDontSee('<b>negrita</b>', false);
+        $this->assertSame(['Con punto <b>negrita</b>'], array_column($this->puntos($respuesta), 'titulo'));
     }
 
     public function test_reinstalling_sql_functions_keeps_the_radius_filter(): void
