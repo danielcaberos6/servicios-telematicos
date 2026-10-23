@@ -62,3 +62,18 @@
         min-height: 44px;
     }
 }
+.detail-map {
+    margin: 12px 0 4px;
+}
+.detail-map .map-canvas {
+    height: 240px;
+}
+.meeting-panel .map-unavailable {
+    margin: 12px 0 8px;
+    font-size: 12px;
+}
+@media (max-width: 700px) {
+    .detail-map .map-canvas {
+        height: 220px;
+    }
+}

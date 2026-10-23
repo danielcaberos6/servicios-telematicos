@@ -159,3 +159,22 @@ document.querySelectorAll("[data-mapa-selector]").forEach((contenedor) => {
         );
     });
 });
+
+// Detalle de la subasta: marcador del punto de encuentro con zoom y atribución.
+document.querySelectorAll("[data-mapa-detalle]").forEach((contenedor) => {
+    const punto = [Number(contenedor.dataset.lat), Number(contenedor.dataset.lng)];
+    if (!coordenadaValida(...punto)) {
+        marcarIndisponible(contenedor);
+        return;
+    }
+    // En pantallas táctiles el mapa no captura el desplazamiento de la página.
+    const tactil = window.matchMedia("(pointer: coarse)").matches;
+    const mapa = crearMapa(contenedor, { dragging: !tactil });
+    if (!mapa) return;
+    mapa.setView(punto, 16);
+    const popup = document.createElement("span");
+    popup.textContent = contenedor.dataset.titulo;
+    L.marker(punto, { title: "Punto de encuentro", alt: "Marcador del punto de encuentro" })
+        .addTo(mapa)
+        .bindPopup(popup);
+});

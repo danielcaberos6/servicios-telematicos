@@ -123,6 +123,43 @@ class UbicacionSubastasTest extends TestCase
         $this->assertEquals('-16.500000', (string) $auction->refresh()->latitud);
     }
 
+    public function test_detail_shows_leaflet_map_with_marker_and_textual_location(): void
+    {
+        $auction = $this->auction(null, ['latitud' => -16.510417, 'longitud' => -68.126389]);
+
+        $this->get("/subastas/{$auction->id_subasta}")->assertOk()
+            ->assertSee('data-mapa-detalle', false)
+            ->assertSee('data-lat="-16.510417"', false)
+            ->assertSee('data-lng="-68.126389"', false)
+            ->assertSee('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css', false)
+            ->assertSee('js/mapas.js', false)
+            ->assertSee('La Paz, Plaza Abaroa, frente a la fuente')
+            ->assertSee('No pudimos cargar el mapa. Usa la dirección escrita para coordinar la entrega.')
+            ->assertDontSee('Esta publicación no tiene ubicación en el mapa');
+    }
+
+    public function test_detail_of_old_publication_without_coordinates_keeps_text_and_article_readable(): void
+    {
+        $auction = $this->auction(null, ['latitud' => null, 'longitud' => null]);
+
+        $this->actingAs(User::factory()->create())->get("/subastas/{$auction->id_subasta}")->assertOk()
+            ->assertSee('La Paz, Plaza Abaroa, frente a la fuente')
+            ->assertSee('Esta publicación no tiene ubicación en el mapa. Usa la dirección escrita para coordinar la entrega.')
+            ->assertSee('Bicicleta en buen estado, con frenos de disco y cambios revisados.')
+            ->assertSee('Hacer oferta')
+            ->assertDontSee('data-mapa-detalle', false)
+            ->assertDontSee('leaflet.js', false);
+    }
+
+    public function test_detail_map_escapes_the_meeting_point_text(): void
+    {
+        $auction = $this->auction(null, ['ubicacion' => 'Plaza "Murillo" <script>alert(1)</script>', 'latitud' => -16.4955, 'longitud' => -68.1336]);
+
+        $this->get("/subastas/{$auction->id_subasta}")->assertOk()
+            ->assertSee('data-titulo="Plaza &quot;Murillo&quot; &lt;script&gt;alert(1)&lt;/script&gt;"', false)
+            ->assertDontSee('<script>alert(1)</script>', false);
+    }
+
     public function test_database_rejects_incomplete_or_out_of_range_pairs(): void
     {
         $auction = $this->auction();
