@@ -13,7 +13,7 @@ declare
     v_motivo text;
 begin
     -- 1. Bloqueo para evitar decisiones simultáneas sobre revisiones
-    perform pg_advisory_xact_lock(8012, 1);
+    perform pg_advisory_xact_lock(8009, 1);
 
     -- 2. Exigir permisos de administrador activo
     perform exigir_administrador(p_actor);
