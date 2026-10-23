@@ -97,13 +97,24 @@
                 <div class="panel meeting-panel">
                     <h3><x-icono nombre="pin" />Punto de encuentro</h3>
                     <p>{{ $subasta->ubicacion }}</p>
-                    @if ($subasta->latitud && $subasta->longitud)
+                    @if (! is_null($subasta->latitud) && ! is_null($subasta->longitud))
+                        <x-leaflet />
+                        <div class="location-map detail-map" data-mapa-detalle data-lat="{{ $subasta->latitud }}"
+                            data-lng="{{ $subasta->longitud }}" data-titulo="{{ $subasta->ubicacion }}">
+                            <div class="map-canvas" data-mapa-lienzo role="region"
+                                aria-label="Mapa del punto de encuentro: {{ $subasta->ubicacion }}"></div>
+                            <p class="map-unavailable" data-mapa-aviso hidden><x-icono nombre="pin" />
+                                <span>No pudimos cargar el mapa. Usa la dirección escrita para coordinar la entrega.</span></p>
+                        </div>
                         <div class="meeting-map-action">
                             <a href="https://www.google.com/maps/search/?api=1&query={{ $subasta->latitud }},{{ $subasta->longitud }}"
                                 target="_blank" rel="noopener noreferrer" class="button secondary small map-link">
                                 <x-icono nombre="pin" /> Ver punto de encuentro en Google Maps ↗
                             </a>
                         </div>
+                    @else
+                        <p class="map-unavailable"><x-icono nombre="pin" />
+                            <span>Esta publicación no tiene ubicación en el mapa. Usa la dirección escrita para coordinar la entrega.</span></p>
                     @endif
                     <small>El vendedor y el ganador coordinan la entrega y el pago.</small>
                 </div>

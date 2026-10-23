@@ -322,7 +322,7 @@ begin
     if p_actor is null or not exists (
         select 1 from usuario_rol ur join rol r on r.id_rol=ur.id_rol join usuario u on u.id_usuario=ur.id_usuario
         where ur.id_usuario=p_actor and u.activo and r.nombre_rol='Administrador'
-    ) then raise exception 'Solo el administrador puede consultar los reportes.' using errcode='42501'; end if;
+    ) then raise exception 'Solo los administradores activos pueden acceder a esta sección.' using errcode='42501'; end if;
 end;
 $$;
 

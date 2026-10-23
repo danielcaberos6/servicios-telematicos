@@ -142,17 +142,32 @@
                                     <x-icono nombre="pin" /> Usar mi ubicación actual
                                 </button>
                             </div>
-                            <input type="hidden" id="latitud" name="latitud" value="{{ old('latitud', $subasta->latitud) }}">
-                            <input type="hidden" id="longitud" name="longitud" value="{{ old('longitud', $subasta->longitud) }}">
+                            <small id="location-help">Indica la ciudad y un lugar público donde coordinarás la entrega y el pago.</small>
+                        </div>
+                        @php
+                            $latitud = old('latitud', $subasta->latitud);
+                            $longitud = old('longitud', $subasta->longitud);
+                        @endphp
+                        <div class="publish-field">
+                            <span class="field-label" id="map-label">Ubicación en el mapa <span class="publish-optional">Opcional</span></span>
+                            <input type="hidden" id="latitud" name="latitud" value="{{ $latitud }}">
+                            <input type="hidden" id="longitud" name="longitud" value="{{ $longitud }}">
+                            <x-leaflet />
+                            <div class="location-map" data-mapa-selector data-lat="latitud" data-lng="longitud" data-estado="gps-status">
+                                <div class="map-canvas" data-mapa-lienzo aria-labelledby="map-label" aria-describedby="map-help"></div>
+                                <p class="map-unavailable" data-mapa-aviso hidden><x-icono nombre="pin" />
+                                    <span>El mapa no está disponible en este momento. Puedes publicar con el punto de encuentro escrito o usar tu ubicación actual.</span></p>
+                                <button type="button" class="button secondary small" data-mapa-centro hidden>Marcar el centro del mapa</button>
+                            </div>
                             <div id="gps-status" class="gps-status" aria-live="polite">
-                                @if (old('latitud', $subasta->latitud) && old('longitud', $subasta->longitud))
+                                @if (filled($latitud) && filled($longitud))
                                     <span class="gps-coords-badge">
-                                        <x-icono nombre="pin" /> Coordenadas registradas: {{ old('latitud', $subasta->latitud) }}, {{ old('longitud', $subasta->longitud) }}
+                                        <x-icono nombre="pin" /> Coordenadas registradas: {{ $latitud }}, {{ $longitud }}
                                         <button type="button" class="btn-clear-gps" id="btn-quitar-gps" title="Quitar coordenadas" aria-label="Quitar coordenadas">✕</button>
                                     </span>
                                 @endif
                             </div>
-                            <small id="location-help">Indica la ciudad y un lugar público donde coordinarás la entrega y el pago.</small>
+                            <small id="map-help">Haz clic en el mapa o arrastra el marcador hasta el punto de encuentro. Así aparecerás en las búsquedas por cercanía.</small>
                         </div>
                     </div>
                 </section>

@@ -10,17 +10,29 @@ class CatalogoService
 {
     public function consultar(array $filters = []): Builder
     {
-        return Subasta::query()
+        $query = Subasta::query()
             ->select('subasta.*')
             ->fromRaw('catalogo_subastas(?::jsonb) as subasta', [json_encode($filters, JSON_THROW_ON_ERROR)])
             ->with(['imagenes', 'categoria'])->withCount('pujas')->withMax('pujas', 'monto');
+        if ($this->filtraPorRadio($filters)) {
+            $query->selectRaw('distancia_km(?::numeric, ?::numeric, subasta.latitud, subasta.longitud) as distancia', [$filters['lat'], $filters['lng']]);
+        }
+
+        return $query;
+    }
+
+    public function filtraPorRadio(array $filters): bool
+    {
+        return isset($filters['lat'], $filters['lng'], $filters['radio']);
     }
 
     public function paginar(array $filters)
     {
         [$column, $direction] = match ($filters['orden'] ?? 'recientes') {
             'finalizan' => ['fecha_fin', 'asc'], 'precio_asc' => ['monto_inicial', 'asc'],
-            'precio_desc' => ['monto_inicial', 'desc'], default => ['fecha_inicio', 'desc'],
+            'precio_desc' => ['monto_inicial', 'desc'],
+            'cercanas' => $this->filtraPorRadio($filters) ? ['distancia', 'asc'] : ['fecha_inicio', 'desc'],
+            default => ['fecha_inicio', 'desc'],
         };
 
         return $this->consultar($filters)->orderBy($column, $direction)->orderByDesc('id_subasta')->paginate(12)->withQueryString();

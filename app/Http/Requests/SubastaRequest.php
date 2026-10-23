@@ -37,4 +37,12 @@ class SubastaRequest extends FormRequest
             'eliminar_imagenes.*' => ['integer', 'distinct'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'latitud.required_with' => 'Falta la latitud del punto de encuentro. Vuelve a marcarlo en el mapa o quita las coordenadas.',
+            'longitud.required_with' => 'Falta la longitud del punto de encuentro. Vuelve a marcarlo en el mapa o quita las coordenadas.',
+        ];
+    }
 }
