@@ -72,6 +72,19 @@ class IdentidadTest extends TestCase
         $this->get('/storage/'.$solicitud->ruta_documento)->assertForbidden();
     }
 
+    public function test_missing_document_file_returns_not_found_only_to_authorized_users(): void
+    {
+        Storage::fake('identidad');
+        $user = $this->persona();
+        $solicitud = $this->solicitud($user);
+        Storage::disk('identidad')->delete($solicitud->ruta_documento);
+        $path = '/identidad/'.$solicitud->id_verificacion.'/documento';
+
+        $this->actingAs($user)->get($path)->assertNotFound();
+        $this->actingAs($this->persona(true))->get($path)->assertNotFound();
+        $this->actingAs($this->persona())->get($path)->assertForbidden();
+    }
+
     public function test_invalid_files_confirmation_and_stale_profile_are_rejected_without_orphans(): void
     {
         Storage::fake('identidad');
