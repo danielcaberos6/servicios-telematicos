@@ -3,10 +3,14 @@ document.querySelectorAll('[data-espacio-seccion]').forEach((espacio) => {
     const toggle = nav.querySelector('.section-menu-toggle');
     nav.classList.add('is-enhanced');
     toggle.hidden = false;
-    toggle.addEventListener('click', () => {
-        const abierto = toggle.getAttribute('aria-expanded') !== 'true';
+    const cambiarEstado = (abierto) => {
         toggle.setAttribute('aria-expanded', String(abierto));
         nav.classList.toggle('is-open', abierto);
+        const accion = toggle.querySelector('.section-menu-action');
+        if (accion) accion.textContent = abierto ? 'Cerrar' : 'Abrir';
+    };
+    toggle.addEventListener('click', () => {
+        cambiarEstado(toggle.getAttribute('aria-expanded') !== 'true');
     });
     if (!espacio.hasAttribute('data-navegacion-local')) return;
     const paneles = [...espacio.querySelectorAll('[data-apartado]')];
@@ -19,8 +23,7 @@ document.querySelectorAll('[data-espacio-seccion]').forEach((espacio) => {
             if (enlace.hash === `#${id}`) enlace.setAttribute('aria-current', 'location');
             else enlace.removeAttribute('aria-current');
         });
-        toggle.setAttribute('aria-expanded', 'false');
-        nav.classList.remove('is-open');
+        cambiarEstado(false);
         // Los mapas necesitan recalcular su tamaño al revelar su apartado.
         window.dispatchEvent(new Event('resize'));
         if (enfocar) {
