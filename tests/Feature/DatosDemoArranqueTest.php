@@ -18,10 +18,12 @@ class DatosDemoArranqueTest extends TestCase
         Storage::fake('public');
         $this->app['env'] = 'local';
         $this->artisan('subastas:cargar-demo')->assertSuccessful();
-        $this->assertDatabaseCount('usuario', 3);
-        $this->assertDatabaseCount('subasta', 9);
+        $this->assertDatabaseCount('usuario', 24);
+        $this->assertDatabaseCount('subasta', 49);
+        $this->assertDatabaseCount('puja', 38);
+        $this->assertDatabaseCount('resenas', 45);
         $this->assertSame(0, Subasta::doesntHave('imagenes')->count());
-        $this->assertSame(7, Subasta::where('estado_revision', 'Aceptada')->count());
+        $this->assertSame(47, Subasta::where('estado_revision', 'Aceptada')->count());
 
         $admin = User::where('correo', 'admin@subastaya.test')->sole();
         $admin->forceFill(['contrasena' => 'ClaveCambiada2026!', 'activo' => false])->save();
@@ -30,6 +32,8 @@ class DatosDemoArranqueTest extends TestCase
         $subastas = DB::table('subasta')->orderBy('id_subasta')->get()->toJson();
         $avisos = DB::table('notificacion')->count();
         $imagenes = DB::table('imagen')->count();
+        $pujas = DB::table('puja')->count();
+        $valoraciones = DB::table('resenas')->count();
 
         $this->artisan('subastas:cargar-demo')->assertSuccessful();
         $this->assertSame($cuenta, $admin->fresh()->getAttributes());
@@ -37,7 +41,9 @@ class DatosDemoArranqueTest extends TestCase
         $this->assertSame($subastas, DB::table('subasta')->orderBy('id_subasta')->get()->toJson());
         $this->assertSame($avisos, DB::table('notificacion')->count());
         $this->assertSame($imagenes, DB::table('imagen')->count());
-        $this->assertDatabaseCount('usuario', 3);
+        $this->assertSame($pujas, DB::table('puja')->count());
+        $this->assertSame($valoraciones, DB::table('resenas')->count());
+        $this->assertDatabaseCount('usuario', 24);
     }
 
     public function test_startup_skips_examples_in_production(): void

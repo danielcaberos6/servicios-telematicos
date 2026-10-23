@@ -9,8 +9,7 @@ Plataforma de subastas en línea con Laravel 13 (PHP 8.4) y PostgreSQL 16, ejecu
 ## Ejecutar
 
 ```sh
-cp .env.example .env
-docker compose up -d --build
+docker compose up -d
 ```
 
 Abre **http://localhost:8000**.
@@ -22,8 +21,10 @@ Al arrancar, el contenedor instala dependencias, aplica las migraciones, carga l
 | `admin@subastaya.test` | Administrador | `Admin2026!` |
 | `demo@subastaya.test` | Usuario | `SubastaYA2026!` |
 | `vendedor@subastaya.test` | Usuario | `SubastaYA2026!` |
+| `participante1@subastaya.test` a `participante5@subastaya.test` | Usuario | `SubastaYA2026!` |
+| `comunidad1@subastaya.test` a `comunidad16@subastaya.test` | Usuario | `SubastaYA2026!` |
 
-También se cargan automáticamente 7 subastas publicadas, una solicitud en revisión y otra rechazada mediante `subastas:cargar-demo`. No hace falta cargar estos ejemplos manualmente. Los reinicios conservan las contraseñas, el estado y los roles de las cuentas existentes y no duplican las subastas ni renuevan sus plazos. En otros entornos no se cargan ejemplos. La carga sucede cuando arranca el contenedor; `docker compose up -d` no la repite si el contenedor ya está funcionando.
+En una base nueva se cargan automáticamente **24 cuentas, 49 subastas con fotos, 38 pujas y 45 valoraciones** mediante `subastas:cargar-demo`. Incluye subastas activas, finalizadas, canceladas, una solicitud en revisión y otra rechazada. No hace falta ejecutar comandos de carga adicionales: si falta `.env`, el arranque lo crea desde `.env.example`. Los reinicios conservan las contraseñas, el estado y los roles de las cuentas existentes y no duplican los ejemplos ya cargados ni renuevan sus plazos. En otros entornos no se cargan ejemplos. La carga sucede cuando arranca el contenedor; `docker compose up -d` no la repite si el contenedor ya está funcionando. Si cambias el Dockerfile o las dependencias de la imagen, usa `docker compose up -d --build` para reconstruirla.
 
 El servicio `scheduler` finaliza cada minuto las subastas vencidas.
 

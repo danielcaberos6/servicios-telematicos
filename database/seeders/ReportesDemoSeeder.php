@@ -20,16 +20,8 @@ class ReportesDemoSeeder extends Seeder
         $this->call(ActividadDemoSeeder::class);
         DB::transaction(function () {
             $base = now()->startOfMonth()->subMonths(5);
-            $admin = User::firstOrCreate(['correo' => 'admin@subastaya.test'], [
-                'nombre' => 'Mariana Salazar', 'ciudad' => 'La Paz', 'contrasena' => 'SubastaYA2026!',
-            ]);
-            if ($admin->wasRecentlyCreated) {
-                $admin->forceFill(['fecha_registro' => $base->copy()->subMonths(2)])->save();
-            }
-            DB::table('usuario_rol')->insertOrIgnore([
-                'id_usuario' => $admin->id_usuario,
-                'id_rol' => DB::table('rol')->where('nombre_rol', 'Administrador')->value('id_rol'),
-            ]);
+            // CuentasDemoSeeder ya creó la cuenta administrativa si faltaba.
+            // Los reinicios no deben restaurar roles retirados por administración.
             $people = collect();
             foreach ([
                 ['Camila Torres', 'Cochabamba'], ['Andrés Vargas', 'Santa Cruz'], ['Fernanda Méndez', 'La Paz'],
