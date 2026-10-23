@@ -20,7 +20,7 @@ class BusquedaGeograficaTest extends TestCase
 
     private function auction(string $titulo, ?float $kmAlNorte, array $overrides = []): Subasta
     {
-        return User::factory()->create()->subastas()->create([
+        return User::factory()->create()->subastas()->forceCreate([
             'titulo' => $titulo,
             'descripcion' => 'Artículo de prueba para la búsqueda por cercanía.',
             'id_categoria' => Categoria::firstOrCreate(['nombre_categoria' => 'Hogar'])->id_categoria,
@@ -31,6 +31,7 @@ class BusquedaGeograficaTest extends TestCase
             'fecha_fin' => now()->addDays(3),
             'latitud' => is_null($kmAlNorte) ? null : round(self::CENTRO['lat'] + $kmAlNorte / self::KM_POR_GRADO, 6),
             'longitud' => is_null($kmAlNorte) ? null : self::CENTRO['lng'],
+            'estado_revision' => 'Aceptada',
             ...$overrides,
         ])->refresh();
     }

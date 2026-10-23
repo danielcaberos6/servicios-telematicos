@@ -14,6 +14,7 @@ class PujaController extends Controller
 
     public function store(PujaRequest $request, Subasta $subasta)
     {
+        abort_unless($subasta->publicada(), 404);
         $data = $request->validated();
         $this->pujaService->registrar($request->user()->id_usuario, $subasta->id_subasta, (string) $data['monto']);
 

@@ -32,7 +32,11 @@ class DemoSeeder extends Seeder
         $items = $this->articulos();
         foreach ($items as $index => [$title, $category, $condition, $price, $location, $image, $hours, $description, $coords]) {
             $owner = $index === 0 ? $demo : $seller;
-            $auction = $owner->subastas()->firstOrCreate(['titulo' => $title], ['descripcion' => $description, 'id_categoria' => Categoria::where('nombre_categoria', $category)->value('id_categoria'), 'estado_articulo' => $condition, 'monto_inicial' => $price, 'ubicacion' => $location, 'latitud' => $coords[0] ?? null, 'longitud' => $coords[1] ?? null, 'fecha_inicio' => now()->subDays($index % 4)->subMinutes(15), 'fecha_fin' => now()->addHours($hours)]);
+            // Las demostraciones se insertan ya aceptadas: representan publicaciones revisadas.
+            $auction = $owner->subastas()->firstOrNew(['titulo' => $title]);
+            if (! $auction->exists) {
+                $auction->forceFill(['descripcion' => $description, 'id_categoria' => Categoria::where('nombre_categoria', $category)->value('id_categoria'), 'estado_articulo' => $condition, 'monto_inicial' => $price, 'ubicacion' => $location, 'latitud' => $coords[0] ?? null, 'longitud' => $coords[1] ?? null, 'fecha_inicio' => now()->subDays($index % 4)->subMinutes(15), 'fecha_fin' => now()->addHours($hours), 'estado_revision' => 'Aceptada'])->save();
+            }
             // Completa el mapa de demostraciones anteriores; las que ya tienen pujas no admiten cambios.
             if ($coords && is_null($auction->latitud) && ! $auction->pujas()->exists()) {
                 $auction->update(['latitud' => $coords[0], 'longitud' => $coords[1]]);

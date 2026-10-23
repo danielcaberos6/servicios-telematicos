@@ -70,7 +70,7 @@
                             @if ($subasta->estado === 'Finalizada')<small>{{ $ganadora ? 'La oferta ganadora está confirmada.' : 'La subasta terminó sin ofertas.' }}</small>@endif
                         </div>
                     </div>
-                    @if ($subasta->estado === 'Activa')
+                    @if ($subasta->estado === 'Activa' && $subasta->publicada())
                         @auth
                             @if (auth()->id() === $subasta->id_usuario)
                                 <div class="info-note">Esta es tu subasta. @if (!$subasta->pujas_count)
@@ -91,7 +91,7 @@
                             @endif
                         @else<a class="button primary full-width" href="{{ route('iniciar-sesion') }}">Inicia sesión para
                             ofertar</a>@endauth
-                    @else<p>Esta subasta ya no admite ofertas.</p>
+                    @else<p>{{ $subasta->publicada() ? 'Esta subasta ya no admite ofertas.' : 'Esta solicitud no está publicada y no admite ofertas.' }}</p>
                     @endif
                 </div>
                 <div class="panel meeting-panel">

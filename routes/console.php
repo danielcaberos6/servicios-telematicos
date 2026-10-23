@@ -7,10 +7,12 @@ use Illuminate\Support\Facades\Schedule;
 Artisan::command('subastas:instalar-funciones', function () {
     DB::transaction(function () {
         DB::unprepared(file_get_contents(database_path('sql/Funciones.sql')));
-        // Redefine catalogo_subastas; sin esto, el filtro por radio dejaría de aplicarse.
         DB::unprepared(file_get_contents(database_path('sql/BusquedaGeografica.sql')));
+        // Redefine el catálogo, las pujas y la finalización; sin esto se publicarían
+        // solicitudes sin revisar y dejaría de aplicarse el filtro por radio.
+        DB::unprepared(file_get_contents(database_path('sql/PublicacionSubastas.sql')));
     });
-    $this->info('Funciones.sql y BusquedaGeografica.sql instalados. Las tablas y sus datos se conservaron.');
+    $this->info('Funciones.sql, BusquedaGeografica.sql y PublicacionSubastas.sql instalados. Las tablas y sus datos se conservaron.');
 })->purpose('Instala o actualiza las funciones y triggers de PostgreSQL');
 
 Artisan::command('subastas:finalizar', function () {
