@@ -1,3 +1,14 @@
+// La altura cambia al abrir el menú móvil o distribuir los enlaces en dos filas.
+const cabecera = document.querySelector(".site-header");
+if (cabecera) {
+    const ajustarCabecera = () => document.documentElement.style.setProperty(
+        "--header-height", `${cabecera.getBoundingClientRect().height}px`
+    );
+    ajustarCabecera();
+    if ("ResizeObserver" in window) new ResizeObserver(ajustarCabecera).observe(cabecera);
+    else window.addEventListener("resize", ajustarCabecera);
+}
+
 document.querySelectorAll("[data-aviso-exito]").forEach((aviso) => {
     const cerrar = aviso.querySelector(".alert-close");
     let temporizador;

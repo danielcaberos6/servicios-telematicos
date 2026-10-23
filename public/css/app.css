@@ -1,4 +1,5 @@
 :root {
+    --header-height: 86px;
     --navy: #062943;
     --blue: #073e83;
     --blue-dark: #052e64;
@@ -230,9 +231,13 @@ small {
     top: 10px;
 }
 .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
     background: var(--navy);
     color: #fff;
 }
+html { scroll-padding-top: calc(var(--header-height) + 16px); }
 .nav-wrap {
     width: min(1420px, calc(100% - 64px));
     margin: auto;
