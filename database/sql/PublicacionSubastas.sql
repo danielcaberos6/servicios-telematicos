@@ -10,6 +10,8 @@ create or replace function catalogo_subastas(p_filtros jsonb default '{}'::jsonb
 returns setof subasta language sql stable as $$
     select s.* from subasta s
     where s.estado_revision = 'Aceptada'
+      -- Las publicaciones de un vendedor desactivado se ocultan hasta que se reactive.
+      and exists (select 1 from usuario u where u.id_usuario = s.id_usuario and u.activo)
       and s.estado_subasta = 'Activa' and s.fecha_inicio <= statement_timestamp() and s.fecha_fin > statement_timestamp()
       and (nullif(p_filtros->>'q', '') is null
            or strpos(lower(s.titulo), lower(p_filtros->>'q')) > 0
@@ -35,6 +37,9 @@ begin
     select * into articulo from subasta where id_subasta = new.id_subasta for update;
     if not found then raise exception 'La subasta no existe.'; end if;
     if articulo.estado_revision <> 'Aceptada' then raise exception 'Esta subasta todavía no está publicada.'; end if;
+    if not exists (select 1 from usuario where id_usuario = articulo.id_usuario and activo) then
+        raise exception 'El vendedor no está disponible; esta subasta no admite ofertas.';
+    end if;
     -- Evaluar la hora real después de obtener el bloqueo, incluso si hubo espera.
     if articulo.estado_subasta <> 'Activa' or articulo.fecha_inicio > clock_timestamp() or articulo.fecha_fin <= clock_timestamp() then
         raise exception 'La subasta no está activa.';

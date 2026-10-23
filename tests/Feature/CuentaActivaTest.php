@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Categoria;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -69,5 +70,32 @@ class CuentaActivaTest extends TestCase
             'id_usuario' => $user->id_usuario,
             'id_rol' => DB::table('rol')->where('nombre_rol', 'Usuario')->value('id_rol'),
         ]);
+    }
+
+    public function test_auctions_of_an_inactive_seller_are_hidden_and_reject_bids_until_reactivation(): void
+    {
+        $seller = User::factory()->create();
+        $auction = $seller->subastas()->forceCreate([
+            'titulo' => 'Guitarra acústica de vendedor', 'descripcion' => 'Guitarra con funda y cuerdas nuevas, lista para tocar.',
+            'id_categoria' => Categoria::firstOrCreate(['nombre_categoria' => 'Instrumentos musicales'])->id_categoria,
+            'estado_articulo' => 'Usado', 'ubicacion' => 'La Paz, Sopocachi', 'monto_inicial' => '300.00',
+            'fecha_inicio' => now()->subHour(), 'fecha_fin' => now()->addDays(3), 'estado_revision' => 'Aceptada',
+        ])->refresh();
+        $bidder = User::factory()->create();
+        $this->actingAs($bidder)->post("/subastas/{$auction->id_subasta}/pujas", ['monto' => '310'])->assertSessionHasNoErrors();
+        $seller->forceFill(['activo' => false])->save();
+
+        $this->get('/')->assertDontSee('Guitarra acústica de vendedor');
+        $this->get('/buscar')->assertDontSee('Guitarra acústica de vendedor');
+        $this->get("/subastas/{$auction->id_subasta}")->assertOk()->assertDontSee('Hacer oferta')
+            ->assertSee('El vendedor no está disponible; esta subasta no admite ofertas.');
+        $this->post("/subastas/{$auction->id_subasta}/pujas", ['monto' => '400'])
+            ->assertSessionHasErrors(['monto' => 'El vendedor no está disponible; esta subasta no admite ofertas.']);
+        $this->assertSame(1, $auction->pujas()->count());
+
+        $seller->forceFill(['activo' => true])->save();
+        $this->get('/buscar')->assertSee('Guitarra acústica de vendedor');
+        $this->post("/subastas/{$auction->id_subasta}/pujas", ['monto' => '400'])->assertSessionHasNoErrors();
+        $this->assertSame(2, $auction->pujas()->count());
     }
 }
