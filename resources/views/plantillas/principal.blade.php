@@ -63,6 +63,7 @@
                     @php
                         $cuenta = auth()->user();
                         $partesNombre = preg_split('/\s+/u', trim($cuenta->nombres ?: $cuenta->nombre), -1, PREG_SPLIT_NO_EMPTY);
+                        $nombresCabecera = trim($cuenta->nombres ?? '') ?: ($partesNombre[0] ?? 'Mi perfil');
                         $apellido = trim($cuenta->apellidos ?? '');
                         $iniciales = mb_strtoupper(mb_substr($partesNombre[0] ?? '', 0, 1)
                             . ($apellido !== '' ? mb_substr($apellido, 0, 1) : (count($partesNombre) > 1 ? mb_substr(end($partesNombre), 0, 1) : '')));
@@ -75,7 +76,7 @@
                                 {{ $iniciales }}
                             @endif
                         </span>
-                        <span class="account-label">{{ Str::limit($cuenta->nombre, 16) }}</span>
+                        <span class="account-label">{{ $nombresCabecera }}</span>
                     </a>
                     <form action="{{ route('cerrar-sesion') }}" method="post">@csrf<button class="logout"
                             type="submit">Salir</button></form>
