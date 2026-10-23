@@ -45,6 +45,8 @@ Los carnets se guardan en `storage/app/identidad`, fuera del almacenamiento púb
 
 ## Revisión de publicaciones
 
+Las nuevas aprobaciones y rechazos registran el ID del administrador autenticado y la fecha de decisión en PostgreSQL, dentro de la misma operación que cambia el estado y notifica al vendedor. El detalle administrativo muestra el responsable y la hora de Bolivia. Las decisiones anteriores conservan estos campos vacíos, sin atribuirles un responsable o una fecha que no se conocen.
+
 Cada subasta nueva se registra **En revisión**, asociada a su vendedor, y no se publica automáticamente. Las subastas que existían antes de esta función se conservaron como **Aceptadas**.
 
 El cierre indicado al enviar la solicitud define un plazo de referencia respecto de su fecha de inicio. Al aprobarla, PostgreSQL fija el inicio en el instante de aprobación y desplaza el cierre conservando íntegramente ese plazo. La espera administrativa no consume tiempo de exposición, incluso si el cierre de referencia ya pasó. Rechazar no cambia las fechas y una segunda decisión no vuelve a desplazar el plazo. Las publicaciones ya aceptadas conservan sus fechas.

@@ -129,7 +129,13 @@
                                     value="{{ old('fecha_fin', $subasta->fecha_fin?->format('Y-m-d\TH:i')) }}"
                                     min="{{ now()->format('Y-m-d\TH:i') }}" max="{{ now()->addYear()->format('Y-m-d\TH:i') }}"
                                     aria-describedby="deadline-help">
-                                <small id="deadline-help">Hora de Bolivia (UTC-4). Inicia al publicar.</small>
+                                <small id="deadline-help">Hora de Bolivia (UTC-4).
+                                    @if ($subasta->exists && $subasta->publicada())
+                                        Este es el cierre de la subasta publicada.
+                                    @else
+                                        Esta fecha define el plazo solicitado desde el envío. Al aprobarse, el inicio y el cierre se desplazan para conservar el plazo completo.
+                                    @endif
+                                </small>
                             </div>
                         </div>
                         <div class="publish-field">

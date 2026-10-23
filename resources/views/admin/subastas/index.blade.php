@@ -35,7 +35,7 @@
                         <th scope="col">Categoría</th>
                         <th scope="col">Monto inicial</th>
                         <th scope="col">Estado</th>
-                        <th scope="col">Fecha de envío</th>
+                        <th scope="col">Envío / publicación</th>
                         <th scope="col">Acción</th>
                     </tr>
                 </thead>

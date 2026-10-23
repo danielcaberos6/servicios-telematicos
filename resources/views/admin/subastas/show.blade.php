@@ -12,8 +12,8 @@
     <h1>{{ $subasta->titulo }}</h1>
     <p>
         <strong>Estado:</strong> <x-estado-revision :subasta="$subasta" /> · 
-        Enviada el {{ $subasta->fecha_inicio->timezone('America/La_Paz')->format('d/m/Y H:i') }} · 
-        Cierre programado: {{ $subasta->fecha_fin->timezone('America/La_Paz')->format('d/m/Y H:i') }}
+        {{ $subasta->publicada() ? 'Publicada' : 'Enviada' }} el {{ $subasta->fecha_inicio->timezone('America/La_Paz')->format('d/m/Y H:i') }} ·
+        {{ $subasta->publicada() ? 'Cierre programado' : 'Cierre de referencia (se ajusta al aprobar)' }}: {{ $subasta->fecha_fin->timezone('America/La_Paz')->format('d/m/Y H:i') }}
     </p>
 
     @if ($subasta->estado_revision === 'Rechazada' && $subasta->motivo_rechazo)
@@ -90,7 +90,7 @@
             @if ($subasta->estado_revision === 'En revisión')
                 <section class="panel" aria-labelledby="decision-titulo" style="border: 2px solid var(--border, #e2e8f0);">
                     <h2 id="decision-titulo">Decisión de revisión</h2>
-                    <p class="muted">Verifica que las imágenes y la descripción correspondan a un artículo lícito. Al aceptar, la subasta se publicará en el catálogo.</p>
+                    <p class="muted">Verifica que las imágenes y la descripción correspondan a un artículo lícito. Al aceptar, la subasta se publicará en el catálogo y su plazo completo comenzará en ese momento, aunque el cierre de referencia ya haya pasado.</p>
 
                     <form method="post" action="{{ route('admin.subastas.resolver', $subasta) }}" style="margin-bottom:1.5rem;">
                         @csrf
@@ -120,6 +120,14 @@
                 <section class="panel" style="background: rgba(0,0,0,0.02);">
                     <h3>Estado resuelto</h3>
                     <p class="muted">Esta solicitud ya fue resuelta como <strong>{{ $subasta->estado_revision }}</strong> y no admite nuevas modificaciones.</p>
+                    @if ($subasta->id_revisor && $subasta->fecha_decision)
+                        <p><strong>Administrador responsable:</strong> {{ $subasta->revisor->nombre }} (ID {{ $subasta->id_revisor }})</p>
+                        <p><strong>Fecha de decisión:</strong>
+                            <time datetime="{{ $subasta->fecha_decision->toIso8601String() }}">{{ $subasta->fecha_decision->timezone('America/La_Paz')->format('d/m/Y H:i:s') }} (Bolivia)</time>
+                        </p>
+                    @else
+                        <p class="muted">Decisión anterior sin registro de responsable ni fecha.</p>
+                    @endif
                 </section>
             @endif
         </div>

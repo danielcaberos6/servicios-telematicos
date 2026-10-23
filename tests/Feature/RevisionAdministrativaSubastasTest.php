@@ -244,6 +244,57 @@ class RevisionAdministrativaSubastasTest extends TestCase
         $this->assertSame($end, $auction->fecha_fin->toISOString());
     }
 
+    public function test_decisions_record_authenticated_administrator_and_database_time(): void
+    {
+        $admin = $this->admin();
+        $other = $this->admin();
+        foreach (['Aceptada', 'Rechazada'] as $decision) {
+            $auction = $this->auction();
+            $this->assertNull($auction->id_revisor);
+            $this->assertNull($auction->fecha_decision);
+            $before = DB::selectOne('select clock_timestamp() as instante')->instante;
+
+            $this->actingAs($admin)->patch("/admin/subastas/{$auction->id_subasta}", [
+                'decision' => $decision,
+                'motivo' => $decision === 'Rechazada' ? 'Fotografías poco claras.' : null,
+                'id_revisor' => $other->id_usuario,
+                'fecha_decision' => '2000-01-01 00:00:00',
+            ])->assertSessionHasNoErrors();
+
+            $auction->refresh();
+            $after = DB::selectOne('select clock_timestamp() as instante')->instante;
+            $this->assertEquals($admin->id_usuario, $auction->id_revisor);
+            $this->assertTrue($auction->fecha_decision->betweenIncluded($before, $after));
+            $this->assertTrue($auction->revisor->is($admin));
+            $this->actingAs($admin)->get("/admin/subastas/{$auction->id_subasta}")
+                ->assertOk()->assertSee('Administrador responsable:')->assertSee($admin->nombre)
+                ->assertSee('ID '.$admin->id_usuario)
+                ->assertSee($auction->fecha_decision->timezone('America/La_Paz')->format('d/m/Y H:i:s'));
+
+            $recorded = $auction->fecha_decision->toISOString();
+            $this->actingAs($other)->patch("/admin/subastas/{$auction->id_subasta}", [
+                'decision' => 'Aceptada',
+            ])->assertSessionHasErrors('decision');
+            $this->assertEquals($admin->id_usuario, $auction->refresh()->id_revisor);
+            $this->assertSame($recorded, $auction->fecha_decision->toISOString());
+        }
+    }
+
+    public function test_invalid_decision_leaves_audit_fields_empty_and_legacy_decisions_are_identified(): void
+    {
+        $admin = $this->admin();
+        $pending = $this->auction();
+        $this->actingAs($admin)->patch("/admin/subastas/{$pending->id_subasta}", [
+            'decision' => 'Rechazada',
+        ])->assertSessionHasErrors('motivo');
+        $this->assertNull($pending->refresh()->id_revisor);
+        $this->assertNull($pending->fecha_decision);
+
+        $legacy = $this->auction('Aceptada');
+        $this->actingAs($admin)->get("/admin/subastas/{$legacy->id_subasta}")
+            ->assertOk()->assertSee('Decisión anterior sin registro de responsable ni fecha.');
+    }
+
     public function test_cannot_resolve_already_resolved_auction(): void
     {
         $admin = $this->admin();

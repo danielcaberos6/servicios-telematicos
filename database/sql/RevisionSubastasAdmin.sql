@@ -59,6 +59,8 @@ begin
     update subasta
     set estado_revision = v_decision,
         motivo_rechazo = v_motivo,
+        id_revisor = p_actor,
+        fecha_decision = v_publicacion,
         fecha_inicio = case when v_decision = 'Aceptada' then v_publicacion else fecha_inicio end,
         fecha_fin = case when v_decision = 'Aceptada'
             then v_publicacion + (articulo.fecha_fin - articulo.fecha_inicio) else fecha_fin end

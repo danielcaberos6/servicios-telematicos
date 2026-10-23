@@ -151,5 +151,8 @@ class ConcurrenciaAdministrativaTest extends TestCase
         $this->assertCount(1, array_filter($resultados, fn ($r) => $r === 'ok'));
         $this->assertSame(1, DB::table('notificacion')->where('id_subasta', $subasta->id_subasta)->whereIn('titulo', ['Subasta publicada', 'Subasta rechazada'])->count());
         $this->assertNotSame('En revisión', $subasta->refresh()->estado_revision);
+        $expectedReviewer = $subasta->estado_revision === 'Aceptada' ? $uno : $dos;
+        $this->assertEquals($expectedReviewer->id_usuario, $subasta->id_revisor);
+        $this->assertNotNull($subasta->fecha_decision);
     }
 }

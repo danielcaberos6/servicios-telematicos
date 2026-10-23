@@ -21,7 +21,7 @@ class Subasta extends Model
 
     protected function casts(): array
     {
-        return ['monto_inicial' => 'decimal:2', 'latitud' => 'decimal:6', 'longitud' => 'decimal:6', 'fecha_inicio' => 'datetime', 'fecha_fin' => 'datetime'];
+        return ['monto_inicial' => 'decimal:2', 'latitud' => 'decimal:6', 'longitud' => 'decimal:6', 'fecha_inicio' => 'datetime', 'fecha_fin' => 'datetime', 'fecha_decision' => 'datetime'];
     }
 
     public function scopeActivas(Builder $query): void
@@ -33,6 +33,9 @@ class Subasta extends Model
     {
         if ($this->estado_subasta !== 'Activa') {
             return $this->estado_subasta;
+        }
+        if (! $this->publicada()) {
+            return $this->estado_revision;
         }
         if ($this->fecha_fin->isPast()) {
             return 'Finalizada';
@@ -55,6 +58,11 @@ class Subasta extends Model
     public function usuario()
     {
         return $this->belongsTo(User::class, 'id_usuario');
+    }
+
+    public function revisor()
+    {
+        return $this->belongsTo(User::class, 'id_revisor');
     }
 
     public function categoria()

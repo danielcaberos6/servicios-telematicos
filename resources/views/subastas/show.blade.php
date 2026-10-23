@@ -79,8 +79,9 @@
                     </div>
                     <div @class(['auction-deadline', 'auction-ended' => $subasta->estado === 'Finalizada'])>
                         <x-icono nombre="clock" />
-                        <div><strong>{{ $subasta->estado === 'Finalizada' ? 'Subasta finalizada' : ($subasta->estado === 'Cancelada' ? 'Subasta cancelada' : 'Finaliza el') }}</strong>
+                        <div><strong>{{ ! $subasta->publicada() ? 'Cierre de referencia' : ($subasta->estado === 'Finalizada' ? 'Subasta finalizada' : ($subasta->estado === 'Cancelada' ? 'Subasta cancelada' : 'Finaliza el')) }}</strong>
                             <time datetime="{{ $subasta->fecha_fin->toIso8601String() }}">{{ $subasta->fecha_fin->format('d/m/Y \a \l\a\s H:i') }} (Bolivia)</time>
+                            @unless ($subasta->publicada())<small>El plazo completo comienza al aprobarse; el cierre se ajustará en ese momento.</small>@endunless
                             @if ($subasta->estado === 'Finalizada')<small>{{ $ganadora ? 'La oferta ganadora está confirmada.' : 'La subasta terminó sin ofertas.' }}</small>@endif
                         </div>
                     </div>
