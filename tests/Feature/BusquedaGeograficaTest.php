@@ -175,6 +175,8 @@ class BusquedaGeograficaTest extends TestCase
 
         $primera = $this->buscar($params)->assertOk()
             ->assertSee('data-mapa-catalogo', false)
+            ->assertSee('<form id="filtros" method="get" action="'.route('subastas.index').'" data-sin-vacios>', false)
+            ->assertSee('<form class="search-bar" action="'.route('subastas.index').'" method="get" data-sin-vacios>', false)
             ->assertSee('id="filtro-lat" name="lat" form="filtros" value="-16.4955"', false)
             ->assertSee('id="filtro-lng" name="lng" form="filtros" value="-68.1336"', false)
             ->assertSee('name="radio" form="filtros"', false)

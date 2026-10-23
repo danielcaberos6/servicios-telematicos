@@ -12,6 +12,23 @@ document.querySelectorAll("form[data-confirm]").forEach((form) => {
     });
 });
 
+// Formularios GET del catálogo: omiten los campos vacíos para que la URL
+// y la paginación solo lleven los filtros aplicados.
+document.querySelectorAll("form[data-sin-vacios]").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+        if (event.defaultPrevented) return;
+        event.preventDefault();
+        const params = new URLSearchParams();
+        for (const [name, value] of new FormData(form, event.submitter)) {
+            if (typeof value === "string" && value.trim() !== "") {
+                params.append(name, value);
+            }
+        }
+        const query = params.toString();
+        window.location.assign(form.action + (query ? `?${query}` : ""));
+    });
+});
+
 document.querySelectorAll("[data-photo]").forEach((button) => {
     button.addEventListener("click", () => {
         document.querySelector("#main-photo").src = button.dataset.photo;

@@ -4,7 +4,7 @@
 
     <section class="search-band">
         <div class="container">
-            <form class="search-bar" action="{{ route('subastas.index') }}" method="get"><x-icono nombre="search" /><input
+            <form class="search-bar" action="{{ route('subastas.index') }}" method="get" data-sin-vacios><x-icono nombre="search" /><input
                     type="search" name="q" value="{{ request('q') }}" placeholder="¿Qué estás buscando hoy?"
                     aria-label="Buscar por título o descripción" maxlength="120">
                 @foreach (request()->except(['q', 'page']) as $key => $value)
@@ -31,7 +31,7 @@
                 <div class="filter-heading">
                     <h2><x-icono nombre="filter" />Filtros</h2><a href="{{ route('subastas.index') }}">Limpiar</a>
                 </div>
-                <form id="filtros" method="get" action="{{ route('subastas.index') }}">
+                <form id="filtros" method="get" action="{{ route('subastas.index') }}" data-sin-vacios>
                     <input type="hidden" name="q" value="{{ request('q') }}">
                     <label for="categoria">Categoría</label><select id="categoria" name="categoria">
                         <option value="">Todas las categorías</option>

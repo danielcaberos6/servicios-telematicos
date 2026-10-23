@@ -118,4 +118,17 @@ class GestionUsuariosTest extends TestCase
         $this->assertFalse($ordinary->esAdministrador());
         $this->assertDatabaseCount('decision_usuario', 0);
     }
+
+    public function test_reinstalling_sql_functions_keeps_the_administrative_access_message(): void
+    {
+        $ordinary = User::factory()->create();
+        $this->artisan('subastas:instalar-funciones')->assertSuccessful();
+
+        try {
+            DB::transaction(fn () => DB::select('select exigir_administrador(?)', [$ordinary->id_usuario]));
+            $this->fail('Un usuario sin rol administrativo superó exigir_administrador.');
+        } catch (QueryException $exception) {
+            $this->assertStringContainsString('Solo los administradores activos pueden acceder a esta sección.', $exception->getMessage());
+        }
+    }
 }
