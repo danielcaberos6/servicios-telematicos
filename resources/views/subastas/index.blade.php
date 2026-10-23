@@ -65,8 +65,17 @@
                     </fieldset>
                     <label for="ubicacion">Punto de encuentro</label><input id="ubicacion" name="ubicacion"
                         placeholder="Ciudad, zona o lugar" value="{{ request('ubicacion') }}" maxlength="250">
+                    <fieldset class="radius-filter" aria-describedby="radius-help">
+                        <legend>Cerca de un punto</legend>
+                        <input type="hidden" id="filtro-lat" name="lat" value="{{ old('lat', request('lat')) }}">
+                        <input type="hidden" id="filtro-lng" name="lng" value="{{ old('lng', request('lng')) }}">
+                        <label class="small-label" for="radio">Radio (km)</label>
+                        <input id="radio" name="radio" type="number" min="0.1" max="500" step="0.1" inputmode="decimal"
+                            placeholder="Ej. 5" value="{{ old('radio', request('radio')) }}">
+                        <small id="radius-help" class="muted">Elige el centro y el radio para ver solo subastas con punto de encuentro a esa distancia.</small>
+                    </fieldset>
                     <label for="orden">Ordenar por</label><select id="orden" name="orden">
-                        @foreach (['recientes' => 'Más recientes', 'finalizan' => 'Próximas a finalizar', 'precio_asc' => 'Menor monto inicial', 'precio_desc' => 'Mayor monto inicial'] as $key => $label)
+                        @foreach (['recientes' => 'Más recientes', 'finalizan' => 'Próximas a finalizar', 'precio_asc' => 'Menor monto inicial', 'precio_desc' => 'Mayor monto inicial', 'cercanas' => 'Más cercanas'] as $key => $label)
                             <option value="{{ $key }}" @selected(request('orden', 'recientes') === $key)>{{ $label }}</option>
                         @endforeach
                     </select>
@@ -84,7 +93,11 @@
                 </div>
                 @if (collect(request()->except(['page', 'orden']))->filter(fn($v) => $v !== null && $v !== '')->isNotEmpty())
                     <div class="filter-chips">
-                        @foreach (request()->except(['page', 'orden']) as $key => $value)
+                        @if ($porRadio)
+                            <a href="{{ route('subastas.index', request()->except(['lat', 'lng', 'radio', 'page'])) }}"
+                                aria-label="Quitar filtro de cercanía">Cercanía: hasta {{ request('radio') }} km <span>×</span></a>
+                        @endif
+                        @foreach (request()->except(['page', 'orden', 'lat', 'lng', 'radio']) as $key => $value)
                             @if (is_scalar($value) && $value !== null && $value !== '')
                                 <a href="{{ route('subastas.index', request()->except([$key, 'page'])) }}"
                                     aria-label="Quitar filtro {{ $key }}">{{ ['q' => 'Búsqueda', 'categoria' => 'Categoría', 'estado' => 'Estado', 'desde' => 'Desde', 'hasta' => 'Hasta', 'min' => 'Desde Bs', 'max' => 'Hasta Bs', 'ubicacion' => 'Lugar'][$key] ?? $key }}:
@@ -98,8 +111,13 @@
                     @forelse($subastas as $subasta)
                     <x-tarjeta-subasta :subasta="$subasta" />@empty<div class="empty-state"><x-icono nombre="search" />
                             <h2>No encontramos coincidencias</h2>
-                            <p>Prueba con otra búsqueda o amplía los filtros.</p><a class="button secondary"
-                                href="{{ route('subastas.index') }}">Limpiar filtros</a>
+                            @if ($porRadio)
+                                <p>No hay subastas activas con punto de encuentro a {{ request('radio') }} km o menos del centro elegido. Amplía el radio o mueve el centro.</p>
+                                <a class="button secondary" href="{{ route('subastas.index', request()->except(['lat', 'lng', 'radio', 'page'])) }}">Quitar filtro de cercanía</a>
+                            @else
+                                <p>Prueba con otra búsqueda o amplía los filtros.</p><a class="button secondary"
+                                    href="{{ route('subastas.index') }}">Limpiar filtros</a>
+                            @endif
                         </div>
                     @endforelse
                 </div><x-paginacion :elementos="$subastas" />

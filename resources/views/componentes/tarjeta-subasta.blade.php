@@ -14,7 +14,7 @@
         <p class="eyebrow">{{ $subasta->categoria?->nombre_categoria ?? 'Sin categoría' }}</p>
         <h3><a href="{{ route('subastas.show', $subasta) }}">{{ $subasta->titulo }}</a></h3>
         <p class="card-description">{{ Str::limit($subasta->descripcion, 75) }}</p>
-        <p class="location"><x-icono nombre="pin" />{{ Str::limit($subasta->ubicacion, 42) }}</p>
+        <p class="location"><x-icono nombre="pin" />{{ Str::limit($subasta->ubicacion, 42) }}@isset($subasta->distancia)<span class="distance"> · a {{ number_format($subasta->distancia, 1, ',', '.') }} km</span>@endisset</p>
         <div class="card-price">
             <div><small>{{ $subasta->pujas_count ? 'Oferta actual' : 'Monto inicial' }}</small><strong><span>Bs</span>
                     {{ number_format($subasta->pujas_max_monto ?? $subasta->monto_inicial, 2, ',', '.') }}</strong>

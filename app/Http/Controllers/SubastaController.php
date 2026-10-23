@@ -34,7 +34,11 @@ class SubastaController extends Controller
     {
         $filters = $request->validated();
 
-        return view('subastas.index', ['subastas' => $this->catalogoService->paginar($filters), 'categorias' => $this->catalogoService->categorias()]);
+        return view('subastas.index', [
+            'subastas' => $this->catalogoService->paginar($filters),
+            'categorias' => $this->catalogoService->categorias(),
+            'porRadio' => $this->catalogoService->filtraPorRadio($filters),
+        ]);
     }
 
     public function create()
