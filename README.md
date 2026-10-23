@@ -57,6 +57,8 @@ Desde **Mi perfil**, un usuario puede completar sus nombres y apellidos y, opcio
 
 Los carnets se guardan en `storage/app/identidad`, fuera del almacenamiento público. Solo el titular y administradores activos acceden mediante rutas autenticadas; las respuestas no permiten caché. Esta carpeta debe incluirse en las copias privadas de respaldo, sin enlaces ni publicación web.
 
+Al elegir el carnet aparece una vista previa local, antes de enviarlo. **Ampliar carnet** abre un visor con zoom, giro de 90° y ajuste a pantalla; al ampliar se puede recorrer la imagen con barras de desplazamiento, teclado, panel táctil o el dedo. El titular y los administradores disponen del mismo visor en el detalle privado de la solicitud. El giro solo cambia la visualización, no el archivo enviado.
+
 ## Revisión de publicaciones
 
 Cada subasta nueva se registra **En revisión**, asociada a su vendedor, y no se publica automáticamente. Las subastas que existían antes de esta función se conservaron como **Aceptadas**.

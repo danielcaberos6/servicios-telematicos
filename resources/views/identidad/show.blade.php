@@ -19,7 +19,7 @@
             @if ($verificacion->usuario->imagen)<img class="avatar" src="{{ $verificacion->usuario->imagen->url }}" alt="Fotografía actual de perfil">@else<p>Sin fotografía de perfil.</p>@endif
         </div>
         <div class="panel"><h2>Carnet privado</h2>
-            <img class="gestion-documento" src="{{ route('identidad.documento', $verificacion) }}" alt="Carnet enviado para revisión manual">
+            <x-visor-carnet :src="route('identidad.documento', $verificacion)" />
         </div>
     </div>
     @if (auth()->user()->esAdministrador() && $verificacion->estado === 'En revisión' && $verificacion->vigente)

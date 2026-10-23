@@ -18,6 +18,7 @@
             <p>El administrador comparará tus nombres y tu foto de perfil con el carnet. Tu rostro debe verse claramente en la foto de perfil.</p>
             <label for="carnet">Fotografía legible del carnet</label>
             <input id="carnet" name="carnet" type="file" accept="image/jpeg,image/png" required>
+            <x-visor-carnet input="carnet" />
             <p class="muted">JPG o PNG de hasta 5 MB. Solo tú y los administradores activos pueden consultarlo. El documento no cambia tus datos de perfil.</p>
             <label class="checkbox-label"><input name="confirmacion" type="checkbox" value="1" required>Confirmo que mis nombres y apellidos coinciden con el carnet.</label>
             <button type="submit" class="button primary">Solicitar verificación</button>
