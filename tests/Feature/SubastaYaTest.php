@@ -323,6 +323,19 @@ class SubastaYaTest extends TestCase
         $this->assertSame($before, $user->fresh()->getAttributes());
     }
 
+    public function test_profile_limits_attempts_to_guess_the_current_password(): void
+    {
+        $user = User::factory()->create();
+        $other = User::factory()->create();
+        $data = ['nombre' => $user->nombre, 'correo' => 'nuevo@example.com'];
+        for ($i = 0; $i < 10; $i++) {
+            $this->actingAs($user)->put('/perfil', [...$data, 'current_password' => "incorrecta{$i}"])->assertSessionHasErrors('current_password');
+        }
+        $this->put('/perfil', [...$data, 'current_password' => 'incorrecta'])->assertTooManyRequests();
+        $this->assertNotSame('nuevo@example.com', $user->fresh()->correo);
+        $this->actingAs($other)->put('/perfil', ['nombre' => $other->nombre, 'correo' => $other->correo])->assertSessionHasNoErrors();
+    }
+
     public function test_profile_rejects_email_already_used_by_another_user(): void
     {
         $user = User::factory()->create();

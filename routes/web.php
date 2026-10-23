@@ -46,7 +46,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/identidad/{verificacion}/documento', [IdentidadController::class, 'documento'])->name('identidad.documento');
     Route::post('/cerrar-sesion', [AutenticacionController::class, 'cerrarSesion'])->name('cerrar-sesion');
     Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
-    Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
+    Route::put('/perfil', [PerfilController::class, 'update'])->middleware('throttle:10,1')->name('perfil.update');
     Route::get('/mis-subastas', [SubastaController::class, 'misSubastas'])->name('subastas.mias');
     Route::get('/subastas/crear', [SubastaController::class, 'create'])->name('subastas.create');
     Route::post('/subastas', [SubastaController::class, 'store'])->middleware('throttle:20,1')->name('subastas.store');
