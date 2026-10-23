@@ -98,7 +98,7 @@ document.querySelectorAll('[data-document-viewer]').forEach((viewer) => {
             preview.hidden = false;
             open.hidden = false;
         } catch {
-            if (current === revision) showError('No se pudo mostrar el carnet. Comprueba que la imagen sea válida y esté disponible.');
+            if (current === revision) showError(`No se pudo mostrar ${viewer.dataset.documentLabel}. Comprueba que la imagen sea válida y esté disponible.`);
         }
     };
     if (input) {

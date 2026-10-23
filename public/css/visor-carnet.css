@@ -1,5 +1,6 @@
 .document-viewer { margin: 16px 0; }
 .document-preview { display: block; width: 100%; max-height: 360px; object-fit: contain; background: var(--paper); margin-bottom: 12px; }
+.document-preview-profile { max-height: 220px; }
 .document-viewer [hidden] { display: none; }
 .document-error { color: #933a32; }
 .document-dialog { width: min(1200px, 96vw); height: 92dvh; max-width: 96vw; max-height: 96dvh; margin: auto; padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--ink); }

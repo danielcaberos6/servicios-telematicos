@@ -16,7 +16,11 @@
             <p><strong>Nombres:</strong> {{ $verificacion->nombres }}</p><p><strong>Apellidos:</strong> {{ $verificacion->apellidos }}</p>
             <h3>Perfil actual</h3>
             <p>{{ $verificacion->usuario->nombre }}</p>
-            @if ($verificacion->usuario->imagen)<img class="avatar" src="{{ $verificacion->usuario->imagen->url }}" alt="Fotografía actual de perfil">@else<p>Sin fotografía de perfil.</p>@endif
+            @if ($verificacion->usuario->imagen)
+                <x-visor-carnet :src="$verificacion->usuario->imagen->url" :perfil="true" />
+            @else
+                <p>Sin fotografía de perfil.</p>
+            @endif
         </div>
         <div class="panel"><h2>Carnet privado</h2>
             <x-visor-carnet :src="route('identidad.documento', $verificacion)" />

@@ -42,7 +42,8 @@ class RevisionIdentidadTest extends TestCase
         $solicitud = $this->solicitud();
         $url = '/admin/identidad/'.$solicitud->id_verificacion;
         $this->actingAs($admin)->get('/admin/identidad')->assertOk()->assertSee('Juan José Pérez Soto');
-        $this->get('/identidad/'.$solicitud->id_verificacion)->assertSee('Revisión manual')->assertSee('Carnet privado');
+        $this->get('/identidad/'.$solicitud->id_verificacion)->assertSee('Revisión manual')->assertSee('Carnet privado')
+            ->assertSee('Ampliar foto de perfil')->assertSee('Ampliar carnet');
         $this->patch($url, ['decision' => 'Aprobada'])->assertSessionHasErrors('revision_confirmada');
         $this->patch($url, ['decision' => 'Aprobada', 'revision_confirmada' => 1])->assertSessionHasNoErrors();
         $this->assertTrue($solicitud->usuario->refresh()->identidad_verificada);
