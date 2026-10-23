@@ -9,6 +9,7 @@ use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PujaController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\RevisionSubastaController;
 use App\Http\Controllers\SubastaController;
 use App\Http\Middleware\SoloAdministrador;
 use Illuminate\Support\Facades\Route;
@@ -18,6 +19,9 @@ Route::get('/buscar', [SubastaController::class, 'index'])->name('subastas.index
 Route::get('/imagenes/{imagen}', [ImagenController::class, 'show'])->name('imagenes.show');
 
 Route::middleware(['auth', SoloAdministrador::class])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/subastas', [RevisionSubastaController::class, 'index'])->name('subastas.index');
+    Route::get('/subastas/{subasta}', [RevisionSubastaController::class, 'show'])->name('subastas.show');
+    Route::patch('/subastas/{subasta}', [RevisionSubastaController::class, 'resolver'])->name('subastas.resolver');
     Route::get('/identidad', [IdentidadController::class, 'index'])->name('identidad.index');
     Route::patch('/identidad/{verificacion}', [IdentidadController::class, 'resolver'])->name('identidad.resolver');
     Route::resource('categorias', CategoriaController::class)->except('show', 'destroy');
