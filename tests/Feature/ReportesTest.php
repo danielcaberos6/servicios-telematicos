@@ -148,7 +148,8 @@ class ReportesTest extends TestCase
         $counts = [User::count(), Subasta::count(), DB::table('puja')->count(), DB::table('resenas')->count()];
         $this->seed(ReportesDemoSeeder::class);
         $this->assertSame($counts, [User::count(), Subasta::count(), DB::table('puja')->count(), DB::table('resenas')->count()]);
-        $this->assertSame(47, Subasta::count());
+        $this->assertSame(47, Subasta::where('estado_revision', 'Aceptada')->count());
+        $this->assertSame(49, Subasta::count());
         $this->assertSame(0, User::where('nombre', 'like', '%Demo%')->count());
         $this->assertGreaterThanOrEqual(9, User::distinct('ciudad')->count('ciudad'));
         $admin = User::where('correo', 'admin@subastaya.test')->firstOrFail();

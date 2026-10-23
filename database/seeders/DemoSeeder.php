@@ -48,6 +48,26 @@ class DemoSeeder extends Seeder
                 $auction->imagenes()->create(['ruta' => $path, 'tamano' => strlen($contents)]);
             }
         }
+        $this->solicitudes($demo);
+    }
+
+    // Solicitudes del usuario demo para ver En revisión y Rechazada en Mis subastas.
+    // Las pendientes avisan al vendedor y a los administradores al insertarse.
+    private function solicitudes(User $demo): void
+    {
+        $items = [
+            ['Escritorio de madera con cajones', 'Muebles', 'Usado', 520, 'La Paz, Plaza Abaroa', 'En revisión', null,
+                'Escritorio de demostración pendiente de revisión. Todavía no aparece en el catálogo.'],
+            ['Reloj de pulsera de colección', 'Ropa, calzado y accesorios', 'Usado', 900, 'La Paz, Plaza España', 'Rechazada',
+                'La descripción no indica la marca ni el modelo. Completa esos datos y agrega fotos propias del reloj.',
+                'Reloj de demostración rechazado para mostrar el motivo que ve el vendedor.'],
+        ];
+        foreach ($items as [$title, $category, $condition, $price, $location, $revision, $reason, $description]) {
+            $auction = $demo->subastas()->firstOrNew(['titulo' => $title]);
+            if (! $auction->exists) {
+                $auction->forceFill(['descripcion' => $description, 'id_categoria' => Categoria::where('nombre_categoria', $category)->value('id_categoria'), 'estado_articulo' => $condition, 'monto_inicial' => $price, 'ubicacion' => $location, 'fecha_inicio' => now()->subHours(3), 'fecha_fin' => now()->addDays(6), 'estado_revision' => $revision, 'motivo_rechazo' => $reason])->save();
+            }
+        }
     }
 
     // Coordenadas aproximadas de cada plaza; los libros quedan sin mapa como una publicación anterior.

@@ -146,7 +146,8 @@ class OperacionesSqlTest extends TestCase
         Storage::fake('public');
         $this->seed(ActividadDemoSeeder::class);
         $this->seed(ActividadDemoSeeder::class);
-        $this->assertDatabaseCount('subasta', 7);
+        // 7 publicaciones aceptadas y 2 solicitudes del usuario demo (En revisión y Rechazada).
+        $this->assertDatabaseCount('subasta', 9);
         $this->assertDatabaseCount('imagen', 7);
         $this->assertDatabaseCount('resenas', 5);
         $this->assertDatabaseCount('puja', 5);

@@ -217,8 +217,8 @@ class BusquedaGeograficaTest extends TestCase
         $this->seed(\Database\Seeders\DemoSeeder::class);
         $this->seed(\Database\Seeders\DemoSeeder::class);
 
-        $this->assertSame(7, Subasta::count());
-        $this->assertSame(6, Subasta::whereNotNull('latitud')->count());
+        $this->assertSame(7, Subasta::where('estado_revision', 'Aceptada')->count());
+        $this->assertSame(6, Subasta::where('estado_revision', 'Aceptada')->whereNotNull('latitud')->count());
         $this->assertNull(Subasta::where('titulo', 'Colección de libros')->value('latitud'));
 
         // Santa Cruz, Plaza 24 de Septiembre: solo la bicicleta está a 10 km o menos.

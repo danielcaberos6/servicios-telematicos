@@ -292,6 +292,21 @@ class RevisionSubastasTest extends TestCase
         $this->assertSame(0, $seller->notificaciones()->where('titulo', 'Solicitud en revisión')->count());
     }
 
+    public function test_demo_data_includes_a_pending_and_a_rejected_request(): void
+    {
+        $this->seed(\Database\Seeders\DemoSeeder::class);
+        $this->seed(\Database\Seeders\DemoSeeder::class);
+        $demo = User::where('correo', 'demo@subastaya.test')->sole();
+        $admin = User::where('correo', 'admin@subastaya.test')->sole();
+
+        $this->assertSame(['En revisión' => 1, 'Rechazada' => 1], $demo->subastas()->where('estado_revision', '<>', 'Aceptada')
+            ->pluck('estado_revision')->countBy()->sortKeys()->all());
+        $this->assertSame(1, $admin->notificaciones()->where('titulo', 'Nueva solicitud de publicación')->count());
+        $this->get('/buscar')->assertDontSee('Escritorio de madera con cajones')->assertDontSee('Reloj de pulsera de colección');
+        $this->actingAs($demo)->get('/mis-subastas')->assertOk()
+            ->assertSee('Escritorio de madera con cajones')->assertSee('La descripción no indica la marca ni el modelo.');
+    }
+
     public function test_reinstalling_sql_functions_keeps_requests_unpublished(): void
     {
         $this->auction('En revisión');
