@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'accepted' => 'Debes aceptar el campo :attribute.',
+    'accepted_if' => 'Debes aceptar el campo :attribute cuando :other sea :value.',
+    'required_if' => 'El campo :attribute es obligatorio cuando :other sea :value.',
+    'gt' => ['numeric' => 'El campo :attribute debe ser mayor que :value.'],
     'required' => 'El campo :attribute es obligatorio.',
     'string' => 'El campo :attribute debe ser texto.',
     'email' => 'Introduce un correo electrónico válido.',

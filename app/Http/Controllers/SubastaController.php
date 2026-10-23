@@ -82,7 +82,8 @@ class SubastaController extends Controller
 
     public function misSubastas(Request $request)
     {
-        $subastas = $this->subastaService->misSubastas($request->user()->id_usuario);
+        $filtros = $request->validate(['apartado' => ['nullable', 'in:revision,publicadas,rechazadas,finalizadas']]);
+        $subastas = $this->subastaService->misSubastas($request->user()->id_usuario, $filtros['apartado'] ?? null);
 
         return view('subastas.mias', compact('subastas'));
     }
@@ -114,7 +115,11 @@ class SubastaController extends Controller
                 if ($images->count() !== count($ids)) {
                     abort(403);
                 }
-                if ($locked->imagenes()->count() - $images->count() + count($request->file('imagenes', [])) > 5) {
+                $totalFotos = $locked->imagenes()->count() - $images->count() + count($request->file('imagenes', []));
+                if ($totalFotos < 1) {
+                    throw ValidationException::withMessages(['imagenes' => 'La subasta debe conservar al menos una foto del artículo.']);
+                }
+                if ($totalFotos > 5) {
                     throw ValidationException::withMessages(['imagenes' => 'La subasta puede tener como máximo 5 imágenes.']);
                 }
                 $removed = $images->pluck('ruta')->all();

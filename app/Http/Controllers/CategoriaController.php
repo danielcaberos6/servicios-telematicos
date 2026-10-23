@@ -9,9 +9,12 @@ use Illuminate\Http\Request;
 
 class CategoriaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return view('admin.categorias.index', ['categorias' => Categoria::orderBy('nombre_categoria')->paginate(15)]);
+        $filtros = $request->validate(['estado' => ['nullable', 'in:habilitadas,deshabilitadas']]);
+        return view('admin.categorias.index', ['categorias' => Categoria::query()
+            ->when($filtros['estado'] ?? null, fn ($query, $estado) => $query->where('habilitada', $estado === 'habilitadas'))
+            ->orderBy('nombre_categoria')->paginate(15)->withQueryString()]);
     }
 
     public function create()

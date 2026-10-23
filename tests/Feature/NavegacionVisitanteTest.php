@@ -14,7 +14,7 @@ class NavegacionVisitanteTest extends TestCase
     public function test_guest_navigation_contains_only_public_sections(): void
     {
         $this->get('/')->assertOk()->assertSee('Cómo funciona')->assertSee(route('subastas.index'))
-            ->assertDontSee('Mis Subastas')->assertDontSee('Notificaciones')
+            ->assertDontSee('Mis subastas')->assertDontSee('Notificaciones')
             ->assertDontSee('href="'.route('perfil.edit').'"', false);
         $this->get('/como-funciona')->assertOk()->assertSee('Preguntas frecuentes')
             ->assertSee('Participa con cuidado')->assertSee('Crear una cuenta')
@@ -27,7 +27,7 @@ class NavegacionVisitanteTest extends TestCase
     public function test_signed_in_users_keep_their_personal_navigation(): void
     {
         $this->actingAs(User::factory()->create())->get('/')->assertOk()
-            ->assertSee('Mis Subastas')->assertSee('Notificaciones')->assertSee('Mi perfil:');
+            ->assertSee('Mis subastas')->assertSee('Notificaciones')->assertSee('Mi perfil:');
         $this->get('/como-funciona')->assertOk()->assertDontSee('Crear una cuenta');
     }
 

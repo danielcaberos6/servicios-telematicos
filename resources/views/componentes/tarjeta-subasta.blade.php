@@ -16,7 +16,7 @@
             @if ($subasta->estado_revision === 'Rechazada')
                 <p class="revision-reason"><strong>Motivo del rechazo:</strong> {{ $subasta->motivo_rechazo }}</p>
             @elseif ($subasta->estado_revision === 'En revisión')
-                <p class="revision-reason">Un administrador revisará tu solicitud. Mientras tanto no aparece en Buscar.</p>
+                <p class="revision-reason">Un administrador revisará tu solicitud. Mientras tanto no aparece en Explorar subastas.</p>
             @endif
         @endif
         <p class="eyebrow">{{ $subasta->categoria?->nombre_categoria ?? 'Sin categoría' }}</p>

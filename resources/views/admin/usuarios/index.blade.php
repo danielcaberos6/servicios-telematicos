@@ -17,14 +17,7 @@
                 <label for="q">Nombre o correo</label>
                 <input id="q" name="q" type="search" maxlength="120" value="{{ $filtros['q'] ?? '' }}" placeholder="Buscar una cuenta">
             </div>
-            <div>
-                <label for="estado">Estado de la cuenta</label>
-                <select id="estado" name="estado">
-                    <option value="">Todos los estados</option>
-                    <option value="activo" @selected(($filtros['estado'] ?? '') === 'activo')>Activa</option>
-                    <option value="inactivo" @selected(($filtros['estado'] ?? '') === 'inactivo')>Desactivada</option>
-                </select>
-            </div>
+            <input type="hidden" name="estado" value="{{ $filtros['estado'] ?? '' }}">
             <button type="submit" class="button primary">Buscar</button>
             <a href="{{ route('admin.usuarios.index') }}" class="text-link">Limpiar filtros</a>
         </form>

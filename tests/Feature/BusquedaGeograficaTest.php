@@ -154,7 +154,7 @@ class BusquedaGeograficaTest extends TestCase
     {
         $this->from('/buscar')->followingRedirects()->get('/buscar?'.http_build_query([...self::CENTRO, 'radio' => 0]))
             ->assertOk()
-            ->assertSee('Catálogo de subastas')
+            ->assertSee('Explorar subastas')
             ->assertSee('El radio de búsqueda debe ser mayor que cero.')
             ->assertSee('id="radio" name="radio" form="filtros" type="number"', false)
             ->assertSee('placeholder="Ej. 5" value="0"', false);

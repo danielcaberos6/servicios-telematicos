@@ -23,7 +23,7 @@ Al arrancar, el contenedor instala dependencias, aplica las migraciones, carga l
 | `demo@subastaya.test` | Usuario | `SubastaYA2026!` |
 | `vendedor@subastaya.test` | Usuario | `SubastaYA2026!` |
 
-No hace falta cargar estas cuentas manualmente. Los reinicios conservan las contraseñas, los datos, el estado y los roles de las cuentas existentes. En otros entornos no se crean cuentas de demostración. La carga sucede al iniciar el contenedor con `docker compose up`, no al construir solamente la imagen.
+También se cargan automáticamente 7 subastas publicadas, una solicitud en revisión y otra rechazada mediante `subastas:cargar-demo`. No hace falta cargar estos ejemplos manualmente. Los reinicios conservan las contraseñas, el estado y los roles de las cuentas existentes y no duplican las subastas ni renuevan sus plazos. En otros entornos no se cargan ejemplos. La carga sucede cuando arranca el contenedor; `docker compose up -d` no la repite si el contenedor ya está funcionando.
 
 El servicio `scheduler` finaliza cada minuto las subastas vencidas.
 
@@ -39,7 +39,7 @@ Crea publicaciones, ofertas y valoraciones de ejemplo. Usuario: `demo@subastaya.
 
 ## Administración: HU-08 y HU-09
 
-La cuenta administrativa ya se crea al arrancar Docker en local. Para agregar también las subastas básicas de demostración:
+Las cuentas y las subastas básicas ya se crean al arrancar Docker en local. Para volver a cargar los ejemplos que falten manualmente:
 
 ```sh
 docker compose exec laravel php artisan db:seed --class=DemoSeeder
@@ -66,6 +66,8 @@ Una solicitud rechazada permite **Corregir y reenviar** desde Mis subastas o su 
 Las nuevas aprobaciones y rechazos registran el ID del administrador autenticado y la fecha de decisión en PostgreSQL, dentro de la misma operación que cambia el estado y notifica al vendedor. El detalle administrativo muestra el responsable y la hora de Bolivia. Las decisiones anteriores conservan estos campos vacíos, sin atribuirles un responsable o una fecha que no se conocen.
 
 Cada subasta nueva se registra **En revisión**, asociada a su vendedor, y no se publica automáticamente. Las subastas que existían antes de esta función se conservaron como **Aceptadas**.
+
+Las nuevas solicitudes requieren entre **1 y 5 fotos del artículo** (JPG, PNG o WebP, hasta 5 MB por foto). Al editar o reenviar, el total de fotos conservadas y nuevas también debe quedar entre 1 y 5: no se permite eliminar la última sin reemplazarla. Las publicaciones anteriores se conservan; si se edita una que no tiene fotos, deberá añadirse al menos una. La foto del perfil sigue siendo independiente.
 
 - **Privacidad**: una solicitud En revisión o Rechazada no aparece en el inicio, en el catálogo ni en los reportes administrativos y no admite pujas. Su detalle y sus fotos responden 404 a terceros; solo los ven el propietario y los administradores. La base de datos también rechaza las pujas sobre subastas no aceptadas, y las solicitudes no publicadas no se finalizan.
 - **Edición**: editar los datos o las fotos de una subasta Aceptada o Rechazada la devuelve a En revisión (se borra el motivo de rechazo) y se vuelve a avisar al vendedor y a los administradores. Ningún cambio se publica sin una nueva decisión.

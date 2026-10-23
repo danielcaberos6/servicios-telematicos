@@ -1,5 +1,5 @@
 @extends('plantillas.principal')
-@section('title', 'Buscar subastas')
+@section('title', 'Explorar subastas')
 @section('content')
 
     <section class="search-band">
@@ -21,10 +21,9 @@
         <div class="section-heading">
             <div>
                 <p class="eyebrow">EXPLORA Y ENCUENTRA</p>
-                <h1 class="page-title">Catálogo de subastas</h1>
+                <h1 class="page-title">Explorar subastas</h1>
                 <p>Artículos activos, listos para recibir tu oferta.</p>
-            </div>@auth<a href="{{ route('subastas.create') }}" class="button primary"><x-icono nombre="plus" />Crear
-                subasta</a>@endauth
+            </div>
         </div>
         <div class="catalog-layout">
             <aside class="filter-panel">  

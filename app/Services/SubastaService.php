@@ -28,10 +28,16 @@ class SubastaService
         return json_decode($row->rutas, true, 512, JSON_THROW_ON_ERROR);
     }
 
-    public function misSubastas(int $actor)
+    public function misSubastas(int $actor, ?string $apartado = null)
     {
         return Subasta::query()->select('subasta.*')->fromRaw('listar_mis_subastas(?) as subasta', [$actor])
-            ->with(['imagenes', 'categoria'])->withCount('pujas')->withMax('pujas', 'monto')->orderByDesc('fecha_inicio')->paginate(12);
+            ->when($apartado === 'revision', fn ($query) => $query->where('estado_revision', 'En revisión'))
+            ->when($apartado === 'rechazadas', fn ($query) => $query->where('estado_revision', 'Rechazada'))
+            ->when($apartado === 'publicadas', fn ($query) => $query->where('estado_revision', 'Aceptada')->where('estado_subasta', 'Activa')->where('fecha_fin', '>', now()))
+            ->when($apartado === 'finalizadas', fn ($query) => $query->where('estado_revision', 'Aceptada')->where(function ($query) {
+                $query->where('estado_subasta', 'Finalizada')->orWhere(fn ($query) => $query->where('estado_subasta', 'Activa')->where('fecha_fin', '<=', now()));
+            }))
+            ->with(['imagenes', 'categoria'])->withCount('pujas')->withMax('pujas', 'monto')->orderByDesc('fecha_inicio')->paginate(12)->withQueryString();
     }
 
     public function ranking(int $id, int $actor): array

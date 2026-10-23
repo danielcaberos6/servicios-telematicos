@@ -5,7 +5,7 @@
 @endpush
 @section('content')
     <div class="container section publish-page">
-        <a class="breadcrumb" href="{{ route('subastas.mias') }}">← Mis Subastas</a>
+        <a class="breadcrumb" href="{{ route('subastas.mias') }}">← Mis subastas</a>
         <header class="publish-heading">
             <div>
                 <p class="eyebrow">DALE UNA NUEVA OPORTUNIDAD</p>
@@ -32,7 +32,7 @@
                     @method('PUT')
                 @endif
 
-                <section class="panel publish-section" aria-labelledby="article-heading">
+                <section class="panel publish-section" id="articulo" data-apartado aria-labelledby="article-heading">
                     <div class="publish-section-heading">
                         <span class="section-number" aria-hidden="true">01</span>
                         <div>
@@ -76,16 +76,16 @@
                     </div>
                 </section>
 
-                <section class="panel publish-section" aria-labelledby="photos-heading">
+                <section class="panel publish-section" id="fotografias" data-apartado aria-labelledby="photos-heading">
                     <div class="publish-section-heading">
                         <span class="section-number" aria-hidden="true">02</span>
                         <div>
-                            <h2 id="photos-heading">Fotografías <span class="publish-optional">Opcional</span></h2>
-                            <p>Las fotos claras ayudan a conocer mejor tu artículo.</p>
+                            <h2 id="photos-heading">Fotografías <span class="required-mark">*</span></h2>
+                            <p>Sube al menos una foto para que el administrador pueda revisar tu artículo.</p>
                         </div>
                     </div>
                     <div class="publish-photo-rules" id="photo-help">
-                        <span>Hasta 5 fotos</span><span>JPG, PNG o WebP</span><span>Máximo 5 MB por foto</span>
+                        <span>Entre 1 y 5 fotos en total</span><span>JPG, PNG o WebP</span><span>Máximo 5 MB por foto</span>
                     </div>
                     @if ($subasta->exists && $subasta->imagenes->isNotEmpty())
                         <div class="existing-images publish-photo-grid">
@@ -103,12 +103,13 @@
                         <strong>Selecciona las fotos de tu artículo</strong>
                         <span>O arrastra y suelta tus archivos aquí. La primera fotografía será la portada.</span>
                         <input id="imagenes" name="imagenes[]" type="file" multiple accept="image/jpeg,image/png,image/webp"
-                            data-preview="image-preview" aria-describedby="photo-help">
+                            data-preview="image-preview" data-fotos-subasta @required(! $subasta->exists || $subasta->imagenes->isEmpty()) aria-describedby="photo-help photo-error">
                     </label>
                     <div id="image-preview" class="image-preview publish-photo-grid" aria-live="polite"></div>
+                    <p id="photo-error" class="publish-photo-error" role="status" aria-live="polite">@error('imagenes'){{ $message }}@enderror</p>
                 </section>
 
-                <section class="panel publish-section" aria-labelledby="conditions-heading">
+                <section class="panel publish-section" id="condiciones" data-apartado aria-labelledby="conditions-heading">
                     <div class="publish-section-heading">
                         <span class="section-number" aria-hidden="true">03</span>
                         <div>
@@ -146,6 +147,11 @@
                                 </small>
                             </div>
                         </div>
+                    </div>
+                </section>
+                <section class="panel publish-section" id="encuentro" data-apartado aria-labelledby="encuentro-heading">
+                    <h2 id="encuentro-heading">Ubicación y punto de encuentro</h2>
+                    <div class="publish-fields">
                         <div class="publish-field">
                             <label for="ubicacion">Punto de encuentro <span class="required-mark">*</span></label>
                             <div class="location-group">
@@ -189,7 +195,7 @@
                 <div class="panel publish-actions">
                     <p><x-icono nombre="shield" /> Revisa los datos antes de {{ $subasta->exists ? 'guardar los cambios' : 'publicar' }}.</p>
                     @if ($subasta->exists && $subasta->estado_revision !== 'En revisión')
-                        <p class="muted">Al guardar, la subasta vuelve a revisión y deja de mostrarse en Buscar hasta que un administrador la acepte.</p>
+                        <p class="muted">Al guardar, la subasta vuelve a revisión y deja de mostrarse en Explorar subastas hasta que un administrador la acepte.</p>
                     @endif
                     <div class="form-footer">
                         <a class="button secondary" href="{{ $subasta->exists ? route('subastas.show', $subasta) : route('subastas.mias') }}">Cancelar</a>

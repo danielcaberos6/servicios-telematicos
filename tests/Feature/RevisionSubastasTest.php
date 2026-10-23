@@ -17,6 +17,12 @@ class RevisionSubastasTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Storage::fake('public');
+    }
+
     private function admin(): User
     {
         $user = User::factory()->create();
@@ -31,6 +37,7 @@ class RevisionSubastasTest extends TestCase
     private function payload(array $overrides = []): array
     {
         return array_replace([
+            'imagenes' => [UploadedFile::fake()->image('articulo.jpg')],
             'titulo' => 'Mochila de excursión 40 litros',
             'descripcion' => 'Mochila con armazón interno, cubierta para lluvia y bolsillos laterales.',
             'id_categoria' => Categoria::firstOrCreate(['nombre_categoria' => 'Deporte'])->id_categoria,
@@ -46,7 +53,7 @@ class RevisionSubastasTest extends TestCase
     private function auction(string $revision, array $overrides = []): Subasta
     {
         return User::factory()->create()->subastas()->forceCreate([
-            ...array_diff_key($this->payload(), ['fecha_fin' => true]),
+            ...array_diff_key($this->payload(), ['fecha_fin' => true, 'imagenes' => true]),
             'titulo' => "Solicitud {$revision}",
             'fecha_inicio' => now()->subHour(),
             'fecha_fin' => now()->addDays(4),

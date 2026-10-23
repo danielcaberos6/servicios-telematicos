@@ -15,8 +15,7 @@
             <div class="search-bar"><x-icono nombre="search" /><input type="search" name="q"
                     value="{{ request('q') }}" maxlength="120" placeholder="Buscar en tus notificaciones"
                     aria-label="Buscar notificaciones"><button class="button primary" type="submit">Buscar</button></div>
-            <label class="checkbox-label"><input type="checkbox" name="solo_no_leidas" value="1"
-                    @checked(request('solo_no_leidas'))>Solo no leídas</label>
+            @if (request()->boolean('solo_no_leidas'))<input type="hidden" name="solo_no_leidas" value="1">@endif
         </form>
         <div class="notification-list">
             @forelse($notificaciones as $item)

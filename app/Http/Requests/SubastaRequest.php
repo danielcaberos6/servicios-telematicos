@@ -32,7 +32,9 @@ class SubastaRequest extends FormRequest
             'monto_inicial' => ['required', 'numeric', 'decimal:0,2', 'min:0.01', 'max:9999999999.99'],
             // La fecha de publicación se fija en el servidor; la subasta inicia al publicarse.
             'fecha_fin' => ['required', 'date', 'after:now', 'before:'.now()->addYear()->toDateTimeString()],
-            'imagenes' => ['nullable', 'array', 'max:5'],
+            'imagenes' => $this->route('subasta') instanceof Subasta
+                ? ['nullable', 'array', 'max:5']
+                : ['required', 'array', 'min:1', 'max:5'],
             'imagenes.*' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120', 'dimensions:max_width=8000,max_height=8000'],
             'eliminar_imagenes' => ['nullable', 'array', 'max:5'],
             'eliminar_imagenes.*' => ['integer', 'distinct'],
@@ -42,6 +44,9 @@ class SubastaRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'imagenes.required' => 'Debes subir al menos una foto del artículo para enviar la subasta a revisión.',
+            'imagenes.min' => 'Debes subir al menos una foto del artículo.',
+            'imagenes.max' => 'La subasta puede tener como máximo 5 fotos.',
             'latitud.required_with' => 'Falta la latitud del punto de encuentro. Vuelve a marcarlo en el mapa o quita las coordenadas.',
             'longitud.required_with' => 'Falta la longitud del punto de encuentro. Vuelve a marcarlo en el mapa o quita las coordenadas.',
         ];
