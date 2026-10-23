@@ -4,10 +4,14 @@ namespace Tests\Feature;
 
 use App\Models\Categoria;
 use App\Models\User;
+use App\Services\GestionUsuarioService;
+use App\Services\IdentidadService;
 use App\Services\PujaService;
+use App\Services\SubastaService;
 use Database\Seeders\ReportesDemoSeeder;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -163,6 +167,60 @@ class GestionUsuariosTest extends TestCase
             ->assertSee('No hay decisiones registradas para esta cuenta.');
         $this->getJson($url.'?publicaciones=0&ofertas=abc')->assertUnprocessable()
             ->assertJsonValidationErrors(['publicaciones', 'ofertas']);
+    }
+
+    public function test_administrator_history_shows_only_their_administrative_actions_and_account_changes(): void
+    {
+        Storage::fake('identidad');
+        $admin = $this->admin();
+        $other = $this->admin();
+        $user = User::factory()->create();
+        $category = Categoria::firstOrCreate(['nombre_categoria' => 'Pruebas']);
+        $auction = app(SubastaService::class)->crear($user->id_usuario, [
+            'titulo' => 'Publicación revisada por el administrador', 'descripcion' => 'Artículo para revisar.',
+            'ubicacion' => 'La Paz', 'estado_articulo' => 'Usado', 'monto_inicial' => '100.00',
+            'id_categoria' => $category->id_categoria, 'fecha_fin' => now()->addDays(3)->toIso8601String(),
+        ]);
+        app(SubastaService::class)->resolverRevision($admin->id_usuario, $auction->id_subasta, 'Rechazada', 'Fotografías poco claras.');
+
+        $user->forceFill(['nombres' => 'Persona', 'apellidos' => 'Verificada'])->save();
+        $user->imagen()->create(['ruta' => 'perfiles/prueba.jpg', 'tamano' => 100]);
+        $identity = app(IdentidadService::class)->solicitar($user->id_usuario, $user->refresh()->version_identidad, UploadedFile::fake()->image('carnet.jpg'));
+        app(IdentidadService::class)->resolver($admin->id_usuario, $identity, 'Aprobada', null);
+        app(GestionUsuarioService::class)->cambiar($admin->id_usuario, $user->id_usuario, 'estado', false);
+        // Esta decisión recae sobre el administrador consultado, pero la hizo otro.
+        app(GestionUsuarioService::class)->cambiar($other->id_usuario, $admin->id_usuario, 'estado', false);
+
+        $this->actingAs($other)->get('/admin/usuarios/'.$admin->id_usuario.'/historial')->assertOk()
+            ->assertSee('Historial administrativo de')->assertSee('Acciones realizadas')
+            ->assertSee('Revisión de publicación')->assertSee('Verificación de identidad')->assertSee('Gestión de cuenta')
+            ->assertSee('Fotografías poco claras.')->assertSee('Aprobada')->assertSee('Cuenta desactivada')
+            ->assertSee('Cambios sobre esta cuenta')->assertSee('Estado de cuenta')
+            ->assertSee(route('admin.subastas.show', $auction), false)
+            ->assertSee(route('identidad.show', $identity), false)
+            ->assertViewHas('acciones', fn ($p) => $p->total() === 3 && $p->pluck('tipo')->all() === ['cuenta', 'identidad', 'publicacion'])
+            ->assertViewMissing('subastas')->assertViewMissing('pujas')
+            ->assertDontSee('Subastas de este usuario')->assertDontSee('Pujas realizadas');
+    }
+
+    public function test_administrator_actions_are_paginated_and_empty_state_does_not_show_bidding_sections(): void
+    {
+        $admin = $this->admin();
+        $other = $this->admin();
+        $user = User::factory()->create();
+        $url = '/admin/usuarios/'.$admin->id_usuario.'/historial';
+        $this->actingAs($other)->get($url)->assertOk()
+            ->assertSee('Este administrador todavía no tiene acciones registradas.')
+            ->assertDontSee('Pujas realizadas')->assertDontSee('Subastas de este usuario');
+        for ($i = 0; $i < 16; $i++) {
+            app(GestionUsuarioService::class)->cambiar($admin->id_usuario, $user->id_usuario, 'estado', $i % 2 === 1);
+        }
+        $this->get($url)->assertOk()
+            ->assertViewHas('acciones', fn ($p) => $p->total() === 16 && $p->count() === 15)
+            ->assertSee('acciones=2#acciones-administrador', false);
+        $this->get($url.'?acciones=2')->assertOk()
+            ->assertViewHas('acciones', fn ($p) => $p->count() === 1 && $p->first()->resultado === 'Cuenta desactivada');
+        $this->getJson($url.'?acciones=0')->assertUnprocessable()->assertJsonValidationErrors('acciones');
     }
 
     public function test_admin_cannot_disable_self_or_remove_the_last_active_admin(): void

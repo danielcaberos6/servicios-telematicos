@@ -4,8 +4,16 @@
 @section('content')
 <section class="container section gestion-page gestion-historial">
     <a href="{{ route('admin.usuarios.index') }}" class="text-link">← Volver a usuarios</a>
-    <h1>Historial de {{ $usuario->nombre }}</h1>
+    <h1>{{ $cuentaAdministradora ? 'Historial administrativo de' : 'Historial de' }} {{ $usuario->nombre }}</h1>
     <p>{{ $usuario->correo }}</p>
+    @if ($cuentaAdministradora)
+        <p class="muted">Consulta las revisiones de publicaciones, verificaciones de identidad y cambios de cuentas realizados por este administrador.</p>
+        <nav class="gestion-filtros" aria-label="Apartados del historial">
+            <a class="text-link" href="#acciones-administrador">Acciones realizadas ({{ $acciones->total() }})</a>
+            <a class="text-link" href="#decisiones-cuenta">Cambios sobre esta cuenta</a>
+        </nav>
+        @include('admin.usuarios.acciones-administrador')
+    @else
     <p class="muted">Consulta sus publicaciones, ofertas realizadas y cambios administrativos. Las publicaciones incluyen todos los estados de revisión.</p>
     <nav class="gestion-filtros" aria-label="Apartados del historial">
         <a class="text-link" href="#subastas-usuario">Subastas ({{ $subastas->total() }})</a>
@@ -57,8 +65,9 @@
         </div>
         <x-paginacion :elementos="$pujas" />
     </section>
+    @endif
     <section class="panel" id="decisiones-cuenta" aria-labelledby="decisiones-titulo">
-        <h2 id="decisiones-titulo">Decisiones administrativas</h2>
+        <h2 id="decisiones-titulo">{{ $cuentaAdministradora ? 'Cambios sobre esta cuenta' : 'Decisiones administrativas' }}</h2>
         <p class="muted">Últimas 100 decisiones, de la más reciente a la más antigua.</p>
         @forelse ($decisiones as $decision)
             <article class="review">

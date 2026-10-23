@@ -22,6 +22,7 @@ class GestionUsuarioController extends Controller
         $request->validate([
             'publicaciones' => ['sometimes', 'integer', 'min:1'],
             'ofertas' => ['sometimes', 'integer', 'min:1'],
+            'acciones' => ['sometimes', 'integer', 'min:1'],
         ]);
         $decisiones = $gestion->historial($request->user()->id_usuario, $usuario->id_usuario);
         $actividad = $gestion->actividad($request->user()->id_usuario, $usuario->id_usuario);
