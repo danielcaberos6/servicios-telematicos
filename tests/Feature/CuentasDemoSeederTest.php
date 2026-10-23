@@ -23,7 +23,7 @@ class CuentasDemoSeederTest extends TestCase
             ['demo@subastaya.test', 'SubastaYA2026!', false],
             ['vendedor@subastaya.test', 'SubastaYA2026!', false],
         ] as [$correo, $password, $admin]) {
-            $this->post('/iniciar-sesion', compact('correo', 'password'))->assertRedirect('/');
+            $this->post('/iniciar-sesion', compact('correo', 'password'))->assertRedirect($admin ? '/admin/usuarios' : '/');
             $user = User::where('correo', $correo)->firstOrFail();
             $this->assertAuthenticatedAs($user);
             $this->assertSame($admin, $user->esAdministrador());

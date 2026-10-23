@@ -82,7 +82,9 @@
                     </div>
                     <div class="form-footer"><button class="button primary" type="submit">Guardar perfil</button></div>
                 </form>
-                @include('identidad.perfil')
+                @unless ($user->esAdministrador())
+                    @include('identidad.perfil')
+                @endunless
                 <div class="panel spaced-heading">
                     <h2>Reseñas y valoraciones</h2>
                     @forelse($reviews as $review)

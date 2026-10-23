@@ -3,7 +3,11 @@
 @section('content')
 
     <div class="container section">
-        <a class="breadcrumb" href="{{ route('subastas.index') }}">← Volver al catálogo</a>
+        @if (auth()->user()?->esAdministrador())
+            <a class="breadcrumb" href="{{ route('admin.usuarios.index') }}">← Volver a administración</a>
+        @else
+            <a class="breadcrumb" href="{{ route('subastas.index') }}">← Volver al catálogo</a>
+        @endif
         <div class="detail-grid">
             <div>
                 <div class="detail-image">
@@ -83,7 +87,9 @@
                     </div>
                     @if ($subasta->estado === 'Activa' && $subasta->publicada() && $subasta->usuario->activo)
                         @auth
-                            @if (auth()->id() === $subasta->id_usuario)
+                            @if (auth()->user()->esAdministrador())
+                                <p class="info-note">Estás consultando esta publicación como administrador.</p>
+                            @elseif (auth()->id() === $subasta->id_usuario)
                                 <div class="info-note">Esta es tu subasta. @if (!$subasta->pujas_count)
                                         <a href="{{ route('subastas.edit', $subasta) }}">Editar publicación →</a>
                                     @else

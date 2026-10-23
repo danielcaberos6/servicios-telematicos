@@ -242,12 +242,12 @@ class RevisionSubastasTest extends TestCase
         $this->get(route('subastas.show', $auction))->assertOk()->assertSee('Mochila &lt;script&gt;', false);
     }
 
-    public function test_administrator_who_submits_gets_only_the_seller_notice(): void
+    public function test_administrator_cannot_submit_or_generate_publication_notices(): void
     {
         $admin = $this->admin();
-        $this->actingAs($admin)->post('/subastas', $this->payload())->assertSessionHasNoErrors();
+        $this->actingAs($admin)->post('/subastas', $this->payload())->assertForbidden();
 
-        $this->assertSame(['Solicitud en revisión'], $admin->notificaciones()->where('titulo', '<>', '¡Bienvenido a SubastaYA!')->pluck('titulo')->all());
+        $this->assertSame([], $admin->notificaciones()->where('titulo', '<>', '¡Bienvenido a SubastaYA!')->pluck('titulo')->all());
     }
 
     public function test_only_each_recipient_can_read_or_mark_their_notices(): void

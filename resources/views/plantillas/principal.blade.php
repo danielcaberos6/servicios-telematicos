@@ -15,18 +15,21 @@
 </head>
 
 <body>
+    @php
+        $esAdministrador = auth()->user()?->esAdministrador() ?? false;
+        $rutaPrincipal = $esAdministrador ? 'admin.usuarios.index' : 'inicio';
+    @endphp
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
     <header class="site-header">
         <div class="nav-wrap">
-            <a class="brand" href="{{ route('inicio') }}" aria-label="SubastaYA, inicio"><span class="brand-icon"><x-icono
+            <a class="brand" href="{{ route($rutaPrincipal) }}" aria-label="{{ $esAdministrador ? 'SubastaYA, administración' : 'SubastaYA, inicio' }}"><span class="brand-icon"><x-icono
                         nombre="gavel" /></span><span>subasta<span class="brand-accent">YA</span><small>ENCUENTRA.
                         OFERTA. GANA.</small></span></a>
             <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="navigation">Menú ☰</button>
             <nav id="navigation" class="navigation" aria-label="Navegación principal">
                 @php
-                    $esAdministrador = auth()->user()?->esAdministrador() ?? false;
                     $enlaces = $esAdministrador
-                        ? [['inicio', 'home', 'Inicio'], ['admin.usuarios.index', 'user', 'Usuarios'], ['admin.categorias.index', 'box', 'Categorías'], ['admin.identidad.index', 'shield', 'Identidad'], ['notificaciones.index', 'bell', 'Notificaciones']]
+                        ? [['admin.usuarios.index', 'user', 'Usuarios'], ['admin.categorias.index', 'box', 'Categorías'], ['admin.identidad.index', 'shield', 'Identidad'], ['notificaciones.index', 'bell', 'Notificaciones']]
                         : [['inicio', 'home', 'Inicio'], ['perfil.edit', 'user', 'Perfil'], ['subastas.index', 'search', 'Buscar'], ['subastas.mias', 'gavel', 'Mis Subastas'], ['notificaciones.index', 'bell', 'Notificaciones']];
                 @endphp
                 @foreach ($enlaces as [$route, $icon, $label])
@@ -86,7 +89,7 @@
         @yield('content')
     </main>
     <footer class="site-footer">
-        <div class="container footer-content"><a class="brand footer-brand" href="{{ route('inicio') }}"><x-icono
+        <div class="container footer-content"><a class="brand footer-brand" href="{{ route($rutaPrincipal) }}"><x-icono
                     nombre="gavel" /><span>subasta<span>YA</span></span></a>
             <p>Una nueva oportunidad para cada artículo.</p><span>© {{ date('Y') }} SubastaYA · Bolivia</span>
         </div>
