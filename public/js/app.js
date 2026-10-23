@@ -156,6 +156,29 @@ document.querySelectorAll("input[data-preview]").forEach((input) => {
     }
 });
 
+// Contar las fotos conservadas junto a las nuevas, también al reemplazarlas.
+document.querySelectorAll("[data-fotos-subasta]").forEach((input) => {
+    const form = input.form;
+    const eliminaciones = [...form.querySelectorAll('input[name="eliminar_imagenes[]"]')];
+    const aviso = form.querySelector("#photo-error");
+    const actualizarFotos = (mostrarAviso = true) => {
+        const conservadas = eliminaciones.filter((checkbox) => !checkbox.checked).length;
+        const total = conservadas + input.files.length;
+        input.required = conservadas === 0;
+        const mensaje = total < 1 ? "Debes subir al menos una foto del artículo."
+            : total > 5 ? "La subasta puede tener como máximo 5 fotos en total."
+            : "";
+        // El otro control de vista previa valida el formato y el tamaño.
+        const formatoInvalido = [...input.files].some((file) => file.size > 5 * 1024 * 1024 || !["image/jpeg", "image/png", "image/webp"].includes(file.type));
+        if (!formatoInvalido) input.setCustomValidity(mensaje);
+        if (mostrarAviso) aviso.textContent = formatoInvalido ? input.validationMessage : mensaje;
+    };
+    input.addEventListener("change", actualizarFotos);
+    eliminaciones.forEach((checkbox) => checkbox.addEventListener("change", actualizarFotos));
+    input.addEventListener("invalid", () => { aviso.textContent = input.validationMessage; });
+    actualizarFotos(false);
+});
+
 document.querySelectorAll("[data-carrusel]").forEach((carrusel) => {
     const pista = carrusel.querySelector("[data-carrusel-pista]");
     const anterior = carrusel.querySelector("[data-carrusel-anterior]");

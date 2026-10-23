@@ -80,12 +80,12 @@
                     <div class="publish-section-heading">
                         <span class="section-number" aria-hidden="true">02</span>
                         <div>
-                            <h2 id="photos-heading">Fotografías <span class="publish-optional">Opcional</span></h2>
-                            <p>Las fotos claras ayudan a conocer mejor tu artículo.</p>
+                            <h2 id="photos-heading">Fotografías <span class="required-mark">*</span></h2>
+                            <p>Sube al menos una foto para que el administrador pueda revisar tu artículo.</p>
                         </div>
                     </div>
                     <div class="publish-photo-rules" id="photo-help">
-                        <span>Hasta 5 fotos</span><span>JPG, PNG o WebP</span><span>Máximo 5 MB por foto</span>
+                        <span>Entre 1 y 5 fotos en total</span><span>JPG, PNG o WebP</span><span>Máximo 5 MB por foto</span>
                     </div>
                     @if ($subasta->exists && $subasta->imagenes->isNotEmpty())
                         <div class="existing-images publish-photo-grid">
@@ -103,9 +103,10 @@
                         <strong>Selecciona las fotos de tu artículo</strong>
                         <span>O arrastra y suelta tus archivos aquí. La primera fotografía será la portada.</span>
                         <input id="imagenes" name="imagenes[]" type="file" multiple accept="image/jpeg,image/png,image/webp"
-                            data-preview="image-preview" aria-describedby="photo-help">
+                            data-preview="image-preview" data-fotos-subasta @required(! $subasta->exists || $subasta->imagenes->isEmpty()) aria-describedby="photo-help photo-error">
                     </label>
                     <div id="image-preview" class="image-preview publish-photo-grid" aria-live="polite"></div>
+                    <p id="photo-error" class="publish-photo-error" role="status" aria-live="polite">@error('imagenes'){{ $message }}@enderror</p>
                 </section>
 
                 <section class="panel publish-section" id="condiciones" data-apartado aria-labelledby="conditions-heading">

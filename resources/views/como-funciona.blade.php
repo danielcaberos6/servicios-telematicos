@@ -32,7 +32,7 @@
                 <p class="eyebrow">PARA VENDER</p>
                 <h2 id="vender-titulo">Dale otra oportunidad.</h2>
                 <ol class="guide-steps">
-                    <li class="panel"><span class="guide-number" aria-hidden="true">01</span><h3>Prepara tu publicación</h3><p>Con tu sesión iniciada, entra a Mis subastas y elige Crear subasta. Agrega fotos claras, una descripción fiel, la categoría, el monto inicial y la fecha de cierre.</p></li>
+                    <li class="panel"><span class="guide-number" aria-hidden="true">01</span><h3>Prepara tu publicación</h3><p>Con tu sesión iniciada, entra a Mis subastas y elige Crear subasta. Agrega entre 1 y 5 fotos claras del artículo, una descripción fiel, la categoría, el monto inicial y la fecha de cierre. Las fotos son obligatorias para la revisión administrativa.</p></li>
                     <li class="panel"><span class="guide-number" aria-hidden="true">02</span><h3>Espera la revisión</h3><p>La solicitud queda En revisión antes de publicarse. Consulta su estado en Mis subastas. Si es rechazada, revisa el motivo y corrige lo necesario.</p></li>
                     <li class="panel"><span class="guide-number" aria-hidden="true">03</span><h3>Coordina la entrega</h3><p>Sigue las ofertas hasta el cierre. Si hay un ganador, acuerden la entrega y el pago. Si no hay ofertas, la subasta termina sin ganador.</p></li>
                 </ol>
