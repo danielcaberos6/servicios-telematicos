@@ -28,5 +28,7 @@ return [
     'distinct' => 'No repitas elementos en :attribute.',
     'current_password' => 'La contraseña actual es incorrecta.',
     'regex' => 'El formato de :attribute no es válido.',
-    'attributes' => ['nombre' => 'nombre', 'correo' => 'correo', 'password' => 'contraseña', 'titulo' => 'título', 'descripcion' => 'descripción', 'id_categoria' => 'categoría', 'ubicacion' => 'punto de encuentro', 'monto_inicial' => 'monto inicial', 'estado_articulo' => 'estado del artículo', 'fecha_fin' => 'fecha de cierre', 'current_password' => 'contraseña actual', 'imagenes' => 'imágenes', 'telefono' => 'teléfono'],
+    'between' => ['numeric' => 'El campo :attribute debe estar entre :min y :max.'],
+    'required_with' => 'El campo :attribute es obligatorio cuando indicas :values.',
+    'attributes' => ['latitud' => 'latitud', 'longitud' => 'longitud', 'nombre' => 'nombre', 'correo' => 'correo', 'password' => 'contraseña', 'titulo' => 'título', 'descripcion' => 'descripción', 'id_categoria' => 'categoría', 'ubicacion' => 'punto de encuentro', 'monto_inicial' => 'monto inicial', 'estado_articulo' => 'estado del artículo', 'fecha_fin' => 'fecha de cierre', 'current_password' => 'contraseña actual', 'imagenes' => 'imágenes', 'telefono' => 'teléfono'],
 ];
