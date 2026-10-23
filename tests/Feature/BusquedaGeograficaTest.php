@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Categoria;
 use App\Models\Subasta;
 use App\Models\User;
+use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -214,8 +215,8 @@ class BusquedaGeograficaTest extends TestCase
 
     public function test_demo_data_includes_mapped_and_legacy_publications(): void
     {
-        $this->seed(\Database\Seeders\DemoSeeder::class);
-        $this->seed(\Database\Seeders\DemoSeeder::class);
+        $this->seed(DemoSeeder::class);
+        $this->seed(DemoSeeder::class);
 
         $this->assertSame(7, Subasta::where('estado_revision', 'Aceptada')->count());
         $this->assertSame(6, Subasta::where('estado_revision', 'Aceptada')->whereNotNull('latitud')->count());

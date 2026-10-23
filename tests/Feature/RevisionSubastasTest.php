@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Categoria;
 use App\Models\Subasta;
 use App\Models\User;
+use Database\Seeders\DemoSeeder;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -294,8 +295,8 @@ class RevisionSubastasTest extends TestCase
 
     public function test_demo_data_includes_a_pending_and_a_rejected_request(): void
     {
-        $this->seed(\Database\Seeders\DemoSeeder::class);
-        $this->seed(\Database\Seeders\DemoSeeder::class);
+        $this->seed(DemoSeeder::class);
+        $this->seed(DemoSeeder::class);
         $demo = User::where('correo', 'demo@subastaya.test')->sole();
         $admin = User::where('correo', 'admin@subastaya.test')->sole();
 
