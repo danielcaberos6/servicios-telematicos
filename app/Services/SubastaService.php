@@ -38,4 +38,14 @@ class SubastaService
     {
         return $this->ejecutar('select * from ranking_subasta(?,?)', [$id, $actor]);
     }
+
+    public function resolverRevision(int $actor, int $id, string $decision, ?string $motivo = null): void
+    {
+        $this->ejecutar('select resolver_revision_subasta(?,?,?,?)', [$actor, $id, $decision, $motivo], 'decision');
+    }
+
+    public function solicitudesRevision(array $filtros = [])
+    {
+        return app(RevisionSubastaService::class)->listar($filtros);
+    }
 }

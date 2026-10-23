@@ -61,6 +61,10 @@ Al elegir el carnet aparece una vista previa local, antes de enviarlo. **Ampliar
 
 ## Revisión de publicaciones
 
+Una solicitud rechazada permite **Corregir y reenviar** desde Mis subastas o su detalle. El formulario muestra el motivo y exige un cierre futuro. **Guardar y reenviar a revisión** guarda datos e imágenes en una transacción, devuelve la solicitud a En revisión y avisa al vendedor y a los administradores activos. El plazo de referencia se calcula desde este nuevo envío y comienza íntegro al aprobarse. El historial conserva las decisiones previas, sus motivos, responsables y fechas, visibles solo para el propietario y los administradores. Las decisiones anteriores sin responsable conocido también se conservan sin inventar datos. Un formulario de reenvío que ya fue procesado exige recargar antes de continuar.
+
+Las nuevas aprobaciones y rechazos registran el ID del administrador autenticado y la fecha de decisión en PostgreSQL, dentro de la misma operación que cambia el estado y notifica al vendedor. El detalle administrativo muestra el responsable y la hora de Bolivia. Las decisiones anteriores conservan estos campos vacíos, sin atribuirles un responsable o una fecha que no se conocen.
+
 Cada subasta nueva se registra **En revisión**, asociada a su vendedor, y no se publica automáticamente. Las subastas que existían antes de esta función se conservaron como **Aceptadas**.
 
 - **Privacidad**: una solicitud En revisión o Rechazada no aparece en el inicio, en el catálogo ni en los reportes administrativos y no admite pujas. Su detalle y sus fotos responden 404 a terceros; solo los ven el propietario y los administradores. La base de datos también rechaza las pujas sobre subastas no aceptadas, y las solicitudes no publicadas no se finalizan.
@@ -68,7 +72,7 @@ Cada subasta nueva se registra **En revisión**, asociada a su vendedor, y no se
 - **Mis subastas**: cada publicación muestra En revisión, Aceptada o Rechazada; si fue rechazada, también el motivo (de 1 a 1000 caracteres, exigido por la base de datos).
 - **Avisos**: al registrar la solicitud, el vendedor recibe "Solicitud en revisión" y cada administrador activo recibe "Nueva solicitud de publicación", ambos con enlace a la solicitud. Solo el destinatario puede consultar, marcar o eliminar su aviso. Los administradores tienen **Notificaciones** en su menú.
 
-La decisión de aceptar o rechazar una solicitud queda fuera de esta función: el esquema ya guarda el estado y el motivo, pero todavía no hay pantalla para resolverla. Los datos de demostración incluyen, para el usuario demo, una solicitud En revisión y otra Rechazada con su motivo.
+- **Bandeja y resolución administrativa (HU-12)**: desde `/admin/subastas` los administradores activos consultan la bandeja de solicitudes con filtros por estado (`En revisión`, `Aceptada`, `Rechazada`, `todos`) y búsqueda por texto. En el detalle (`/admin/subastas/{id}`), el administrador puede inspeccionar fotos, vendedor y mapa, y tomar una decisión: **Aceptar** (publica la subasta en el catálogo y notifica al vendedor) o **Rechazar** (exige un motivo obligatorio de 1 a 1000 caracteres y notifica al vendedor con el motivo). La resolución está protegida contra concurrencia con bloqueos en PostgreSQL. Los datos de demostración incluyen solicitudes de ejemplo para evaluar este flujo.
 
 ## Mapas y búsqueda por cercanía
 
@@ -90,7 +94,7 @@ Las pruebas fijan explícitamente la conexión a `subastaya_test` y comprueban s
 
 ## Base de datos
 
-La lógica de negocio vive en PostgreSQL: el esquema inicial está en `database/sql/Script.sql` y las funciones generales en `database/sql/Funciones.sql`. Las ampliaciones de gestión se organizan en `GestionUsuarios.sql`, `RolesUsuarios.sql`, `GestionCategorias.sql`, `NombresUsuarios.sql`, `IdentidadUsuarios.sql`, `RevisionIdentidad.sql`, `BusquedaGeografica.sql`, `RevisionSubastas.sql` y `PublicacionSubastas.sql`, instaladas por sus migraciones. Para actualizar un entorno existente, ejecuta `docker compose exec laravel php artisan migrate`.
+La lógica de negocio vive en PostgreSQL: el esquema inicial está en `database/sql/Script.sql` y las funciones generales en `database/sql/Funciones.sql`. Las ampliaciones de gestión se organizan en `GestionUsuarios.sql`, `RolesUsuarios.sql`, `GestionCategorias.sql`, `NombresUsuarios.sql`, `IdentidadUsuarios.sql`, `RevisionIdentidad.sql`, `BusquedaGeografica.sql`, `RevisionSubastas.sql`, `PublicacionSubastas.sql` y `RevisionSubastasAdmin.sql`, instaladas por sus migraciones. Para actualizar un entorno existente, ejecuta `docker compose exec laravel php artisan migrate`.
 
 Tras modificar funciones o triggers, crea una migración que instale el cambio. El comando `php artisan subastas:instalar-funciones` reinstala, en este orden, `Funciones.sql`, `BusquedaGeografica.sql` y `PublicacionSubastas.sql`. Los dos últimos solo contienen funciones; `PublicacionSubastas.sql` redefine el catálogo (revisión y filtro por radio), la validación de pujas, la finalización y el aviso de nuevas solicitudes, por lo que debe ejecutarse al final. Los archivos que contienen ampliaciones de esquema se ejecutan mediante migraciones, una sola vez.
 

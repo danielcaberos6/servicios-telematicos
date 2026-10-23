@@ -76,6 +76,58 @@ begin
 end;
 $$;
 
+-- Las solicitudes sin publicar pueden corregirse aunque su cierre de referencia pasó.
+create or replace function exigir_subasta_propia(p_actor bigint, p_id bigint, p_editar boolean default true)
+returns subasta language plpgsql as $$
+declare resultado subasta;
+begin
+    select * into resultado from subasta where id_subasta=p_id for update;
+    if not found then raise exception 'Subasta no encontrada.' using errcode='P0002'; end if;
+    if p_actor is null or resultado.id_usuario<>p_actor then
+        raise exception 'Esta subasta pertenece a otro usuario.' using errcode='42501';
+    end if;
+    if exists(select 1 from puja where id_subasta=p_id) then
+        raise exception 'Una subasta con pujas no puede modificarse ni eliminarse.';
+    end if;
+    if p_editar and (resultado.estado_subasta<>'Activa' or
+        (resultado.estado_revision='Aceptada' and resultado.fecha_fin<=clock_timestamp())) then
+        raise exception 'Solo puedes editar subastas activas que todavía no recibieron pujas.';
+    end if;
+    return resultado;
+end;
+$$;
+
+create or replace function actualizar_subasta(p_actor bigint, p_id bigint, p_datos jsonb) returns subasta language plpgsql as $$
+declare resultado subasta; reenviar boolean; instante timestamptz;
+begin
+    resultado := exigir_subasta_propia(p_actor,p_id);
+    reenviar := resultado.estado_revision='Rechazada';
+    if coalesce((p_datos->>'reenviar')::boolean,false) and not reenviar then
+        raise exception 'Esta solicitud ya cambió de estado. Recarga la página antes de continuar.';
+    end if;
+    if reenviar and not coalesce((p_datos->>'reenviar')::boolean,false) then
+        raise exception 'Confirma el reenvío de la solicitud corregida.';
+    end if;
+    instante := clock_timestamp();
+    if (p_datos->>'fecha_fin')::timestamptz<=instante then raise exception 'El cierre debe estar en el futuro.'; end if;
+    if reenviar and not exists(select 1 from categoria where id_categoria=(p_datos->>'id_categoria')::bigint and habilitada for share) then
+        raise exception 'Selecciona una categoría habilitada para reenviar.';
+    end if;
+    update subasta set titulo=p_datos->>'titulo', descripcion=p_datos->>'descripcion', ubicacion=p_datos->>'ubicacion',
+        estado_articulo=p_datos->>'estado_articulo', monto_inicial=(p_datos->>'monto_inicial')::numeric,
+        fecha_inicio=case when reenviar then instante else fecha_inicio end,
+        fecha_fin=(p_datos->>'fecha_fin')::timestamptz, id_categoria=(p_datos->>'id_categoria')::bigint,
+        latitud=case when p_datos ? 'latitud' then (p_datos->>'latitud')::numeric else latitud end,
+        longitud=case when p_datos ? 'longitud' then (p_datos->>'longitud')::numeric else longitud end,
+        estado_revision=case when reenviar then 'En revisión' else estado_revision end,
+        motivo_rechazo=case when reenviar then null else motivo_rechazo end,
+        id_revisor=case when reenviar then null else id_revisor end,
+        fecha_decision=case when reenviar then null else fecha_decision end
+    where id_subasta=p_id returning * into resultado;
+    return resultado;
+end;
+$$;
+
 -- Al registrar una solicitud se avisa al vendedor y a cada Administrador activo; ambos
 -- avisos enlazan la subasta. Las publicaciones insertadas ya aceptadas conservan su aviso.
 create or replace function notificar_publicacion() returns trigger language plpgsql as $$

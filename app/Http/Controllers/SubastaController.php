@@ -69,6 +69,9 @@ class SubastaController extends Controller
         // 404 en vez de 403 para no revelar a terceros que la solicitud existe.
         abort_unless($subasta->visiblePara($request->user()), 404);
         $subasta->load(['imagenes', 'categoria', 'usuario'])->loadCount('pujas')->loadMax('pujas', 'monto');
+        if ($request->user() && ($request->user()->id_usuario === $subasta->id_usuario || $request->user()->esAdministrador())) {
+            $subasta->load('decisiones.revisor');
+        }
         $ganadora = $subasta->pujas()->with('usuario')->orderByDesc('monto')->first();
 
         $canViewRanking = $request->user() && ($request->user()->id_usuario === $subasta->id_usuario || $subasta->pujas()->where('id_usuario', $request->user()->id_usuario)->exists());
@@ -128,7 +131,8 @@ class SubastaController extends Controller
         }
         Storage::disk('public')->delete($removed);
 
-        return redirect()->route('subastas.show', $subasta)->with('status', 'Subasta actualizada. Quedó En revisión hasta que un administrador la acepte.');
+        return redirect()->route('subastas.show', $subasta)->with('status', $request->boolean('reenviar')
+            ? 'Correcciones guardadas. Tu subasta fue reenviada a revisión.' : 'Subasta actualizada.');
     }
 
     public function destroy(Request $request, Subasta $subasta)
@@ -156,7 +160,7 @@ class SubastaController extends Controller
 
     private function checkEditable(Subasta $subasta): void
     {
-        if ($subasta->pujas()->exists() || $subasta->estado !== 'Activa') {
+        if ($subasta->pujas()->exists() || ! $subasta->editable()) {
             throw ValidationException::withMessages(['subasta' => 'Solo puedes editar subastas activas que todavía no recibieron pujas.']);
         }
     }

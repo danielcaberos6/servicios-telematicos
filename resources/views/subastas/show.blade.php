@@ -63,12 +63,19 @@
                         <p>Solicitud <x-estado-revision :subasta="$subasta" /></p>
                         @if ($subasta->estado_revision === 'Rechazada')
                             <p><strong>Motivo del rechazo:</strong> {{ $subasta->motivo_rechazo }}</p>
+                            @if (auth()->id() === $subasta->id_usuario && $subasta->editable() && ! $subasta->pujas_count)
+                                <a class="button primary small" href="{{ route('subastas.edit', $subasta) }}">Corregir y reenviar</a>
+                            @endif
                         @else
                             <p>Esta subasta todavía no es pública: solo la ven su propietario y los administradores.</p>
+                        @endif
+                        @if (auth()->user()?->esAdministrador())
+                            <p style="margin-top:0.5rem;"><a href="{{ route('admin.subastas.show', $subasta) }}" class="button primary small">Revisar solicitud como administrador →</a></p>
                         @endif
                     </div>
                 @endunless
                 <h1>{{ $subasta->titulo }}</h1>
+                <x-historial-subasta :subasta="$subasta" />
                 <p class="muted">{{ $subasta->estado_articulo }} · {{ $subasta->publicada() ? 'Publicada' : 'Enviada' }} el
                     {{ $subasta->fecha_inicio->format('d/m/Y H:i') }}</p>
                 <div class="panel bid-panel">
@@ -80,8 +87,9 @@
                     </div>
                     <div @class(['auction-deadline', 'auction-ended' => $subasta->estado === 'Finalizada'])>
                         <x-icono nombre="clock" />
-                        <div><strong>{{ $subasta->estado === 'Finalizada' ? 'Subasta finalizada' : ($subasta->estado === 'Cancelada' ? 'Subasta cancelada' : 'Finaliza el') }}</strong>
+                        <div><strong>{{ ! $subasta->publicada() ? 'Cierre de referencia' : ($subasta->estado === 'Finalizada' ? 'Subasta finalizada' : ($subasta->estado === 'Cancelada' ? 'Subasta cancelada' : 'Finaliza el')) }}</strong>
                             <time datetime="{{ $subasta->fecha_fin->toIso8601String() }}">{{ $subasta->fecha_fin->format('d/m/Y \a \l\a\s H:i') }} (Bolivia)</time>
+                            @unless ($subasta->publicada())<small>El plazo completo comienza al aprobarse; el cierre se ajustará en ese momento.</small>@endunless
                             @if ($subasta->estado === 'Finalizada')<small>{{ $ganadora ? 'La oferta ganadora está confirmada.' : 'La subasta terminó sin ofertas.' }}</small>@endif
                         </div>
                     </div>

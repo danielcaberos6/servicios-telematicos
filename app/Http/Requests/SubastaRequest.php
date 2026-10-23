@@ -17,10 +17,11 @@ class SubastaRequest extends FormRequest
     {
         return [
             'titulo' => ['required', 'string', 'min:5', 'max:120'],
+            'reenviar' => ['sometimes', 'accepted'],
             'descripcion' => ['required', 'string', 'min:15', 'max:5000'],
             'id_categoria' => ['required', 'integer', Rule::exists('categoria', 'id_categoria')->where(function ($query) {
                 $query->where('habilitada', true);
-                if ($this->route('subasta') instanceof Subasta) {
+                if ($this->route('subasta') instanceof Subasta && $this->route('subasta')->estado_revision !== 'Rechazada') {
                     $query->orWhere('id_categoria', $this->route('subasta')->id_categoria);
                 }
             })],

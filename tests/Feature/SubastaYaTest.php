@@ -85,7 +85,7 @@ class SubastaYaTest extends TestCase
         ]))->assertSessionHasNoErrors()->assertRedirect();
         $auction = Subasta::with('imagenes')->firstOrFail();
         $this->assertSame($owner->id_usuario, $auction->id_usuario);
-        $this->assertSame('Activa', $auction->estado);
+        $this->assertSame('En revisión', $auction->estado);
         $this->assertTrue($auction->fecha_inicio->isToday());
         Storage::disk('public')->assertExists($auction->imagenes->first()->ruta);
         $this->get($auction->imagenes->first()->url)->assertOk();

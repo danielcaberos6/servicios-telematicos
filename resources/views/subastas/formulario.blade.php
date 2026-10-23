@@ -20,6 +20,14 @@
                 action="{{ $subasta->exists ? route('subastas.update', $subasta) : route('subastas.store') }}"
                 enctype="multipart/form-data">
                 @csrf
+                @if ($subasta->estado_revision === 'Rechazada')
+                    <input type="hidden" name="reenviar" value="1">
+                    <div class="panel">
+                        <h2>Corrige tu solicitud</h2>
+                        <p><strong>Motivo del rechazo:</strong> {{ $subasta->motivo_rechazo }}</p>
+                        <p>Al guardar, se reenviará a revisión. La publicación necesita otra aprobación administrativa.</p>
+                    </div>
+                @endif
                 @if ($subasta->exists)
                     @method('PUT')
                 @endif
@@ -129,7 +137,13 @@
                                     value="{{ old('fecha_fin', $subasta->fecha_fin?->format('Y-m-d\TH:i')) }}"
                                     min="{{ now()->format('Y-m-d\TH:i') }}" max="{{ now()->addYear()->format('Y-m-d\TH:i') }}"
                                     aria-describedby="deadline-help">
-                                <small id="deadline-help">Hora de Bolivia (UTC-4). Inicia al publicar.</small>
+                                <small id="deadline-help">Hora de Bolivia (UTC-4).
+                                    @if ($subasta->exists && $subasta->publicada())
+                                        Este es el cierre de la subasta publicada.
+                                    @else
+                                        Esta fecha define el plazo solicitado desde el envío. Al aprobarse, el inicio y el cierre se desplazan para conservar el plazo completo.
+                                    @endif
+                                </small>
                             </div>
                         </div>
                         <div class="publish-field">
@@ -180,7 +194,7 @@
                     <div class="form-footer">
                         <a class="button secondary" href="{{ $subasta->exists ? route('subastas.show', $subasta) : route('subastas.mias') }}">Cancelar</a>
                         <button class="button primary" type="submit"><x-icono nombre="gavel" />
-                            {{ $subasta->exists ? 'Guardar cambios' : 'Publicar subasta' }}
+                            {{ $subasta->estado_revision === 'Rechazada' ? 'Guardar y reenviar a revisión' : ($subasta->exists ? 'Guardar cambios' : 'Publicar subasta') }}
                         </button>
                     </div>
                 </div>

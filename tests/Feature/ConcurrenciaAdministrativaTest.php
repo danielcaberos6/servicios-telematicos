@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Categoria;
 use App\Models\User;
 use App\Services\IdentidadService;
 use Illuminate\Http\UploadedFile;
@@ -27,6 +28,7 @@ class ConcurrenciaAdministrativaTest extends TestCase
             DB::table('notificacion')->whereIn('id_usuario', $this->usuarios)->delete();
             DB::table('verificacion_identidad')->whereIn('id_usuario', $this->usuarios)->delete();
             DB::table('decision_usuario')->whereIn('id_usuario', $this->usuarios)->delete();
+            DB::table('subasta')->whereIn('id_usuario', $this->usuarios)->delete();
             DB::table('usuario_rol')->whereIn('id_usuario', $this->usuarios)->delete();
             DB::table('imagen')->whereIn('id_usuario', $this->usuarios)->delete();
             DB::table('usuario')->whereIn('id_usuario', $this->usuarios)->delete();
@@ -123,5 +125,36 @@ class ConcurrenciaAdministrativaTest extends TestCase
         $this->assertSame(1, DB::table('notificacion')->where('id_verificacion', $id)->whereIn('titulo', ['Identidad verificada', 'Verificación de identidad rechazada'])->count());
         $estado = DB::table('verificacion_identidad')->where('id_verificacion', $id)->value('estado');
         $this->assertSame($estado === 'Aprobada', $titular->refresh()->identidad_verificada);
+    }
+
+    public function test_simultaneous_auction_decisions_create_only_one_result_and_notification(): void
+    {
+        $uno = $this->cuenta(true);
+        $dos = $this->cuenta(true);
+        $vendedor = $this->cuenta();
+        $categoria = Categoria::firstOrCreate(['nombre_categoria' => 'Deporte']);
+        $subasta = $vendedor->subastas()->forceCreate([
+            'titulo' => 'Bicicleta de montaña',
+            'descripcion' => 'Bicicleta en excelente estado.',
+            'id_categoria' => $categoria->id_categoria,
+            'estado_articulo' => 'Usado',
+            'ubicacion' => 'La Paz, Plaza Avaroa',
+            'monto_inicial' => '500.00',
+            'fecha_inicio' => now()->subHour(),
+            'fecha_fin' => now()->addDays(5),
+            'estado_subasta' => 'Activa',
+            'estado_revision' => 'En revisión',
+        ]);
+
+        $resultados = $this->competir('select resolver_revision_subasta(?,?,?,?)', [
+            [$uno->id_usuario, $subasta->id_subasta, 'Aceptada', null],
+            [$dos->id_usuario, $subasta->id_subasta, 'Rechazada', 'Fotos inadecuadas'],
+        ]);
+        $this->assertCount(1, array_filter($resultados, fn ($r) => $r === 'ok'));
+        $this->assertSame(1, DB::table('notificacion')->where('id_subasta', $subasta->id_subasta)->whereIn('titulo', ['Subasta publicada', 'Subasta rechazada'])->count());
+        $this->assertNotSame('En revisión', $subasta->refresh()->estado_revision);
+        $expectedReviewer = $subasta->estado_revision === 'Aceptada' ? $uno : $dos;
+        $this->assertEquals($expectedReviewer->id_usuario, $subasta->id_revisor);
+        $this->assertNotNull($subasta->fecha_decision);
     }
 }
