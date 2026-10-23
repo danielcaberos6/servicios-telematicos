@@ -210,6 +210,88 @@ class RevisionSubastasTest extends TestCase
             ->assertSee('Usado · Publicada el')->assertSee('green">Activa</span>', false);
     }
 
+    public function test_submission_notifies_the_seller_and_each_active_administrator_once(): void
+    {
+        $admins = [$this->admin(), $this->admin()];
+        $inactive = $this->admin();
+        $inactive->forceFill(['activo' => false])->save();
+        $seller = User::factory()->create();
+
+        $this->actingAs($seller)->post('/subastas', $this->payload(['titulo' => 'Mochila <script>alert(1)</script>']))->assertSessionHasNoErrors();
+        $auction = Subasta::sole();
+
+        $this->assertSame(1, $seller->notificaciones()->where('titulo', 'Solicitud en revisión')->where('id_subasta', $auction->id_subasta)->count());
+        $this->assertSame(0, $seller->notificaciones()->where('titulo', 'Nueva solicitud de publicación')->count());
+        foreach ($admins as $admin) {
+            $this->assertSame(1, $admin->notificaciones()->where('titulo', 'Nueva solicitud de publicación')->where('id_subasta', $auction->id_subasta)->count());
+        }
+        $this->assertSame(0, $inactive->notificaciones()->where('titulo', 'Nueva solicitud de publicación')->count());
+
+        $this->actingAs($seller)->get('/notificaciones')->assertOk()
+            ->assertSee('Solicitud en revisión')
+            ->assertSee('Enviaste «Mochila &lt;script&gt;alert(1)&lt;/script&gt;» a revisión.', false)
+            ->assertDontSee('<script>alert(1)</script>', false)
+            ->assertSee('href="'.route('subastas.show', $auction).'">Ver solicitud →', false)
+            ->assertDontSee('Nueva solicitud de publicación');
+        $this->actingAs($admins[0])->get('/notificaciones')->assertOk()
+            ->assertSee('Nueva solicitud de publicación')
+            ->assertSee('href="'.route('subastas.show', $auction).'">Ver solicitud →', false)
+            ->assertDontSee('Solicitud en revisión');
+        // El acceso del aviso funciona para su destinatario.
+        $this->get(route('subastas.show', $auction))->assertOk()->assertSee('Mochila &lt;script&gt;', false);
+    }
+
+    public function test_administrator_who_submits_gets_only_the_seller_notice(): void
+    {
+        $admin = $this->admin();
+        $this->actingAs($admin)->post('/subastas', $this->payload())->assertSessionHasNoErrors();
+
+        $this->assertSame(['Solicitud en revisión'], $admin->notificaciones()->where('titulo', '<>', '¡Bienvenido a SubastaYA!')->pluck('titulo')->all());
+    }
+
+    public function test_only_each_recipient_can_read_or_mark_their_notices(): void
+    {
+        $admin = $this->admin();
+        $otherAdmin = $this->admin();
+        $seller = User::factory()->create();
+        $stranger = User::factory()->create();
+        $this->actingAs($seller)->post('/subastas', $this->payload())->assertSessionHasNoErrors();
+        $sellerNotice = $seller->notificaciones()->where('titulo', 'Solicitud en revisión')->sole();
+        $adminNotice = $admin->notificaciones()->where('titulo', 'Nueva solicitud de publicación')->sole();
+
+        foreach ([[$stranger, $sellerNotice], [$stranger, $adminNotice], [$admin, $sellerNotice], [$seller, $adminNotice], [$otherAdmin, $adminNotice]] as [$user, $notice]) {
+            $this->actingAs($user)->patch("/notificaciones/{$notice->id_notificacion}")->assertForbidden();
+            $this->delete("/notificaciones/{$notice->id_notificacion}")->assertForbidden();
+        }
+        $this->actingAs($stranger)->get('/notificaciones')->assertDontSee('Solicitud en revisión')->assertDontSee('Nueva solicitud de publicación');
+        $this->assertFalse($sellerNotice->refresh()->leido);
+        $this->assertFalse($adminNotice->refresh()->leido);
+
+        $this->actingAs($admin)->patch("/notificaciones/{$adminNotice->id_notificacion}")->assertRedirect();
+        $this->actingAs($seller)->patch("/notificaciones/{$sellerNotice->id_notificacion}")->assertRedirect();
+        $this->assertTrue($adminNotice->refresh()->leido);
+        $this->assertTrue($sellerNotice->refresh()->leido);
+        $this->assertFalse($otherAdmin->notificaciones()->where('titulo', 'Nueva solicitud de publicación')->sole()->leido);
+    }
+
+    public function test_administrator_navigation_includes_notifications(): void
+    {
+        $this->actingAs($this->admin())->get('/admin/usuarios')->assertOk()
+            ->assertSee('href="'.route('notificaciones.index').'"', false);
+    }
+
+    public function test_invalid_requests_are_not_registered_or_notified(): void
+    {
+        $admin = $this->admin();
+        $seller = User::factory()->create();
+        $this->actingAs($seller)->post('/subastas', $this->payload(['titulo' => '', 'latitud' => '95']))->assertSessionHasErrors(['titulo', 'latitud']);
+        $this->post('/subastas', $this->payload(['imagenes' => [UploadedFile::fake()->create('virus.pdf', 10, 'application/pdf')]]))->assertSessionHasErrors('imagenes.0');
+
+        $this->assertDatabaseCount('subasta', 0);
+        $this->assertSame(0, $admin->notificaciones()->where('titulo', 'Nueva solicitud de publicación')->count());
+        $this->assertSame(0, $seller->notificaciones()->where('titulo', 'Solicitud en revisión')->count());
+    }
+
     public function test_reinstalling_sql_functions_keeps_requests_unpublished(): void
     {
         $this->auction('En revisión');

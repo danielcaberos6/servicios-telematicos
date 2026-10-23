@@ -70,3 +70,24 @@ begin
     return total;
 end;
 $$;
+
+-- Al registrar una solicitud se avisa al vendedor y a cada Administrador activo; ambos
+-- avisos enlazan la subasta. Las publicaciones insertadas ya aceptadas conservan su aviso.
+create or replace function notificar_publicacion() returns trigger language plpgsql as $$
+begin
+    if new.estado_revision = 'En revisión' then
+        insert into notificacion (id_usuario,id_subasta,titulo,contenido)
+        values (new.id_usuario, new.id_subasta, 'Solicitud en revisión',
+            'Enviaste «' || new.titulo || '» a revisión. Te avisaremos cuando un administrador tome una decisión.');
+        insert into notificacion (id_usuario,id_subasta,titulo,contenido)
+        select distinct u.id_usuario, new.id_subasta, 'Nueva solicitud de publicación',
+            'La subasta «' || new.titulo || '» espera tu revisión.'
+        from usuario u join usuario_rol ur on ur.id_usuario=u.id_usuario join rol r on r.id_rol=ur.id_rol
+        where u.activo and r.nombre_rol='Administrador' and u.id_usuario<>new.id_usuario;
+    elsif new.estado_revision = 'Aceptada' then
+        insert into notificacion (id_usuario,id_subasta,titulo,contenido)
+        values (new.id_usuario, new.id_subasta, 'Subasta publicada', 'Tu subasta «' || new.titulo || '» fue publicada correctamente.');
+    end if;
+    return new;
+end;
+$$;

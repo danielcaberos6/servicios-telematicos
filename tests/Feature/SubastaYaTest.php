@@ -89,7 +89,7 @@ class SubastaYaTest extends TestCase
         $this->assertTrue($auction->fecha_inicio->isToday());
         Storage::disk('public')->assertExists($auction->imagenes->first()->ruta);
         $this->get($auction->imagenes->first()->url)->assertOk();
-        $this->assertDatabaseHas('notificacion', ['id_usuario' => $owner->id_usuario, 'titulo' => 'Subasta publicada']);
+        $this->assertDatabaseHas('notificacion', ['id_usuario' => $owner->id_usuario, 'titulo' => 'Solicitud en revisión']);
         $this->assertSame('En revisión', $auction->estado_revision);
         $this->get('/buscar')->assertDontSee($auction->titulo);
     }
@@ -349,7 +349,7 @@ class SubastaYaTest extends TestCase
         $this->actingAs($user)->post('/subastas', $this->payload())->assertSessionHasNoErrors()->assertRedirect();
         $this->assertDatabaseCount('subasta', 1);
         $this->assertDatabaseHas('subasta', ['id_usuario' => $user->id_usuario, 'titulo' => 'Cámara fotográfica de prueba']);
-        $this->assertDatabaseHas('notificacion', ['id_usuario' => $user->id_usuario, 'titulo' => 'Subasta publicada']);
+        $this->assertDatabaseHas('notificacion', ['id_usuario' => $user->id_usuario, 'titulo' => 'Solicitud en revisión']);
     }
 
     public function test_profile_update_ignores_another_users_id(): void
