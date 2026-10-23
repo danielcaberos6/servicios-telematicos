@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [SubastaController::class, 'inicio'])->middleware(SoloUsuario::class)->name('inicio');
 Route::get('/buscar', [SubastaController::class, 'index'])->middleware(SoloUsuario::class)->name('subastas.index');
+Route::view('/como-funciona', 'como-funciona')->name('como-funciona');
 Route::get('/imagenes/{imagen}', [ImagenController::class, 'show'])->name('imagenes.show');
 
 Route::middleware(['auth', SoloAdministrador::class])->prefix('admin')->name('admin.')->group(function () {
@@ -56,6 +57,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/subastas/{subasta}', [SubastaController::class, 'update'])->name('subastas.update');
         Route::delete('/subastas/{subasta}', [SubastaController::class, 'destroy'])->name('subastas.destroy');
         Route::post('/subastas/{subasta}/pujas', [PujaController::class, 'store'])->middleware('throttle:30,1')->name('pujas.store');
+        Route::get('/subastas/{subasta}/participar', [SubastaController::class, 'participar'])->whereNumber('subasta')->name('subastas.participar');
     });
     Route::get('/notificaciones', [NotificacionController::class, 'index'])->name('notificaciones.index');
     Route::patch('/notificaciones/leer-todas', [NotificacionController::class, 'leerTodas'])->name('notificaciones.leerTodas');

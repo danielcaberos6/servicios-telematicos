@@ -27,6 +27,8 @@ No hace falta cargar estas cuentas manualmente. Los reinicios conservan las cont
 
 El servicio `scheduler` finaliza cada minuto las subastas vencidas.
 
+Los visitantes ven Inicio, Subastas (el catálogo con búsqueda y filtros) y **Cómo funciona** (`/como-funciona`), con los pasos para comprar y publicar, consejos de seguridad y preguntas frecuentes. Perfil, Mis subastas y Notificaciones aparecen al iniciar sesión. El botón **Inicia sesión para ofertar** conserva la subasta de origen y vuelve a su detalle después del acceso, sin registrar una oferta automáticamente.
+
 ## Datos de demostración
 
 ```sh

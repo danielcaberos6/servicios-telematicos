@@ -84,6 +84,11 @@ class SubastaController extends Controller
         return view('subastas.mias', compact('subastas'));
     }
 
+    public function participar(Subasta $subasta)
+    {
+        return redirect()->route('subastas.show', $subasta);
+    }
+
     public function edit(Request $request, Subasta $subasta)
     {
         $this->checkOwner($request, $subasta);

@@ -1,0 +1,23 @@
+.guide-page { max-width: 1180px; }
+.guide-intro { max-width: 740px; padding: 16px 0 8px; }
+.guide-intro h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.15; margin: 12px 0 18px; }
+.guide-intro > p:not(.eyebrow) { color: var(--muted); font-size: 18px; line-height: 1.7; }
+.guide-section { margin-top: 44px; }
+.guide-section h2 { font-size: 25px; margin: 0 0 20px; }
+.guide-steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.guide-number { display: inline-block; color: var(--blue); font-size: 28px; font-weight: 800; margin-bottom: 16px; }
+.guide-steps h3 { font-size: 18px; margin: 0 0 12px; }
+.guide-steps p, .guide-faq p { color: var(--muted); line-height: 1.75; margin: 0; }
+.guide-safety { display: flex; gap: 20px; background: #eaf7f0; border-color: #c4e5d6; }
+.guide-safety > .icon { flex-shrink: 0; color: #155d42; width: 30px; height: 30px; }
+.guide-safety h2 { margin-bottom: 12px; }
+.guide-safety ul { padding-left: 20px; margin: 0; }
+.guide-safety li { line-height: 1.75; margin-bottom: 8px; }
+.guide-faq details { border-bottom: 1px solid var(--line); padding: 20px 0; }
+.guide-faq summary { cursor: pointer; font-weight: 700; line-height: 1.6; }
+.guide-faq p { padding-top: 14px; max-width: 850px; }
+@media (max-width: 760px) {
+    .guide-steps { grid-template-columns: 1fr; }
+    .guide-section { margin-top: 32px; }
+    .guide-safety { gap: 12px; }
+}

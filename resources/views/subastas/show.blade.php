@@ -106,7 +106,7 @@
                                             required><button class="button primary" type="submit">Hacer oferta</button></div>
                                 </form>
                             @endif
-                        @else<a class="button primary full-width" href="{{ route('iniciar-sesion') }}">Inicia sesión para
+                        @else<a class="button primary full-width" href="{{ route('subastas.participar', $subasta) }}">Inicia sesión para
                             ofertar</a>@endauth
                     @else<p>{{ ! $subasta->publicada() ? 'Esta solicitud no está publicada y no admite ofertas.' : ($subasta->estado === 'Activa' ? 'El vendedor no está disponible; esta subasta no admite ofertas.' : 'Esta subasta ya no admite ofertas.') }}</p>
                     @endif
