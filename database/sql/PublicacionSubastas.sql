@@ -159,11 +159,13 @@ $$;
 -- Editar una subasta Aceptada o Rechazada (datos o fotos) la devuelve a revisión:
 -- ningún cambio se publica sin una nueva decisión del Administrador. Se avisa al
 -- vendedor y a cada Administrador activo, como al registrar la solicitud.
+-- fecha_inicio pasa al momento del reenvío: al aprobarla, la duración es solo el tiempo
+-- que le quedaba, sin sumar el que ya estuvo publicada.
 create or replace function reenviar_a_revision(p_id bigint) returns void language plpgsql as $$
 declare articulo subasta;
 begin
     update subasta set estado_revision = 'En revisión', motivo_rechazo = null,
-        id_revisor = null, fecha_decision = null
+        id_revisor = null, fecha_decision = null, fecha_inicio = clock_timestamp()
     where id_subasta = p_id and estado_revision <> 'En revisión' returning * into articulo;
     if not found then return; end if;
     insert into notificacion (id_usuario,id_subasta,titulo,contenido)

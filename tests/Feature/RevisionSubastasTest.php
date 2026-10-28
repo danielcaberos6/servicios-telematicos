@@ -475,6 +475,22 @@ class RevisionSubastasTest extends TestCase
         $this->assertSame(2, $auction->decisiones()->count());
     }
 
+    public function test_reapproving_an_edited_auction_does_not_add_the_time_it_was_published(): void
+    {
+        $admin = $this->admin();
+        $cierre = now()->addDays(3)->startOfMinute();
+        $auction = $this->auction('Aceptada', ['fecha_inicio' => now()->subDays(5), 'fecha_fin' => $cierre]);
+
+        $this->actingAs($auction->usuario)->put("/subastas/{$auction->id_subasta}", $this->payload([
+            'fecha_fin' => $cierre->format('Y-m-d\TH:i'),
+        ]))->assertSessionHasNoErrors();
+        $this->actingAs($admin)->patch("/admin/subastas/{$auction->id_subasta}", ['decision' => 'Aceptada'])
+            ->assertSessionHasNoErrors();
+
+        // Solo se suma lo que tardó la revisión (milisegundos), no los 5 días ya publicada.
+        $this->assertLessThan(60, $cierre->diffInSeconds($auction->refresh()->fecha_fin));
+    }
+
     public function test_editing_a_rejected_auction_resubmits_it_without_the_old_reason(): void
     {
         $auction = $this->auction('Rechazada');
