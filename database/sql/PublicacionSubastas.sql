@@ -1,7 +1,7 @@
 -- SUBASTAYA · Publicación de subastas tras la revisión
 -- Solo funciones y triggers (create or replace): puede reinstalarse sin tocar datos.
--- Requiere RevisionSubastas.sql y BusquedaGeografica.sql; redefine funciones de Funciones.sql,
--- por eso subastas:instalar-funciones lo ejecuta al final.
+-- Requiere RevisionSubastas.sql y BusquedaGeografica.sql, por eso subastas:instalar-funciones
+-- lo ejecuta al final. Es la única definición de estas funciones: no se copian en Funciones.sql.
 
 -- Catálogo público: solo publicaciones Aceptadas, activas y en su periodo de vigencia.
 -- Con lat, lng y radio (km) se excluyen las publicaciones sin coordenadas y las
@@ -57,6 +57,8 @@ begin
     return new;
 end;
 $$;
+drop trigger if exists puja_validacion on puja;
+create trigger puja_validacion before insert on puja for each row execute function validar_puja();
 
 -- Una solicitud que nunca se publicó no se finaliza ni genera avisos de cierre.
 create or replace function finalizar_subastas() returns integer language plpgsql as $$
@@ -155,6 +157,8 @@ begin
     return new;
 end;
 $$;
+drop trigger if exists subasta_publicada on subasta;
+create trigger subasta_publicada after insert on subasta for each row execute function notificar_publicacion();
 
 -- Editar una subasta Aceptada o Rechazada (datos o fotos) la devuelve a revisión:
 -- ningún cambio se publica sin una nueva decisión del Administrador. Se avisa al

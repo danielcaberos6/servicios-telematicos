@@ -2,25 +2,13 @@
 -- Ejecutar después de Script.sql. Laravel usa consultas parametrizadas.
 -- p_actor siempre procede de la sesión autenticada de Laravel, nunca del formulario.
 -- Las funciones usan SECURITY INVOKER; las credenciales de BD son exclusivas del servidor.
+--
+-- El catálogo, las pujas, la edición de subastas, las imágenes de subastas y la
+-- finalización viven SOLO en PublicacionSubastas.sql (catalogo_subastas, validar_puja,
+-- notificar_publicacion, exigir_subasta_propia, actualizar_subasta, guardar_imagen,
+-- eliminar_imagen, finalizar_subastas y sus triggers). No las redefinas aquí: este archivo
+-- se reinstala antes que aquel y una copia antigua dejaría de aplicar la revisión.
 
-
--- Catálogo público: solo publicaciones activas en su periodo de vigencia.
-create or replace function catalogo_subastas(p_filtros jsonb default '{}'::jsonb)
-returns setof subasta language sql stable as $$
-    select s.* from subasta s
-    where s.estado_subasta = 'Activa' and s.fecha_inicio <= statement_timestamp() and s.fecha_fin > statement_timestamp()
-      and (nullif(p_filtros->>'q', '') is null
-           or strpos(lower(s.titulo), lower(p_filtros->>'q')) > 0
-           or strpos(lower(coalesce(s.descripcion, '')), lower(p_filtros->>'q')) > 0)
-      and (nullif(p_filtros->>'categoria', '') is null or s.id_categoria = (p_filtros->>'categoria')::bigint)
-      and (nullif(p_filtros->>'estado', '') is null or s.estado_articulo = p_filtros->>'estado')
-      and (nullif(p_filtros->>'ubicacion', '') is null
-           or strpos(lower(coalesce(s.ubicacion, '')), lower(p_filtros->>'ubicacion')) > 0)
-      and (nullif(p_filtros->>'desde', '') is null or s.fecha_inicio >= ((p_filtros->>'desde')::date::timestamp at time zone 'America/La_Paz'))
-      and (nullif(p_filtros->>'hasta', '') is null or s.fecha_inicio < (((p_filtros->>'hasta')::date + 1)::timestamp at time zone 'America/La_Paz'))
-      and (nullif(p_filtros->>'min', '') is null or s.monto_inicial >= (p_filtros->>'min')::numeric)
-      and (nullif(p_filtros->>'max', '') is null or s.monto_inicial <= (p_filtros->>'max')::numeric);
-$$;
 
 create or replace function listar_categorias()
 returns setof categoria language sql stable as $$
@@ -73,24 +61,6 @@ $$;
 drop trigger if exists usuario_bienvenida on usuario;
 create trigger usuario_bienvenida after insert on usuario for each row execute function bienvenida_usuario();
 
--- Bloqueo compartido por edición, eliminación e imágenes: evita carreras con una puja.
-create or replace function exigir_subasta_propia(p_actor bigint, p_id bigint, p_editar boolean default true)
-returns subasta language plpgsql as $$
-declare resultado subasta;
-begin
-    select * into resultado from subasta where id_subasta = p_id for update;
-    if not found then raise exception 'Subasta no encontrada.' using errcode = 'P0002'; end if;
-    if resultado.id_usuario <> p_actor or p_actor is null then
-        raise exception 'Esta subasta pertenece a otro usuario.' using errcode = '42501';
-    end if;
-    if exists(select 1 from puja where id_subasta = p_id) then raise exception 'Una subasta con pujas no puede modificarse ni eliminarse.'; end if;
-    if p_editar and (resultado.estado_subasta <> 'Activa' or resultado.fecha_fin <= clock_timestamp()) then
-        raise exception 'Solo puedes editar subastas activas que todavía no recibieron pujas.';
-    end if;
-    return resultado;
-end;
-$$;
-
 create or replace function crear_subasta(p_actor bigint, p_datos jsonb) returns subasta language plpgsql as $$
 declare resultado subasta;
 begin
@@ -99,21 +69,6 @@ begin
         (p_datos->>'monto_inicial')::numeric, clock_timestamp(), (p_datos->>'fecha_fin')::timestamptz, p_actor,
         (p_datos->>'id_categoria')::bigint, (p_datos->>'latitud')::numeric, (p_datos->>'longitud')::numeric)
     returning * into resultado;
-    return resultado;
-end;
-$$;
-
-create or replace function actualizar_subasta(p_actor bigint, p_id bigint, p_datos jsonb) returns subasta language plpgsql as $$
-declare resultado subasta;
-begin
-    perform exigir_subasta_propia(p_actor,p_id);
-    if (p_datos->>'fecha_fin')::timestamptz <= clock_timestamp() then raise exception 'El cierre debe estar en el futuro.'; end if;
-    update subasta set titulo = p_datos->>'titulo', descripcion = p_datos->>'descripcion', ubicacion = p_datos->>'ubicacion',
-        estado_articulo = p_datos->>'estado_articulo', monto_inicial = (p_datos->>'monto_inicial')::numeric,
-        fecha_fin = (p_datos->>'fecha_fin')::timestamptz, id_categoria = (p_datos->>'id_categoria')::bigint,
-        latitud = case when p_datos ? 'latitud' then (p_datos->>'latitud')::numeric else latitud end,
-        longitud = case when p_datos ? 'longitud' then (p_datos->>'longitud')::numeric else longitud end
-    where id_subasta = p_id returning * into resultado;
     return resultado;
 end;
 $$;
@@ -160,37 +115,6 @@ begin
 end;
 $$;
 
-create or replace function guardar_imagen(p_actor bigint, p_subasta bigint, p_ruta text, p_tamano bigint)
-returns imagen language plpgsql as $$
-declare resultado imagen;
-begin
-    if p_subasta is not null then
-        perform exigir_subasta_propia(p_actor,p_subasta);
-        if (select count(*) from imagen where id_subasta=p_subasta) >= 5 then raise exception 'Máximo cinco imágenes por subasta.'; end if;
-    else
-        perform 1 from usuario where id_usuario=p_actor for update;
-    end if;
-    insert into imagen(ruta,tamano,id_usuario,id_subasta)
-    values(p_ruta,p_tamano,case when p_subasta is null then p_actor else null end,p_subasta) returning * into resultado;
-    return resultado;
-end;
-$$;
-
-create or replace function eliminar_imagen(p_actor bigint,p_id bigint) returns text language plpgsql as $$
-declare foto imagen;
-begin
-    select * into foto from imagen where id_imagen=p_id;
-    if not found then raise exception 'Imagen no encontrada.' using errcode='P0002'; end if;
-    if foto.id_subasta is not null then
-        perform exigir_subasta_propia(p_actor,foto.id_subasta);
-    elsif foto.id_usuario <> p_actor or p_actor is null then
-        raise exception 'La imagen pertenece a otro usuario.' using errcode='42501';
-    end if;
-    delete from imagen where id_imagen=p_id;
-    return foto.ruta;
-end;
-$$;
-
 create or replace function listar_notificaciones(p_actor bigint,p_busqueda text default '',p_no_leidas boolean default false)
 returns setof notificacion language sql stable as $$
     select * from notificacion where id_usuario=p_actor and (not p_no_leidas or not leido)
@@ -230,26 +154,6 @@ returns table(estrellas integer,cantidad bigint) language sql stable as $$
 $$;
 
 -- Integridad y eventos
-create or replace function validar_puja() returns trigger language plpgsql as $$
-declare articulo subasta%rowtype; mayor numeric(12,2);
-begin
-    select * into articulo from subasta where id_subasta = new.id_subasta for update;
-    if not found then raise exception 'La subasta no existe.'; end if;
-    -- Evaluar la hora real después de obtener el bloqueo, incluso si hubo espera.
-    if articulo.estado_subasta <> 'Activa' or articulo.fecha_inicio > clock_timestamp() or articulo.fecha_fin <= clock_timestamp() then
-        raise exception 'La subasta no está activa.';
-    end if;
-    if articulo.id_usuario = new.id_usuario then raise exception 'No puedes pujar en tu propia subasta.' using errcode = '42501'; end if;
-    select max(monto) into mayor from puja where id_subasta = new.id_subasta;
-    if new.monto < articulo.monto_inicial or (mayor is not null and new.monto <= mayor) then
-        raise exception 'La oferta debe superar la puja actual y alcanzar el monto inicial.';
-    end if;
-    return new;
-end;
-$$;
-drop trigger if exists puja_validacion on puja;
-create trigger puja_validacion before insert on puja for each row execute function validar_puja();
-
 create or replace function proteger_subasta() returns trigger language plpgsql as $$
 begin
     if exists (select 1 from puja where id_subasta = old.id_subasta) then
@@ -267,16 +171,6 @@ $$;
 drop trigger if exists subasta_proteccion on subasta;
 create trigger subasta_proteccion before update or delete on subasta for each row execute function proteger_subasta();
 
-create or replace function notificar_publicacion() returns trigger language plpgsql as $$
-begin
-    insert into notificacion (id_usuario,id_subasta,titulo,contenido)
-    values (new.id_usuario, new.id_subasta, 'Subasta publicada', 'Tu subasta «' || new.titulo || '» fue publicada correctamente.');
-    return new;
-end;
-$$;
-drop trigger if exists subasta_publicada on subasta;
-create trigger subasta_publicada after insert on subasta for each row execute function notificar_publicacion();
-
 create or replace function notificar_puja() returns trigger language plpgsql as $$
 declare anterior bigint; propietario bigint; nombre text;
 begin
@@ -293,27 +187,6 @@ end;
 $$;
 drop trigger if exists puja_notificacion on puja;
 create trigger puja_notificacion after insert on puja for each row execute function notificar_puja();
-
-create or replace function finalizar_subastas() returns integer language plpgsql as $$
-declare articulo record; ganador bigint; total integer := 0;
-begin
-    for articulo in select * from subasta where estado_subasta = 'Activa' and fecha_fin <= clock_timestamp() for update skip locked loop
-        update subasta set estado_subasta = 'Finalizada' where id_subasta = articulo.id_subasta;
-        select id_usuario into ganador from puja where id_subasta = articulo.id_subasta order by monto desc limit 1;
-        insert into notificacion (id_usuario,id_subasta,titulo,contenido) values
-            (articulo.id_usuario,articulo.id_subasta,'Subasta finalizada','Terminó «' || articulo.titulo || '»' || case when ganador is null then ' sin ofertas.' else ' con una oferta ganadora. Consulta el detalle para coordinar la entrega.' end);
-        if ganador is not null then
-            insert into notificacion (id_usuario,id_subasta,titulo,contenido) values
-                (ganador,articulo.id_subasta,'¡Ganaste una subasta!','Ganaste «' || articulo.titulo || '». Consulta el detalle para coordinar la entrega.');
-            insert into notificacion (id_usuario,id_subasta,titulo,contenido)
-            select distinct p.id_usuario,articulo.id_subasta,'Subasta finalizada','Terminó «' || articulo.titulo || '». Tu oferta no fue la ganadora.'
-            from puja p where p.id_subasta = articulo.id_subasta and p.id_usuario <> ganador;
-        end if;
-        total := total + 1;
-    end loop;
-    return total;
-end;
-$$;
 
 -- BEGIN REPORTES ADMINISTRATIVOS
 -- Los acumulados y los límites de fecha se interpretan en hora de Bolivia.
