@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Categoria;
-use App\Models\Subasta;
 use App\Models\User;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;

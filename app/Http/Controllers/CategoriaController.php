@@ -12,6 +12,7 @@ class CategoriaController extends Controller
     public function index(Request $request)
     {
         $filtros = $request->validate(['estado' => ['nullable', 'in:habilitadas,deshabilitadas']]);
+
         return view('admin.categorias.index', ['categorias' => Categoria::query()
             ->when($filtros['estado'] ?? null, fn ($query, $estado) => $query->where('habilitada', $estado === 'habilitadas'))
             ->orderBy('nombre_categoria')->paginate(15)->withQueryString()]);

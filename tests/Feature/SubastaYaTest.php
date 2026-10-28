@@ -253,6 +253,27 @@ class SubastaYaTest extends TestCase
         $this->assertTrue(Hash::check('NuevaClave123', $user->fresh()->contrasena));
     }
 
+    public function test_changing_the_password_closes_other_sessions_but_keeps_the_current_one(): void
+    {
+        $user = User::factory()->create();
+        $hashAnterior = $user->contrasena;
+        $this->post('/iniciar-sesion', ['correo' => $user->correo, 'password' => 'password'])->assertRedirect('/');
+        $this->get('/perfil')->assertOk();
+        $this->put('/perfil', ['nombre' => $user->nombre, 'correo' => $user->correo, 'current_password' => 'password',
+            'password' => 'NuevaClave123', 'password_confirmation' => 'NuevaClave123'])->assertSessionHasNoErrors();
+        // Como en una petición real, el usuario se vuelve a cargar desde la base.
+        $this->app['auth']->forgetGuards();
+        $this->get('/perfil')->assertOk();
+        $this->assertAuthenticatedAs($user);
+
+        // Otro dispositivo: su sesión conserva el hash de la contraseña anterior.
+        $this->flushSession();
+        $this->app['auth']->forgetGuards();
+        $this->actingAs($user->fresh())->withSession(['password_hash_web' => $hashAnterior])
+            ->get('/perfil')->assertRedirect('/iniciar-sesion');
+        $this->assertGuest();
+    }
+
     public function test_profile_rejects_phone_with_letters_without_changing_the_profile(): void
     {
         $user = User::factory()->create(['telefono' => '76543210']);

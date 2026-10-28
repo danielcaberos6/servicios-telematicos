@@ -9,6 +9,7 @@ use App\Services\IdentidadService;
 use App\Services\ImagenService;
 use App\Services\UsuarioService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -56,6 +57,12 @@ class PerfilController extends Controller
                 Storage::disk('public')->delete($path);
             }
             throw $e;
+        }
+        if (filled($data['password'] ?? null)) {
+            // Las demás sesiones guardan el hash anterior y AuthenticateSession las cierra;
+            // esta se renueva con el nuevo hash (y la cookie "recordarme", si la usaba).
+            $guard = Auth::guard();
+            $guard->login($request->user()->fresh(), $request->hasCookie($guard->getRecallerName()));
         }
         if ($old) {
             try {

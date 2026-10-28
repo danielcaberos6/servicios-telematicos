@@ -33,6 +33,7 @@ class FotosSubastasTest extends TestCase
         Storage::fake('public');
         $user = User::factory()->create();
         $this->actingAs($user);
+
         return $user;
     }
 
@@ -56,7 +57,9 @@ class FotosSubastasTest extends TestCase
             $subasta = Subasta::latest('id_subasta')->firstOrFail();
             $this->assertSame('En revisión', $subasta->estado_revision);
             $this->assertSame($cantidad, $subasta->imagenes()->count());
-            foreach ($subasta->imagenes as $foto) Storage::disk('public')->assertExists($foto->ruta);
+            foreach ($subasta->imagenes as $foto) {
+                Storage::disk('public')->assertExists($foto->ruta);
+            }
         }
     }
 

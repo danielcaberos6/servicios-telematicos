@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Categoria;
 use App\Models\Subasta;
 use App\Models\User;
 use Database\Seeders\DemoSeeder;
@@ -38,11 +37,12 @@ class NavegacionApartadosTest extends TestCase
         $this->get('/subastas/crear')->assertOk()->assertSee('href="#encuentro"', false)
             ->assertSee('id="encuentro" data-apartado', false);
 
+        // Otra cuenta, otra sesión: la anterior guarda el hash de contraseña del vendedor.
+        $this->flushSession();
         $this->actingAs(User::where('correo', 'admin@subastaya.test')->sole())->get('/perfil')
             ->assertOk()->assertSee('href="#seguridad"', false)->assertDontSee('href="#identidad"', false);
         foreach (['/admin/usuarios', '/admin/categorias', '/admin/identidad', '/admin/subastas', '/reportes/subastas'] as $url) {
             $this->get($url)->assertOk()->assertSee('data-espacio-seccion', false);
         }
     }
-
 }
