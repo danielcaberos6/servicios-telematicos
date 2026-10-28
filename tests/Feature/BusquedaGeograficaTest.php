@@ -138,7 +138,7 @@ class BusquedaGeograficaTest extends TestCase
             [[...self::CENTRO, 'radio' => 0], ['radio' => 'El radio de búsqueda debe ser mayor que cero.']],
             [[...self::CENTRO, 'radio' => -3], ['radio' => 'El radio de búsqueda debe ser mayor que cero.']],
             [[...self::CENTRO, 'radio' => 'cinco'], ['radio' => 'El radio de búsqueda debe ser un número de kilómetros.']],
-            [[...self::CENTRO, 'radio' => 501], ['radio' => 'El radio de búsqueda admite hasta 500 km.']],
+            [[...self::CENTRO, 'radio' => 151], ['radio' => 'El radio de búsqueda admite hasta 150 km.']],
             [['lat' => 95, 'lng' => -68, 'radio' => 5], ['lat' => 'La latitud del centro debe estar entre -90 y 90.']],
             [['lat' => -16, 'lng' => -190, 'radio' => 5], ['lng' => 'La longitud del centro debe estar entre -180 y 180.']],
         ];
@@ -148,6 +148,7 @@ class BusquedaGeograficaTest extends TestCase
                 ->assertSessionHasErrors($errors);
             $this->getJson('/buscar?'.http_build_query($params))->assertUnprocessable()->assertJsonValidationErrors(array_keys($errors));
         }
+        $this->getJson('/buscar?'.http_build_query([...self::CENTRO, 'radio' => 150]))->assertOk();
     }
 
     public function test_invalid_radius_redirect_shows_the_errors_in_the_catalog(): void

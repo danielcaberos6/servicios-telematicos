@@ -10,6 +10,12 @@
                 @foreach (request()->except(['q', 'page']) as $key => $value)
                     @if (is_scalar($value))
                         <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @elseif (is_array($value))
+                        @foreach ($value as $item)
+                            @if (is_scalar($item))
+                                <input type="hidden" name="{{ $key }}[]" value="{{ $item }}">
+                            @endif
+                        @endforeach
                     @endif
                 @endforeach
                 <button class="button primary" type="submit">
@@ -32,13 +38,20 @@
                 </div>
                 <form id="filtros" method="get" action="{{ route('subastas.index') }}" data-sin-vacios>
                     <input type="hidden" name="q" value="{{ request('q') }}">
-                    <label for="categoria">Categoría</label><select id="categoria" name="categoria">
-                        <option value="">Todas las categorías</option>
-                        @foreach ($categorias as $cat)
-                            <option value="{{ $cat->id_categoria }}" @selected(request('categoria') == $cat->id_categoria)>
-                                {{ $cat->nombre_categoria }}</option>
-                        @endforeach
-                    </select>
+                    @php
+                        $categoriasElegidas = array_map('strval', array_filter((array) request('categoria'), 'is_scalar'));
+                    @endphp
+                    <fieldset class="filter-categories">
+                        <legend>Categorías</legend>
+                        <p class="small-label">Sin marcar, se muestran todas.</p>
+                        <div class="filter-check-list">
+                            @foreach ($categorias as $cat)
+                                <label class="checkbox-label"><input type="checkbox" name="categoria[]"
+                                        value="{{ $cat->id_categoria }}" @checked(in_array((string) $cat->id_categoria, $categoriasElegidas, true))>
+                                    {{ $cat->nombre_categoria }}</label>
+                            @endforeach
+                        </div>
+                    </fieldset>
                     <label for="estado">Estado del artículo</label><select id="estado" name="estado">
                         <option value="">Todos los estados</option>
                         @foreach (\App\Models\Subasta::CONDITIONS as $state)
@@ -104,7 +117,7 @@
                         <input type="hidden" id="filtro-lng" name="lng" form="filtros" value="{{ old('lng', request('lng')) }}">
                         <div class="radius-field">
                             <label for="radio">Radio (km)</label>
-                            <input id="radio" name="radio" form="filtros" type="number" min="0.1" max="500" step="0.1"
+                            <input id="radio" name="radio" form="filtros" type="number" min="0.1" max="150" step="0.1"
                                 inputmode="decimal" placeholder="Ej. 5" value="{{ old('radio', request('radio')) }}">
                         </div>
                         <button type="button" class="button secondary" data-mapa-gps><x-icono nombre="pin" />Usar mi ubicación</button>
@@ -135,11 +148,17 @@
                             <a href="{{ route('subastas.index', request()->except(['lat', 'lng', 'radio', 'page'])) }}"
                                 aria-label="Quitar filtro de cercanía">Cercanía: hasta {{ request('radio') }} km <span>×</span></a>
                         @endif
-                        @foreach (request()->except(['page', 'orden', 'lat', 'lng', 'radio']) as $key => $value)
+                        @foreach ($categoriasElegidas as $idCategoria)
+                            @if ($nombreCategoria = $categorias->firstWhere('id_categoria', (int) $idCategoria)?->nombre_categoria)
+                                <a href="{{ route('subastas.index', [...request()->except(['categoria', 'page']), 'categoria' => array_values(array_diff($categoriasElegidas, [$idCategoria]))]) }}"
+                                    aria-label="Quitar categoría {{ $nombreCategoria }}">Categoría: {{ $nombreCategoria }} <span>×</span></a>
+                            @endif
+                        @endforeach
+                        @foreach (request()->except(['page', 'orden', 'lat', 'lng', 'radio', 'categoria']) as $key => $value)
                             @if (is_scalar($value) && $value !== null && $value !== '')
                                 <a href="{{ route('subastas.index', request()->except([$key, 'page'])) }}"
-                                    aria-label="Quitar filtro {{ $key }}">{{ ['q' => 'Búsqueda', 'categoria' => 'Categoría', 'estado' => 'Estado', 'desde' => 'Desde', 'hasta' => 'Hasta', 'min' => 'Desde Bs', 'max' => 'Hasta Bs', 'ubicacion' => 'Lugar'][$key] ?? $key }}:
-                                    {{ $key === 'categoria' ? $categorias->firstWhere('id_categoria', $value)?->nombre_categoria : $value }}
+                                    aria-label="Quitar filtro {{ $key }}">{{ ['q' => 'Búsqueda', 'estado' => 'Estado', 'desde' => 'Desde', 'hasta' => 'Hasta', 'min' => 'Desde Bs', 'max' => 'Hasta Bs', 'ubicacion' => 'Lugar'][$key] ?? $key }}:
+                                    {{ $value }}
                                     <span>×</span></a>
                             @endif
                         @endforeach

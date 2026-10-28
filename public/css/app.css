@@ -725,6 +725,24 @@ html { scroll-padding-top: calc(var(--header-height) + var(--section-nav-height)
 .filter-panel .button {
     margin-top: 24px;
 }
+.filter-panel .filter-categories {
+    border-top: 0;
+    margin-top: 0;
+}
+.filter-categories .small-label {
+    margin-top: 0;
+}
+.filter-check-list {
+    display: grid;
+    gap: 7px;
+    max-height: 220px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+.filter-panel .filter-check-list input[type="checkbox"] {
+    width: 16px;
+    padding: 0;
+}
 .catalog-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 18px;
@@ -1694,6 +1712,12 @@ form small {
     }
     .filter-panel form > fieldset {
         margin-top: 5px;
+    }
+    .filter-panel form > .filter-categories {
+        grid-column: 1/-1;
+    }
+    .filter-check-list {
+        grid-template-columns: 1fr 1fr;
     }
     .filter-panel form > .button {
         grid-column: 1/-1;

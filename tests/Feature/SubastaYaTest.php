@@ -136,6 +136,24 @@ class SubastaYaTest extends TestCase
         $this->get('/buscar?q=sincoincidencias')->assertSee('No encontramos coincidencias');
     }
 
+    public function test_catalog_filters_by_one_or_several_categories(): void
+    {
+        $arte = Categoria::firstOrCreate(['nombre_categoria' => 'Arte de prueba']);
+        $hogar = Categoria::firstOrCreate(['nombre_categoria' => 'Hogar de prueba']);
+        $deportes = Categoria::firstOrCreate(['nombre_categoria' => 'Deportes de prueba']);
+        $this->auction(null, ['titulo' => 'Cuadro al óleo', 'id_categoria' => $arte->id_categoria]);
+        $this->auction(null, ['titulo' => 'Sofá de tres plazas', 'id_categoria' => $hogar->id_categoria]);
+        $this->auction(null, ['titulo' => 'Bicicleta de montaña', 'id_categoria' => $deportes->id_categoria]);
+
+        $this->get('/buscar?categoria='.$arte->id_categoria)->assertOk()
+            ->assertSee('Cuadro al óleo')->assertDontSee('Sofá de tres plazas')->assertDontSee('Bicicleta de montaña');
+        $this->get('/buscar?'.http_build_query(['categoria' => [$arte->id_categoria, $hogar->id_categoria]]))->assertOk()
+            ->assertSee('Cuadro al óleo')->assertSee('Sofá de tres plazas')->assertDontSee('Bicicleta de montaña')
+            ->assertSee('Quitar categoría Arte de prueba')->assertSee('Quitar categoría Hogar de prueba');
+        $this->get('/buscar')->assertSee('Cuadro al óleo')->assertSee('Sofá de tres plazas')->assertSee('Bicicleta de montaña');
+        $this->getJson('/buscar?'.http_build_query(['categoria' => [$arte->id_categoria, 999999]]))->assertUnprocessable()->assertJsonValidationErrors('categoria.1');
+    }
+
     public function test_publication_date_filter_includes_last_seconds_of_local_day(): void
     {
         $day = now()->subDay()->startOfDay();

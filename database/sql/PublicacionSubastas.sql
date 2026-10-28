@@ -16,7 +16,12 @@ returns setof subasta language sql stable as $$
       and (nullif(p_filtros->>'q', '') is null
            or strpos(lower(s.titulo), lower(p_filtros->>'q')) > 0
            or strpos(lower(coalesce(s.descripcion, '')), lower(p_filtros->>'q')) > 0)
-      and (nullif(p_filtros->>'categoria', '') is null or s.id_categoria = (p_filtros->>'categoria')::bigint)
+      -- categoria: una o varias categorías (lista JSON); la subasta debe pertenecer a alguna.
+      and case when jsonb_typeof(p_filtros->'categoria') = 'array' and jsonb_array_length(p_filtros->'categoria') > 0
+                   then s.id_categoria in (select c::bigint from jsonb_array_elements_text(p_filtros->'categoria') c)
+               when jsonb_typeof(p_filtros->'categoria') in ('number', 'string') and p_filtros->>'categoria' <> ''
+                   then s.id_categoria = (p_filtros->>'categoria')::bigint
+               else true end
       and (nullif(p_filtros->>'estado', '') is null or s.estado_articulo = p_filtros->>'estado')
       and (nullif(p_filtros->>'ubicacion', '') is null
            or strpos(lower(coalesce(s.ubicacion, '')), lower(p_filtros->>'ubicacion')) > 0)
