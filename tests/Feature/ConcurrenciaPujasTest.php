@@ -90,7 +90,7 @@ class ConcurrenciaPujasTest extends TestCase
             }
             $aceptadas = $resultado === 'aceptada' ? 2 : 1;
             $this->assertSame($aceptadas, $subasta->pujas()->count());
-            $this->assertSame($aceptadas, $vendedor->notificaciones()->where('titulo', 'Nueva oferta')->count());
+            $this->assertSame(0, $vendedor->notificaciones()->where('titulo', 'Nueva oferta')->count());
             $this->assertSame($aceptadas - 1, $uno->notificaciones()->where('titulo', 'Superaron tu oferta')->count());
         }
     }

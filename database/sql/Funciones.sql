@@ -172,12 +172,11 @@ drop trigger if exists subasta_proteccion on subasta;
 create trigger subasta_proteccion before update or delete on subasta for each row execute function proteger_subasta();
 
 create or replace function notificar_puja() returns trigger language plpgsql as $$
-declare anterior bigint; propietario bigint; nombre text;
+declare anterior bigint; nombre text;
 begin
-    select id_usuario,titulo into propietario,nombre from subasta where id_subasta = new.id_subasta;
+    select titulo into nombre from subasta where id_subasta = new.id_subasta;
     select id_usuario into anterior from puja where id_subasta = new.id_subasta and id_puja <> new.id_puja order by monto desc limit 1;
-    insert into notificacion (id_usuario,id_subasta,titulo,contenido) values
-        (propietario,new.id_subasta,'Nueva oferta','Recibiste una oferta de Bs ' || new.monto || ' en «' || nombre || '».');
+    -- El vendedor consulta las pujas en el detalle y recibe un resumen al cierre.
     if anterior is not null and anterior <> new.id_usuario then
         insert into notificacion (id_usuario,id_subasta,titulo,contenido) values
             (anterior,new.id_subasta,'Superaron tu oferta','Hay una oferta mayor en «' || nombre || '».');

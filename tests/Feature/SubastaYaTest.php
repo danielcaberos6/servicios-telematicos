@@ -192,7 +192,7 @@ class SubastaYaTest extends TestCase
         $this->assertDatabaseCount('puja', 2);
         $this->actingAs($owner)->put('/subastas/'.$auction->id_subasta, $this->payload())->assertSessionHasErrors('subasta');
         $this->delete('/subastas/'.$auction->id_subasta)->assertSessionHasErrors('subasta');
-        $this->assertDatabaseHas('notificacion', ['id_usuario' => $owner->id_usuario, 'titulo' => 'Nueva oferta']);
+        $this->assertDatabaseMissing('notificacion', ['id_usuario' => $owner->id_usuario, 'titulo' => 'Nueva oferta']);
     }
 
     public function test_database_itself_rejects_an_invalid_direct_bid(): void
@@ -221,6 +221,7 @@ class SubastaYaTest extends TestCase
         $this->artisan('subastas:finalizar')->assertSuccessful();
         $this->assertSame('Finalizada', $auction->fresh()->estado_subasta);
         $this->assertSame(1, Notificacion::where('id_usuario', $auction->id_usuario)->where('titulo', 'Subasta finalizada')->count());
+        $this->assertStringContainsString('sin ofertas.', Notificacion::where('id_usuario', $auction->id_usuario)->where('titulo', 'Subasta finalizada')->sole()->contenido);
     }
 
     public function test_notification_actions_are_scoped_to_the_current_user(): void
@@ -439,6 +440,11 @@ class SubastaYaTest extends TestCase
         $this->artisan('subastas:finalizar')->assertSuccessful();
         $this->artisan('subastas:finalizar')->assertSuccessful();
         $this->assertSame(1, Notificacion::where('id_usuario', $winner->id_usuario)->where('titulo', '¡Ganaste una subasta!')->count());
+        $resumen = Notificacion::where('id_usuario', $owner->id_usuario)->where('titulo', 'Subasta finalizada')->sole();
+        $this->assertStringContainsString($auction->titulo, $resumen->contenido);
+        $this->assertStringContainsString('Ganador: '.$winner->nombre, $resumen->contenido);
+        $this->assertStringContainsString('Puja ganadora: Bs 150,00', $resumen->contenido);
+        $this->assertStringNotContainsString($winner->correo, $resumen->contenido);
         $this->get('/subastas/'.$auction->id_subasta)->assertSee($owner->correo);
         $this->actingAs($owner)->get('/subastas/'.$auction->id_subasta)->assertSee($winner->correo);
         $this->actingAs(User::factory()->create())->get('/subastas/'.$auction->id_subasta)->assertDontSee($owner->correo)->assertDontSee($winner->correo);

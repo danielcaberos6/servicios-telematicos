@@ -62,14 +62,20 @@ create trigger puja_validacion before insert on puja for each row execute functi
 
 -- Una solicitud que nunca se publicó no se finaliza ni genera avisos de cierre.
 create or replace function finalizar_subastas() returns integer language plpgsql as $$
-declare articulo record; ganador bigint; total integer := 0;
+declare articulo record; ganador bigint; nombre_ganador text; monto_ganador numeric(12,2); total integer := 0;
 begin
     for articulo in select * from subasta where estado_subasta = 'Activa' and estado_revision = 'Aceptada'
                     and fecha_fin <= clock_timestamp() for update skip locked loop
         update subasta set estado_subasta = 'Finalizada' where id_subasta = articulo.id_subasta;
-        select id_usuario into ganador from puja where id_subasta = articulo.id_subasta order by monto desc limit 1;
+        select p.id_usuario,u.nombre,p.monto into ganador,nombre_ganador,monto_ganador
+        from puja p join usuario u on u.id_usuario=p.id_usuario
+        where p.id_subasta=articulo.id_subasta order by p.monto desc,p.id_puja asc limit 1;
         insert into notificacion (id_usuario,id_subasta,titulo,contenido) values
-            (articulo.id_usuario,articulo.id_subasta,'Subasta finalizada','Terminó «' || articulo.titulo || '»' || case when ganador is null then ' sin ofertas.' else ' con una oferta ganadora. Consulta el detalle para coordinar la entrega.' end);
+            (articulo.id_usuario,articulo.id_subasta,'Subasta finalizada','Terminó «' || articulo.titulo || '»' ||
+                case when ganador is null then ' sin ofertas.'
+                else '. Ganador: ' || nombre_ganador || '. Puja ganadora: Bs ' ||
+                    translate(to_char(monto_ganador,'FM9,999,999,990.00'),',.','.,') ||
+                    '. Consulta el detalle para coordinar la entrega.' end);
         if ganador is not null then
             insert into notificacion (id_usuario,id_subasta,titulo,contenido) values
                 (ganador,articulo.id_subasta,'¡Ganaste una subasta!','Ganaste «' || articulo.titulo || '». Consulta el detalle para coordinar la entrega.');

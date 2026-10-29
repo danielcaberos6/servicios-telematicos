@@ -91,6 +91,10 @@ Los mapas usan Leaflet 1.9.4 (unpkg, con verificación de integridad) y las tese
 
 La distancia se calcula en PostgreSQL con la fórmula de haversine sobre una esfera de 6371 km (`distancia_km` en `database/sql/BusquedaGeografica.sql`). Los datos de demostración incluyen coordenadas aproximadas de cada plaza, excepto la colección de libros, que representa una publicación anterior sin mapa.
 
+## Notificaciones de pujas
+
+El vendedor recibe un único resumen al finalizar cada subasta, con el artículo, el nombre del ganador y la puja ganadora; si nadie participó, se indica que terminó sin ofertas. Las nuevas pujas se consultan en el detalle y no generan avisos al vendedor. Los pujadores conservan los avisos al ser superados y al finalizar la subasta. Los avisos anteriores al ajuste se conservan en el historial.
+
 ## Pruebas
 
 ```sh

@@ -99,8 +99,29 @@ class ParticipacionPujasTest extends TestCase
         $this->assertSame(2, $subasta->pujas()->count());
         $this->assertSame('110.00', (string) $subasta->pujas()->max('monto'));
         $this->assertSame($avisos, DB::table('notificacion')->count());
-        $this->assertSame(2, $vendedor->notificaciones()->where('titulo', 'Nueva oferta')->count());
+        $this->assertSame(0, $vendedor->notificaciones()->where('titulo', 'Nueva oferta')->count());
         $this->assertSame(1, $uno->notificaciones()->where('titulo', 'Superaron tu oferta')->count());
         $this->assertSame(0, $dos->notificaciones()->where('titulo', 'Superaron tu oferta')->count());
+    }
+
+    public function test_las_pujas_avisan_solo_al_postor_desplazado_y_conservan_los_avisos_anteriores(): void
+    {
+        $vendedor = User::factory()->create();
+        $uno = User::factory()->create();
+        $dos = User::factory()->create();
+        $subasta = $this->subasta($vendedor);
+        $anterior = $vendedor->notificaciones()->create([
+            'id_subasta' => $subasta->id_subasta,
+            'titulo' => 'Nueva oferta', 'contenido' => 'Aviso anterior al ajuste.',
+        ]);
+        $this->artisan('subastas:instalar-funciones')->assertSuccessful();
+        foreach ([[$uno, '100.00'], [$dos, '110.00'], [$dos, '120.00'], [$uno, '130.00']] as [$postor, $monto]) {
+            app(PujaService::class)->registrar($postor->id_usuario, $subasta->id_subasta, $monto);
+        }
+        $this->assertSame(4, $subasta->pujas()->count());
+        $this->assertSame(1, $vendedor->notificaciones()->where('titulo', 'Nueva oferta')->count());
+        $this->assertNotNull($anterior->fresh());
+        $this->assertSame(1, $uno->notificaciones()->where('titulo', 'Superaron tu oferta')->count());
+        $this->assertSame(1, $dos->notificaciones()->where('titulo', 'Superaron tu oferta')->count());
     }
 }
