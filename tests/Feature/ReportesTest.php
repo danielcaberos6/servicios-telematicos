@@ -114,6 +114,38 @@ class ReportesTest extends TestCase
         $this->assertSame('Bicicleta 16', $data['detalle'][0]['titulo']);
     }
 
+    public function test_report_shows_winner_and_amount_only_after_closing(): void
+    {
+        $admin = $this->admin();
+        $owner = User::factory()->create();
+        $loser = User::factory()->create(['nombre' => 'Postor anterior']);
+        $winner = User::factory()->create(['nombre' => 'Ganadora del reporte']);
+        $closed = $this->auction($owner, ['titulo' => 'Con ganador', 'fecha_fin' => now()->addSeconds(2)]);
+        $closed->pujas()->create(['id_usuario' => $loser->id_usuario, 'monto' => '150.00']);
+        $closed->pujas()->create(['id_usuario' => $winner->id_usuario, 'monto' => '1250.50']);
+        $active = $this->auction($owner, ['titulo' => 'Todavía activa']);
+        $active->pujas()->create(['id_usuario' => $loser->id_usuario, 'monto' => '200.00']);
+        $empty = $this->auction($owner, ['titulo' => 'Sin participantes', 'fecha_fin' => now()->subDay()]);
+        $cancelled = $this->auction($owner, ['titulo' => 'Publicación cancelada', 'estado_subasta' => 'Cancelada']);
+        // El reporte reconoce el cierre incluso antes de la siguiente ejecución del scheduler.
+        DB::statement('select pg_sleep(2.1)');
+        $url = '/reportes/subastas?desde=2025-06-01&hasta=2025-06-30';
+        $result = $this->actingAs($admin)->getJson($url)->assertOk();
+        $rows = collect($result->json('detalle'))->keyBy('id_subasta');
+        $this->assertSame('Finalizada', $rows[$closed->id_subasta]['estado']);
+        $this->assertSame($winner->id_usuario, $rows[$closed->id_subasta]['id_ganador']);
+        $this->assertSame($winner->nombre, $rows[$closed->id_subasta]['ganador']);
+        $this->assertEquals(1250.50, $rows[$closed->id_subasta]['monto_ganador']);
+        foreach ([$active, $empty, $cancelled] as $auction) {
+            $this->assertNull($rows[$auction->id_subasta]['ganador']);
+            $this->assertNull($rows[$auction->id_subasta]['monto_ganador']);
+        }
+        $this->get($url)->assertOk()->assertSee($winner->nombre)->assertSee('1.250,50')
+            ->assertSee('Pendiente')->assertSee('Sin ofertas')->assertSee('No aplica')
+            ->assertDontSee($winner->correo);
+        $this->get($url.'&estado=Finalizada')->assertOk()->assertSee($winner->nombre)->assertDontSee('Todavía activa');
+    }
+
     public function test_user_report_compares_equal_periods_and_weights_reviews_correctly(): void
     {
         $admin = $this->admin();

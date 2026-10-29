@@ -246,8 +246,16 @@ begin
         from generate_series(date_trunc('month',d_inicio::timestamp),date_trunc('month',d_fin::timestamp),interval '1 month') m
     ), categorias as (
         select categoria as etiqueta,count(*) as cantidad from filtradas group by categoria
-    ), detalle as (
+    ), paginadas as (
         select * from filtradas order by fecha_fin desc,id_subasta desc limit 15 offset (pagina-1)*15
+    ), detalle as (
+        select d.*,g.id_ganador,g.ganador,g.monto_ganador
+        from paginadas d left join lateral (
+            select u.id_usuario as id_ganador,u.nombre as ganador,p.monto as monto_ganador
+            from puja p join usuario u on u.id_usuario=p.id_usuario
+            where p.id_subasta=d.id_subasta and d.estado='Finalizada'
+            order by p.monto desc,p.id_puja asc limit 1
+        ) g on true
     )
     select jsonb_build_object(
         'indicadores',jsonb_build_object('total',count(*),'activas',count(*) filter(where estado='Activa'),

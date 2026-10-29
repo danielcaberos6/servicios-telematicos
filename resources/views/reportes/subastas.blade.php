@@ -38,9 +38,17 @@
 @section('tabla')
 <div class="report-table-heading"><h2 id="detalle-titulo">Detalle de subastas en el periodo</h2><span>{{ $datos['total'] }} resultados</span></div>
 <div class="report-table-scroll"><table class="report-table">
-    <thead><tr><th scope="col">Título</th><th scope="col">Vendedor</th><th scope="col">Categoría</th><th scope="col">Monto inicial (Bs)</th><th scope="col">Pujas</th><th scope="col">Estado</th><th scope="col">Fecha de cierre</th></tr></thead>
+    <thead><tr><th scope="col">Título</th><th scope="col">Vendedor</th><th scope="col">Categoría</th><th scope="col">Monto inicial (Bs)</th><th scope="col">Pujas</th><th scope="col">Estado</th><th scope="col">Ganador</th><th scope="col">Puja ganadora (Bs)</th><th scope="col">Fecha de cierre</th></tr></thead>
     <tbody>@forelse ($datos['tabla'] as $fila)
-        <tr><th scope="row"><a href="{{ route('subastas.show', $fila['id_subasta']) }}">{{ $fila['titulo'] }}</a></th><td>{{ $fila['vendedor'] }}</td><td>{{ $fila['categoria'] }}</td><td class="report-number">{{ number_format($fila['monto_inicial'], 2, ',', '.') }}</td><td>{{ $fila['pujas'] }}</td><td><span @class(['report-state', 'state-active' => $fila['estado'] === 'Activa', 'state-cancelled' => $fila['estado'] === 'Cancelada'])>{{ $fila['estado'] }}</span></td><td class="report-date">{{ \Carbon\Carbon::parse($fila['fecha_fin'])->timezone('America/La_Paz')->format('d/m/Y H:i') }}</td></tr>
-    @empty<tr><td colspan="7" class="report-empty">Sin datos para el periodo seleccionado</td></tr>@endforelse</tbody>
+        <tr>
+            <th scope="row"><a href="{{ route('subastas.show', $fila['id_subasta']) }}">{{ $fila['titulo'] }}</a></th>
+            <td>{{ $fila['vendedor'] }}</td><td>{{ $fila['categoria'] }}</td>
+            <td class="report-number">{{ number_format($fila['monto_inicial'], 2, ',', '.') }}</td><td>{{ $fila['pujas'] }}</td>
+            <td><span @class(['report-state', 'state-active' => $fila['estado'] === 'Activa', 'state-cancelled' => $fila['estado'] === 'Cancelada'])>{{ $fila['estado'] }}</span></td>
+            <td>{{ match ($fila['estado']) { 'Activa' => 'Pendiente', 'Cancelada' => 'No aplica', default => $fila['ganador'] ?? 'Sin ofertas' } }}</td>
+            <td class="report-number">{{ $fila['monto_ganador'] !== null ? number_format($fila['monto_ganador'], 2, ',', '.') : '—' }}</td>
+            <td class="report-date">{{ \Carbon\Carbon::parse($fila['fecha_fin'])->timezone('America/La_Paz')->format('d/m/Y H:i') }}</td>
+        </tr>
+    @empty<tr><td colspan="9" class="report-empty">Sin datos para el periodo seleccionado</td></tr>@endforelse</tbody>
 </table></div>
 @endsection

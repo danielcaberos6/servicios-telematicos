@@ -11,7 +11,7 @@
     </header>
 
     <div class="reports-layout">
-        <details class="report-filter-disclosure" open><summary>Filtrar reporte</summary>@include('reportes.filtros')</details>
+        @include('reportes.filtros')
         <div class="reports-results">
             @yield('indicadores')
             @yield('graficos')
