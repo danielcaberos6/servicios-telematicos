@@ -1,0 +1,12 @@
+.participation-list { list-style:none; padding:0; margin:28px 0; }
+.participation-row { display:flex; align-items:flex-start; gap:24px; padding:24px 0; border-top:1px solid var(--line); }
+.participation-photo { width:112px; height:112px; object-fit:cover; border-radius:6px; flex-shrink:0; }
+.participation-info { min-width:0; flex:1; overflow-wrap:anywhere; }
+.participation-info h2 { font-size:1.15rem; margin:0 0 8px; }
+.participation-info h2 a { color:var(--ink); }
+.participation-status { color:var(--blue); font-weight:700; margin:0 0 16px; }
+.participation-amounts { display:flex; flex-wrap:wrap; gap:12px 32px; margin:16px 0; }
+.participation-amounts dt { color:var(--muted); font-size:.85rem; }
+.participation-amounts dd { margin:4px 0 0; font-weight:600; }
+.participation-info .text-link { display:inline-flex; align-items:center; min-height:44px; }
+@media(max-width:600px) { .participation-row { gap:14px; }.participation-photo { width:72px; height:72px; }.participation-amounts { display:grid; grid-template-columns:1fr; gap:12px; }.participation-info h2 { font-size:1rem; } }

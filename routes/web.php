@@ -6,6 +6,7 @@ use App\Http\Controllers\GestionUsuarioController;
 use App\Http\Controllers\IdentidadController;
 use App\Http\Controllers\ImagenController;
 use App\Http\Controllers\NotificacionController;
+use App\Http\Controllers\ParticipacionController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PujaController;
 use App\Http\Controllers\ReporteController;
@@ -54,6 +55,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
     Route::put('/perfil', [PerfilController::class, 'update'])->middleware('throttle:10,1')->name('perfil.update');
     Route::middleware(SoloUsuario::class)->group(function () {
+        Route::get('/mis-participaciones', [ParticipacionController::class, 'index'])->name('participaciones.index');
+        Route::get('/favoritos', [ParticipacionController::class, 'favoritos'])->name('favoritos.index');
+        Route::put('/favoritos/{subasta}', [ParticipacionController::class, 'guardar'])->name('favoritos.guardar');
+        Route::delete('/favoritos/{subasta}', [ParticipacionController::class, 'retirar'])->name('favoritos.retirar');
         Route::get('/mis-subastas', [SubastaController::class, 'misSubastas'])->name('subastas.mias');
         Route::get('/subastas/crear', [SubastaController::class, 'create'])->name('subastas.create');
         Route::post('/subastas', [SubastaController::class, 'store'])->middleware('throttle:20,1')->name('subastas.store');

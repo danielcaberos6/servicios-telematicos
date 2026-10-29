@@ -117,6 +117,12 @@
                         </div>
                     </div>
                     <p class="muted">{{ $subasta->modelo_puja === 1 ? 'Modelo anterior: conserva sus importes y reglas originales. No tiene fondos reservados.' : 'Incremento de puja: Bs '.$subasta->incremento_puja.'. Cada oferta confirma el siguiente monto exacto.' }}</p>
+                    @if ($subasta->publicada() && auth()->check() && !auth()->user()->esAdministrador())
+                        <form method="post" action="{{ route($esFavorito ? 'favoritos.retirar' : 'favoritos.guardar', $subasta) }}">
+                            @csrf @method($esFavorito ? 'DELETE' : 'PUT')
+                            <button class="button secondary full-width" type="submit" aria-pressed="{{ $esFavorito ? 'true' : 'false' }}">{{ $esFavorito ? 'Quitar de favoritos' : 'Guardar en favoritos' }}</button>
+                        </form>
+                    @endif
                     @if ($subasta->estado === 'Activa' && $subasta->publicada() && $subasta->usuario->activo)
                         @auth
                             @if (auth()->user()->esAdministrador())

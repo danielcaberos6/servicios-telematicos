@@ -33,7 +33,7 @@
                     $enlaces = $esAdministrador
                         ? [['admin.subastas.index', 'gavel', 'Subastas'], ['admin.usuarios.index', 'user', 'Usuarios'], ['admin.categorias.index', 'box', 'Categorías'], ['admin.identidad.index', 'shield', 'Identidad'], ['notificaciones.index', 'bell', 'Notificaciones']]
                         : (auth()->check()
-                            ? [['inicio', 'home', 'Inicio'], ['perfil.edit', 'user', 'Perfil'], ['subastas.index', 'search', 'Explorar subastas'], ['subastas.mias', 'gavel', 'Mis subastas'], ['notificaciones.index', 'bell', 'Notificaciones']]
+                            ? [['inicio', 'home', 'Inicio'], ['perfil.edit', 'user', 'Perfil'], ['subastas.index', 'search', 'Explorar subastas'], ['subastas.mias', 'gavel', 'Mis subastas'], ['participaciones.index', 'trophy', 'Mis participaciones'], ['notificaciones.index', 'bell', 'Notificaciones']]
                             : [['inicio', 'home', 'Inicio'], ['subastas.index', 'search', 'Explorar subastas'], ['como-funciona', 'book', 'Cómo funciona']]);
                 @endphp
                 @foreach ($enlaces as [$route, $icon, $label])
@@ -42,6 +42,7 @@
                             ? request()->routeIs(Str::beforeLast($route, '.') . '.*')
                             : request()->routeIs($route);
                         $activo = $activo || ($route === 'admin.identidad.index' && request()->routeIs('identidad.show'));
+                        $activo = $activo || ($route === 'participaciones.index' && request()->routeIs('favoritos.index'));
                     @endphp
                     <a href="{{ route($route) }}" @class(['nav-link', 'active' => $activo])
                         @if ($activo) aria-current="page" @endif><x-icono

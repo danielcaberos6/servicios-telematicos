@@ -26,6 +26,11 @@
     } elseif (request()->routeIs('notificaciones.index')) {
         $titulo = 'Notificaciones';
         $items = $filtrar('notificaciones.index', 'solo_no_leidas', ['' => 'Todas', '1' => 'No leídas']);
+    } elseif (request()->routeIs('participaciones.index', 'favoritos.index')) {
+        $titulo = 'Mis participaciones';
+        $items = $filtrar('participaciones.index', 'apartado', \App\Services\ParticipacionService::APARTADOS);
+        if (request()->routeIs('favoritos.index')) $items = array_map(fn ($item) => [$item[0], $item[1], false], $items);
+        $items[] = [route('favoritos.index'), 'Favoritos', request()->routeIs('favoritos.index')];
     } elseif (request()->routeIs('admin.usuarios.*')) {
         $titulo = 'Usuarios';
         $items = $filtrar('admin.usuarios.index', 'estado', ['' => 'Todos los usuarios', 'activo' => 'Activos', 'inactivo' => 'Desactivados']);

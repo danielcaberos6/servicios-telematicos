@@ -19,6 +19,7 @@ Artisan::command('subastas:instalar-funciones', function () {
         // Redefine el catálogo, las pujas y la finalización; sin esto se publicarían
         // solicitudes sin revisar y dejaría de aplicarse el filtro por radio.
         DB::unprepared(file_get_contents(database_path('sql/PublicacionSubastas.sql')));
+        DB::unprepared(file_get_contents(database_path('sql/ParticipacionSubastas.sql')));
     });
     $this->info('Funciones.sql, BusquedaGeografica.sql y PublicacionSubastas.sql instalados. Las tablas y sus datos se conservaron.');
 })->purpose('Instala o actualiza las funciones y triggers de PostgreSQL');
@@ -28,6 +29,12 @@ Artisan::command('subastas:finalizar', function () {
     $this->info("Subastas finalizadas: {$result->total}");
 })->purpose('Finaliza subastas vencidas y notifica a sus participantes');
 Schedule::command('subastas:finalizar')->everyMinute()->withoutOverlapping();
+
+Artisan::command('subastas:recordar-favoritos', function () {
+    $resultado = DB::selectOne('select recordar_cierres_favoritos() as total');
+    $this->info("Recordatorios generados: {$resultado->total}");
+})->purpose('Recuerda una sola vez el cierre próximo de los favoritos');
+Schedule::command('subastas:recordar-favoritos')->everyMinute()->withoutOverlapping();
 
 Artisan::command('subastas:crear-bd-pruebas', function () {
     // Debe coincidir con DB_DATABASE de phpunit.xml.

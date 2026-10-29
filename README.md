@@ -93,6 +93,14 @@ La distancia se calcula en PostgreSQL con la fórmula de haversine sobre una esf
 
 ## Notificaciones de pujas
 
+HU18 diferencia dos versiones: las publicaciones anteriores conservan sus importes, centavos e historial (`modelo_puja=1`); las nuevas usan el modelo 2, con monto inicial positivo múltiplo de 5 Bs e incremento de 5, 10, 20, 50 o 100 Bs (5 por defecto). La primera puja es exactamente el monto inicial; después solo se confirma la oferta vigente más el incremento, sin campo libre. PostgreSQL bloquea la subasta antes de comprobar el importe: las peticiones alteradas o desactualizadas no generan pujas ni avisos. El monto inicial y el incremento quedan fijados con la primera aceptación, incluso si luego se edita la descripción y vuelve a revisión.
+
+**Mis participaciones** (`/mis-participaciones`) agrupa las pujas por subasta, con apartados Todas, Voy ganando, Me superaron, Ganadas, No ganadas y Canceladas. La lista privada muestra la mayor oferta propia, la oferta vigente y el cierre, paginando de 15 en 15. **Favoritos** (`/favoritos`), accesible desde el menú lateral de participaciones, permite guardar o retirar artículos sin ofertar y sin duplicados. Las publicaciones no disponibles se excluyen de esa lista.
+
+El planificador ejecuta `subastas:recordar-favoritos` cada minuto. Genera un solo aviso interno por usuario y subasta durante los últimos 30 minutos, si el favorito ya existía antes de ese umbral y la publicación sigue activa y disponible. Retirar y volver a guardar no repite el aviso. No envía mensajes externos.
+
+Por decisión del usuario, HU18 no integra todavía fondos, reservas ni billetera (dependencia HU16). Los accesos a conversación y seguimiento de entrega dependen de HU19, que aún no está implementada; el enlace al detalle de la subasta ya está disponible. Ninguna publicación se presenta como si tuviera fondos reservados.
+
 El vendedor recibe un único resumen al finalizar cada subasta, con el artículo, el nombre del ganador y la puja ganadora; si nadie participó, se indica que terminó sin ofertas. Las nuevas pujas se consultan en el detalle y no generan avisos al vendedor. Los pujadores conservan los avisos al ser superados y al finalizar la subasta. Los avisos anteriores al ajuste se conservan en el historial.
 
 ## Pruebas

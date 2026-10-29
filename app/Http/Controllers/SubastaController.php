@@ -81,7 +81,9 @@ class SubastaController extends Controller
         $historialOfertas = $canViewRanking
             ? app(PujaService::class)->historial($subasta, $request->user()) : null;
 
-        return view('subastas.show', compact('subasta', 'ganadora', 'ranking', 'canViewRanking', 'historialOfertas'));
+        $esFavorito = $request->user() && DB::table('favorito_subasta')->where('id_usuario', $request->user()->id_usuario)->where('id_subasta', $subasta->id_subasta)->exists();
+
+        return view('subastas.show', compact('subasta', 'ganadora', 'ranking', 'canViewRanking', 'historialOfertas', 'esFavorito'));
     }
 
     public function misSubastas(Request $request)
