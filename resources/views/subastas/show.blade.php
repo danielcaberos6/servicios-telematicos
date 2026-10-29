@@ -116,6 +116,7 @@
                             @if ($subasta->estado === 'Finalizada')<small>{{ $ganadora ? 'La oferta ganadora está confirmada.' : 'La subasta terminó sin ofertas.' }}</small>@endif
                         </div>
                     </div>
+                    <p class="muted">{{ $subasta->modelo_puja === 1 ? 'Modelo anterior: conserva sus importes y reglas originales. No tiene fondos reservados.' : 'Incremento de puja: Bs '.$subasta->incremento_puja.'. Cada oferta confirma el siguiente monto exacto.' }}</p>
                     @if ($subasta->estado === 'Activa' && $subasta->publicada() && $subasta->usuario->activo)
                         @auth
                             @if (auth()->user()->esAdministrador())
@@ -127,14 +128,23 @@
                                         Recibiste ofertas; la edición está cerrada.
                                     @endif
                                 </div>
+                            @elseif ($subasta->modelo_puja === 2 && $subasta->siguienteOfertaMinima() > 9999999999)
+                                <p class="info-note">Esta subasta alcanzó el monto máximo permitido y ya no admite nuevas ofertas.</p>
                             @else<form method="post" action="{{ route('pujas.store', $subasta) }}"
-                                    data-confirm="¿Confirmas esta oferta? Las ofertas registradas no pueden retirarse.">
+                                    data-confirm="¿Confirmas tu oferta{{ $subasta->modelo_puja === 2 ? ' de Bs '.number_format($subasta->siguienteOfertaMinima(), 0, ',', '.') : '' }}? Las ofertas registradas no pueden retirarse.">
+                                    @if ($subasta->modelo_puja === 2)
+                                        @csrf
+                                        <p>Tu próxima oferta: <strong>Bs {{ number_format($subasta->siguienteOfertaMinima(), 0, ',', '.') }}</strong></p>
+                                        <input type="hidden" name="monto" value="{{ $subasta->siguienteOfertaMinima() }}">
+                                        <button class="button primary full-width" type="submit">Confirmar oferta de Bs {{ number_format($subasta->siguienteOfertaMinima(), 0, ',', '.') }}</button>
+                                        <small>El servidor verifica el monto al confirmar. Si otra persona oferta antes, actualiza el detalle.</small>
+                                    @else
                                     @csrf<label for="monto">Tu oferta (Bs)</label>
                                     <div class="bid-input"><input id="monto" name="monto" type="number" step="0.01"
                                             min="{{ $subasta->pujas_count ? number_format((float) $subasta->pujas_max_monto + 0.01, 2, '.', '') : $subasta->monto_inicial }}"
                                             max="9999999999.99" value="{{ old('monto') }}"
-                                            placeholder="{{ $subasta->pujas_count ? number_format((float) $subasta->pujas_max_monto + 0.01, 2, '.', '') : $subasta->monto_inicial }}"
                                             required><button class="button primary" type="submit">Hacer oferta</button></div>
+                                    @endif
                                 </form>
                             @endif
                         @else<a class="button primary full-width" href="{{ route('subastas.participar', $subasta) }}">Inicia sesión para

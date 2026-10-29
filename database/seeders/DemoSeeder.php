@@ -28,7 +28,7 @@ class DemoSeeder extends Seeder
             // Las demostraciones se insertan ya aceptadas: representan publicaciones revisadas.
             $auction = $owner->subastas()->firstOrNew(['titulo' => $title]);
             if (! $auction->exists) {
-                $auction->forceFill(['descripcion' => $description, 'id_categoria' => Categoria::where('nombre_categoria', $category)->value('id_categoria'), 'estado_articulo' => $condition, 'monto_inicial' => $price, 'ubicacion' => $location, 'latitud' => $coords[0] ?? null, 'longitud' => $coords[1] ?? null, 'fecha_inicio' => now()->subDays($index % 4)->subMinutes(15), 'fecha_fin' => now()->addHours($hours), 'estado_revision' => 'Aceptada'])->save();
+                $auction->forceFill(['modelo_puja' => 1, 'descripcion' => $description, 'id_categoria' => Categoria::where('nombre_categoria', $category)->value('id_categoria'), 'estado_articulo' => $condition, 'monto_inicial' => $price, 'ubicacion' => $location, 'latitud' => $coords[0] ?? null, 'longitud' => $coords[1] ?? null, 'fecha_inicio' => now()->subDays($index % 4)->subMinutes(15), 'fecha_fin' => now()->addHours($hours), 'estado_revision' => 'Aceptada'])->save();
             }
             // Completa el mapa de demostraciones anteriores; las que ya tienen pujas no admiten cambios.
             if ($coords && is_null($auction->latitud) && ! $auction->pujas()->exists()) {
@@ -53,7 +53,7 @@ class DemoSeeder extends Seeder
         foreach ($items as [$title, $category, $condition, $price, $location, $revision, $reason, $description]) {
             $auction = $demo->subastas()->firstOrNew(['titulo' => $title]);
             if (! $auction->exists) {
-                $auction->forceFill(['descripcion' => $description, 'id_categoria' => Categoria::where('nombre_categoria', $category)->value('id_categoria'), 'estado_articulo' => $condition, 'monto_inicial' => $price, 'ubicacion' => $location, 'fecha_inicio' => now()->subHours(3), 'fecha_fin' => now()->addDays(6), 'estado_revision' => $revision, 'motivo_rechazo' => $reason])->save();
+                $auction->forceFill(['modelo_puja' => 1, 'descripcion' => $description, 'id_categoria' => Categoria::where('nombre_categoria', $category)->value('id_categoria'), 'estado_articulo' => $condition, 'monto_inicial' => $price, 'ubicacion' => $location, 'fecha_inicio' => now()->subHours(3), 'fecha_fin' => now()->addDays(6), 'estado_revision' => $revision, 'motivo_rechazo' => $reason])->save();
             }
             $this->asegurarFoto($auction, $category === 'Muebles' ? 'escritorio.jpg' : 'reloj.jpg');
         }

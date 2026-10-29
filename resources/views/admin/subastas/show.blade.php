@@ -60,6 +60,7 @@
                 <p><strong>Condición del artículo:</strong> {{ $subasta->estado_articulo }}</p>
                 <p><strong>Monto inicial:</strong> <span style="font-size:1.25rem; font-weight:700; color:var(--primary, #0284c7);">Bs {{ number_format($subasta->monto_inicial, 2, ',', '.') }}</span></p>
                 <p><strong>Periodo de subasta:</strong> {{ $subasta->fecha_inicio->diffInDays($subasta->fecha_fin) }} días</p>
+                <p><strong>Incremento de puja:</strong> Bs {{ $subasta->incremento_puja }}</p>
             </div>
 
             <div class="panel">

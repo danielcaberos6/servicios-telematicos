@@ -28,7 +28,7 @@ class ReportesTest extends TestCase
     private function auction(User $owner, array $data = []): Subasta
     {
         return $owner->subastas()->forceCreate(array_replace([
-            'titulo' => 'Publicación para reportes', 'descripcion' => 'Descripción del artículo para probar reportes.',
+            'titulo' => 'Publicación para reportes', 'descripcion' => 'Descripción del artículo para probar reportes.', 'modelo_puja' => 1,
             'ubicacion' => 'Tarija, plaza principal', 'id_categoria' => Categoria::where('nombre_categoria', 'Deporte')->value('id_categoria'),
             'estado_articulo' => 'Usado', 'monto_inicial' => '100.50', 'fecha_inicio' => '2025-06-15 10:00:00-04', 'fecha_fin' => now()->addDays(5), 'estado_revision' => 'Aceptada',
         ], $data));

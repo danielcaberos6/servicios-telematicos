@@ -33,7 +33,7 @@ class SubastaYaTest extends TestCase
             'id_categoria' => Categoria::firstOrCreate(['nombre_categoria' => 'Electrónica e informática'])->id_categoria,
             'estado_articulo' => 'Usado',
             'ubicacion' => 'La Paz, Plaza Abaroa',
-            'monto_inicial' => '100.50',
+            'monto_inicial' => '100.00',
             'fecha_fin' => now()->addDays(3)->format('Y-m-d\TH:i'),
         ], $overrides);
     }
@@ -41,7 +41,7 @@ class SubastaYaTest extends TestCase
     private function auction(?User $user = null, array $overrides = []): Subasta
     {
         return ($user ?? User::factory()->create())->subastas()->forceCreate([
-            ...array_diff_key($this->payload(), ['imagenes' => true]), 'fecha_inicio' => now()->subDay(), 'estado_revision' => 'Aceptada', ...$overrides,
+            ...array_diff_key($this->payload(), ['imagenes' => true]), 'modelo_puja' => 1, 'fecha_inicio' => now()->subDay(), 'estado_revision' => 'Aceptada', ...$overrides,
         ])->refresh();
     }
 
@@ -186,9 +186,9 @@ class SubastaYaTest extends TestCase
         $bidder = User::factory()->create();
         $this->actingAs($owner)->post('/subastas/'.$auction->id_subasta.'/pujas', ['monto' => 150])->assertForbidden();
         $this->actingAs($bidder)->post('/subastas/'.$auction->id_subasta.'/pujas', ['monto' => 90])->assertSessionHasErrors('monto');
-        $this->post('/subastas/'.$auction->id_subasta.'/pujas', ['monto' => '100.50'])->assertSessionHasNoErrors();
-        $this->post('/subastas/'.$auction->id_subasta.'/pujas', ['monto' => '100.50'])->assertSessionHasErrors('monto');
-        $this->post('/subastas/'.$auction->id_subasta.'/pujas', ['monto' => '100.51'])->assertSessionHasNoErrors();
+        $this->post('/subastas/'.$auction->id_subasta.'/pujas', ['monto' => '100.00'])->assertSessionHasNoErrors();
+        $this->post('/subastas/'.$auction->id_subasta.'/pujas', ['monto' => '100.00'])->assertSessionHasErrors('monto');
+        $this->post('/subastas/'.$auction->id_subasta.'/pujas', ['monto' => '105.00'])->assertSessionHasNoErrors();
         $this->assertDatabaseCount('puja', 2);
         $this->actingAs($owner)->put('/subastas/'.$auction->id_subasta, $this->payload())->assertSessionHasErrors('subasta');
         $this->delete('/subastas/'.$auction->id_subasta)->assertSessionHasErrors('subasta');

@@ -76,7 +76,7 @@ class CuentaActivaTest extends TestCase
     {
         $seller = User::factory()->create();
         $auction = $seller->subastas()->forceCreate([
-            'titulo' => 'Guitarra acústica de vendedor', 'descripcion' => 'Guitarra con funda y cuerdas nuevas, lista para tocar.',
+            'titulo' => 'Guitarra acústica de vendedor', 'descripcion' => 'Guitarra con funda y cuerdas nuevas, lista para tocar.', 'modelo_puja' => 1,
             'id_categoria' => Categoria::firstOrCreate(['nombre_categoria' => 'Instrumentos musicales'])->id_categoria,
             'estado_articulo' => 'Usado', 'ubicacion' => 'La Paz, Sopocachi', 'monto_inicial' => '300.00',
             'fecha_inicio' => now()->subHour(), 'fecha_fin' => now()->addDays(3), 'estado_revision' => 'Aceptada',

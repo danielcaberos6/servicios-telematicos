@@ -9,6 +9,8 @@ class Subasta extends Model
 {
     public const CONDITIONS = ['Nuevo', 'Usado'];
 
+    public const INCREMENTOS = [5, 10, 20, 50, 100];
+
     public const REVISIONES = ['En revisión', 'Aceptada', 'Rechazada'];
 
     protected $table = 'subasta';
@@ -17,11 +19,18 @@ class Subasta extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['titulo', 'descripcion', 'ubicacion', 'latitud', 'longitud', 'estado_articulo', 'monto_inicial', 'fecha_inicio', 'fecha_fin', 'id_categoria'];
+    protected $fillable = ['titulo', 'descripcion', 'ubicacion', 'latitud', 'longitud', 'estado_articulo', 'monto_inicial', 'incremento_puja', 'fecha_inicio', 'fecha_fin', 'id_categoria'];
 
     protected function casts(): array
     {
-        return ['monto_inicial' => 'decimal:2', 'latitud' => 'decimal:6', 'longitud' => 'decimal:6', 'fecha_inicio' => 'datetime', 'fecha_fin' => 'datetime', 'fecha_decision' => 'datetime'];
+        return ['monto_inicial' => 'decimal:2', 'incremento_puja' => 'integer', 'modelo_puja' => 'integer', 'condiciones_fijadas' => 'boolean', 'latitud' => 'decimal:6', 'longitud' => 'decimal:6', 'fecha_inicio' => 'datetime', 'fecha_fin' => 'datetime', 'fecha_decision' => 'datetime'];
+    }
+
+    public function siguienteOfertaMinima(): int
+    {
+        return $this->pujas_max_monto !== null
+            ? (int) ceil((float) $this->pujas_max_monto) + $this->incremento_puja
+            : (int) ceil((float) $this->monto_inicial);
     }
 
     public function scopeActivas(Builder $query): void

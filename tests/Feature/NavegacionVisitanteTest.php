@@ -46,7 +46,7 @@ class NavegacionVisitanteTest extends TestCase
         $bidder = User::factory()->create();
         $this->post('/iniciar-sesion', ['correo' => $bidder->correo, 'password' => 'password'])->assertRedirect($participar);
         $this->get($participar)->assertRedirect(route('subastas.show', $auction));
-        $this->get(route('subastas.show', $auction))->assertOk()->assertSee('Hacer oferta');
+        $this->get(route('subastas.show', $auction))->assertOk()->assertSee('Confirmar oferta de Bs 100');
         $this->assertDatabaseCount('puja', 0);
     }
 }

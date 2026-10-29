@@ -37,7 +37,7 @@ $$;
 
 -- Solo se puja en subastas Aceptadas; En revisión o Rechazada no admiten ofertas.
 create or replace function validar_puja() returns trigger language plpgsql as $$
-declare articulo subasta%rowtype; mayor numeric(12,2);
+declare articulo subasta%rowtype; mayor numeric(12,2); minimo numeric;
 begin
     select * into articulo from subasta where id_subasta = new.id_subasta for update;
     if not found then raise exception 'La subasta no existe.'; end if;
@@ -51,7 +51,13 @@ begin
     end if;
     if articulo.id_usuario = new.id_usuario then raise exception 'No puedes pujar en tu propia subasta.' using errcode = '42501'; end if;
     select max(monto) into mayor from puja where id_subasta = new.id_subasta;
-    if new.monto < articulo.monto_inicial or (mayor is not null and new.monto <= mayor) then
+    if articulo.modelo_puja=2 then
+        if new.monto <> trunc(new.monto) then raise exception 'La oferta debe ser un monto entero, sin centavos.'; end if;
+        minimo := coalesce(mayor+articulo.incremento_puja,articulo.monto_inicial);
+        if new.monto <> minimo then
+            raise exception 'La siguiente oferta permitida es Bs %. Actualiza el detalle y vuelve a confirmar.', minimo;
+        end if;
+    elsif new.monto < articulo.monto_inicial or (mayor is not null and new.monto <= mayor) then
         raise exception 'La oferta debe superar la puja actual y alcanzar el monto inicial.';
     end if;
     return new;
@@ -122,12 +128,16 @@ begin
         raise exception 'Confirma el reenvío de la solicitud corregida.';
     end if;
     instante := clock_timestamp();
+    if resultado.modelo_puja=2 and mod((p_datos->>'monto_inicial')::numeric,5) <> 0 then
+        raise exception 'El monto inicial debe ser un múltiplo entero positivo de Bs 5.';
+    end if;
     if (p_datos->>'fecha_fin')::timestamptz<=instante then raise exception 'El cierre debe estar en el futuro.'; end if;
     if reenviar and not exists(select 1 from categoria where id_categoria=(p_datos->>'id_categoria')::bigint and habilitada for share) then
         raise exception 'Selecciona una categoría habilitada para reenviar.';
     end if;
     update subasta set titulo=p_datos->>'titulo', descripcion=p_datos->>'descripcion', ubicacion=p_datos->>'ubicacion',
         estado_articulo=p_datos->>'estado_articulo', monto_inicial=(p_datos->>'monto_inicial')::numeric,
+        incremento_puja=coalesce((p_datos->>'incremento_puja')::integer,resultado.incremento_puja),
         fecha_inicio=case when reenviar then instante else fecha_inicio end,
         fecha_fin=(p_datos->>'fecha_fin')::timestamptz, id_categoria=(p_datos->>'id_categoria')::bigint,
         latitud=case when p_datos ? 'latitud' then (p_datos->>'latitud')::numeric else latitud end,

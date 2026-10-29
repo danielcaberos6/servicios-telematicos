@@ -64,10 +64,14 @@ create trigger usuario_bienvenida after insert on usuario for each row execute f
 create or replace function crear_subasta(p_actor bigint, p_datos jsonb) returns subasta language plpgsql as $$
 declare resultado subasta;
 begin
-    insert into subasta(titulo,descripcion,ubicacion,estado_articulo,monto_inicial,fecha_inicio,fecha_fin,id_usuario,id_categoria,latitud,longitud)
+    if (p_datos->>'monto_inicial')::numeric <= 0 or mod((p_datos->>'monto_inicial')::numeric,5) <> 0 then
+        raise exception 'El monto inicial debe ser un múltiplo entero positivo de Bs 5.';
+    end if;
+    insert into subasta(titulo,descripcion,ubicacion,estado_articulo,monto_inicial,fecha_inicio,fecha_fin,id_usuario,id_categoria,latitud,longitud,incremento_puja,modelo_puja)
     values(p_datos->>'titulo', p_datos->>'descripcion', p_datos->>'ubicacion', p_datos->>'estado_articulo',
         (p_datos->>'monto_inicial')::numeric, clock_timestamp(), (p_datos->>'fecha_fin')::timestamptz, p_actor,
-        (p_datos->>'id_categoria')::bigint, (p_datos->>'latitud')::numeric, (p_datos->>'longitud')::numeric)
+        (p_datos->>'id_categoria')::bigint, (p_datos->>'latitud')::numeric, (p_datos->>'longitud')::numeric,
+        coalesce((p_datos->>'incremento_puja')::integer,5),2)
     returning * into resultado;
     return resultado;
 end;
@@ -90,6 +94,9 @@ $$;
 create or replace function registrar_puja(p_actor bigint, p_id bigint, p_monto numeric) returns puja language plpgsql as $$
 declare resultado puja;
 begin
+    if exists(select 1 from subasta where id_subasta=p_id and modelo_puja=2) and p_monto <> trunc(p_monto) then
+        raise exception 'La oferta debe ser un monto entero, sin centavos.';
+    end if;
     if p_monto <> round(p_monto,2) then raise exception 'La oferta admite hasta dos decimales.'; end if;
     insert into puja(id_usuario,id_subasta,monto) values(p_actor,p_id,p_monto) returning * into resultado;
     return resultado;
@@ -156,10 +163,18 @@ $$;
 -- Integridad y eventos
 create or replace function proteger_subasta() returns trigger language plpgsql as $$
 begin
+    if TG_OP = 'UPDATE' then
+        if new.modelo_puja <> old.modelo_puja then raise exception 'El modelo de puja de esta subasta no puede cambiarse.'; end if;
+        if old.modelo_puja=2 and (old.condiciones_fijadas or old.estado_revision='Aceptada') and
+            row(new.monto_inicial,new.incremento_puja) is distinct from row(old.monto_inicial,old.incremento_puja) then
+            raise exception 'El monto inicial y el incremento no pueden cambiar después de la primera aprobación.';
+        end if;
+        new.condiciones_fijadas := old.condiciones_fijadas or (new.modelo_puja=2 and new.estado_revision='Aceptada');
+    end if;
     if exists (select 1 from puja where id_subasta = old.id_subasta) then
         if TG_OP = 'DELETE' then raise exception 'Una subasta con pujas no puede eliminarse.'; end if;
-        if row(new.titulo,new.descripcion,new.ubicacion,new.estado_articulo,new.monto_inicial,new.fecha_inicio,new.fecha_fin,new.id_usuario,new.id_categoria,new.latitud,new.longitud)
-           is distinct from row(old.titulo,old.descripcion,old.ubicacion,old.estado_articulo,old.monto_inicial,old.fecha_inicio,old.fecha_fin,old.id_usuario,old.id_categoria,old.latitud,old.longitud)
+        if row(new.titulo,new.descripcion,new.ubicacion,new.estado_articulo,new.monto_inicial,new.incremento_puja,new.fecha_inicio,new.fecha_fin,new.id_usuario,new.id_categoria,new.latitud,new.longitud)
+           is distinct from row(old.titulo,old.descripcion,old.ubicacion,old.estado_articulo,old.monto_inicial,old.incremento_puja,old.fecha_inicio,old.fecha_fin,old.id_usuario,old.id_categoria,old.latitud,old.longitud)
            or new.estado_subasta = 'Cancelada' then
             raise exception 'Una subasta con pujas no puede modificarse.';
         end if;

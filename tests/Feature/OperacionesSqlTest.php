@@ -25,7 +25,7 @@ class OperacionesSqlTest extends TestCase
     {
         $auction = app(SubastaService::class)->crear($owner->id_usuario, [
             'titulo' => 'Subasta para comprobar funciones', 'descripcion' => 'Descripción de prueba con suficiente detalle.',
-            'ubicacion' => 'La Paz, Plaza Abaroa', 'estado_articulo' => 'Usado', 'monto_inicial' => '100.00',
+            'ubicacion' => 'La Paz, Plaza Abaroa', 'estado_articulo' => 'Usado', 'monto_inicial' => '100.00', 'incremento_puja' => 10,
             'id_categoria' => Categoria::first()->id_categoria, 'fecha_fin' => now()->addDays(2)->toIso8601String(),
         ]);
         // Simula la aceptación del Administrador para poder pujar.

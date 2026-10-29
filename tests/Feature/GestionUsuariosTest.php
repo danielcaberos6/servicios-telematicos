@@ -133,7 +133,7 @@ class GestionUsuariosTest extends TestCase
         $other = User::factory()->create();
         $category = Categoria::firstOrCreate(['nombre_categoria' => 'Pruebas']);
         $create = fn (User $seller, string $title, string $state = 'Aceptada') => $seller->subastas()->forceCreate([
-            'titulo' => $title, 'descripcion' => 'Artículo usado para probar el historial.',
+            'titulo' => $title, 'descripcion' => 'Artículo usado para probar el historial.', 'modelo_puja' => 1,
             'ubicacion' => 'La Paz', 'estado_articulo' => 'Usado', 'monto_inicial' => 100,
             'id_categoria' => $category->id_categoria, 'fecha_inicio' => now()->subHour(),
             'fecha_fin' => now()->addDays(2), 'estado_revision' => $state,

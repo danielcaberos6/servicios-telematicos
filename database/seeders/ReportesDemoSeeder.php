@@ -75,6 +75,7 @@ class ReportesDemoSeeder extends Seeder
                     }
                     // Lotes históricos ya revisados: se insertan aceptados y con su estado final.
                     $auction->forceFill([
+                        'modelo_puja' => 1,
                         'descripcion' => 'Artículo disponible para revisar al coordinar la entrega. Publicación de ejemplo para explorar los reportes del sistema.',
                         'ubicacion' => $owner->ciudad.', plaza principal', 'id_categoria' => Categoria::where('nombre_categoria', $category)->value('id_categoria'),
                         'estado_articulo' => $number % 3 === 0 ? 'Nuevo' : 'Usado', 'monto_inicial' => $price + ($number % 5) * 20,

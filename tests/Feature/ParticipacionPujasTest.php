@@ -20,7 +20,7 @@ class ParticipacionPujasTest extends TestCase
     {
         $subasta = app(SubastaService::class)->crear($vendedor->id_usuario, [
             'titulo' => 'Artículo para pujar', 'descripcion' => 'Descripción del artículo de prueba.',
-            'ubicacion' => 'Plaza Abaroa, La Paz', 'estado_articulo' => 'Usado', 'monto_inicial' => '100.00',
+            'ubicacion' => 'Plaza Abaroa, La Paz', 'estado_articulo' => 'Usado', 'monto_inicial' => '100.00', 'incremento_puja' => 10,
             'id_categoria' => Categoria::first()->id_categoria, 'fecha_fin' => now()->addDays(2)->toIso8601String(),
         ]);
         DB::table('subasta')->where('id_subasta', $subasta->id_subasta)->update(['estado_revision' => 'Aceptada']);
@@ -55,7 +55,7 @@ class ParticipacionPujasTest extends TestCase
         $url = '/subastas/'.$subasta->id_subasta;
         $this->actingAs($vendedor)->get($url)->assertSee('Todavía no hay ofertas.');
         $postor = User::factory()->create();
-        for ($monto = 100; $monto <= 115; $monto++) {
+        for ($monto = 100; $monto <= 250; $monto += 10) {
             app(PujaService::class)->registrar($postor->id_usuario, $subasta->id_subasta, (string) $monto);
         }
         $this->get($url)->assertViewHas('historialOfertas', fn ($p) => $p->total() === 16 && $p->count() === 15)
@@ -67,7 +67,7 @@ class ParticipacionPujasTest extends TestCase
     {
         $subasta = $this->subasta(User::factory()->create());
         $postor = User::factory()->create(['telefono' => '71234567']);
-        app(PujaService::class)->registrar($postor->id_usuario, $subasta->id_subasta, '123.45');
+        app(PujaService::class)->registrar($postor->id_usuario, $subasta->id_subasta, '100.00');
         $url = '/subastas/'.$subasta->id_subasta.'?ofertas=1';
         $this->get($url)->assertDontSee('Historial de ofertas')->assertDontSee($postor->correo)->assertDontSee($postor->telefono);
         $ajeno = User::factory()->create();

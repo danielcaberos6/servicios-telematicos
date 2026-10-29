@@ -149,7 +149,7 @@ class UbicacionSubastasTest extends TestCase
 
     public function test_detail_of_old_publication_without_coordinates_keeps_text_and_article_readable(): void
     {
-        $auction = $this->auction(null, ['latitud' => null, 'longitud' => null]);
+        $auction = $this->auction(null, ['latitud' => null, 'longitud' => null, 'modelo_puja' => 1]);
 
         $this->actingAs(User::factory()->create())->get("/subastas/{$auction->id_subasta}")->assertOk()
             ->assertSee('La Paz, Plaza Abaroa, frente a la fuente')

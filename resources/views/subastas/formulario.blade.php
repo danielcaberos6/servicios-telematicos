@@ -121,10 +121,21 @@
                         <div class="form-grid">
                             <div class="publish-field">
                                 <label for="monto_inicial">Monto inicial (Bs) <span class="required-mark">*</span></label>
-                                <input id="monto_inicial" name="monto_inicial" type="number" min="0.01" max="9999999999.99"
-                                    step="0.01" value="{{ old('monto_inicial', $subasta->monto_inicial) }}" required
-                                    placeholder="0.00" aria-describedby="amount-help">
-                                <small id="amount-help">El precio desde el que comienzan las ofertas.</small>
+                                <input id="monto_inicial" name="monto_inicial" type="number" min="{{ $subasta->modelo_puja === 1 ? '0.01' : '5' }}" max="{{ $subasta->modelo_puja === 1 ? '9999999999.99' : '9999999995' }}"
+                                    step="{{ $subasta->modelo_puja === 1 ? '0.01' : '5' }}" value="{{ old('monto_inicial', $subasta->monto_inicial) }}" required @readonly($subasta->condiciones_fijadas)
+                                    placeholder="100" aria-describedby="amount-help">
+                                <small id="amount-help">{{ $subasta->modelo_puja === 1 ? 'Publicación del modelo anterior: conserva sus condiciones originales.' : 'Bolivianos enteros y múltiplos de 5. La primera oferta será exactamente este monto.' }}</small>
+                            </div>
+                            <div class="publish-field">
+                                <label for="incremento_puja">Incremento de puja (Bs) <span class="required-mark">*</span></label>
+                                <select id="incremento_puja" name="incremento_puja" required aria-describedby="incremento-help" @disabled($subasta->condiciones_fijadas || $subasta->modelo_puja === 1)>
+                                    @foreach (\App\Models\Subasta::INCREMENTOS as $incremento)
+                                        <option value="{{ $incremento }}" @selected(old('incremento_puja', $subasta->incremento_puja ?? 5) == $incremento)>De {{ $incremento }} en {{ $incremento }} Bs</option>
+                                    @endforeach
+                                </select>
+                                @if ($subasta->condiciones_fijadas || $subasta->modelo_puja === 1)<input type="hidden" name="incremento_puja" value="{{ $subasta->incremento_puja }}">@endif
+                                <small id="incremento-help">{{ $subasta->modelo_puja === 1 ? 'El incremento fijo se aplica solo a las publicaciones del nuevo modelo.' : 'Cada nueva oferta aumenta exactamente este importe. El monto inicial y el incremento quedan fijados con la primera aprobación.' }}</small>
+                                @error('incremento_puja')<p class="publish-photo-error">{{ $message }}</p>@enderror
                             </div>
                             <div class="publish-field">
                                 <label for="fecha_fin">Fecha y hora de cierre <span class="required-mark">*</span></label>

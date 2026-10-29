@@ -29,7 +29,10 @@ class SubastaRequest extends FormRequest
             'ubicacion' => ['required', 'string', 'min:5', 'max:250'],
             'latitud' => ['nullable', 'numeric', 'between:-90,90', 'required_with:longitud'],
             'longitud' => ['nullable', 'numeric', 'between:-180,180', 'required_with:latitud'],
-            'monto_inicial' => ['required', 'numeric', 'decimal:0,2', 'min:0.01', 'max:9999999999.99'],
+            'monto_inicial' => $this->route('subasta')?->modelo_puja === 1
+                ? ['required', 'numeric', 'decimal:0,2', 'min:0.01', 'max:9999999999.99']
+                : ['required', 'numeric', 'multiple_of:5', 'min:5', 'max:9999999995'],
+            'incremento_puja' => ['sometimes', 'required', 'integer', Rule::in(Subasta::INCREMENTOS)],
             // La fecha de publicación se fija en el servidor; la subasta inicia al publicarse.
             'fecha_fin' => ['required', 'date', 'after:now', 'before:'.now()->addYear()->toDateTimeString()],
             'imagenes' => $this->route('subasta') instanceof Subasta
@@ -44,6 +47,8 @@ class SubastaRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'monto_inicial.multiple_of' => 'El monto inicial debe ser un múltiplo entero positivo de Bs 5.',
+            'incremento_puja.in' => 'Elige un incremento de 5, 10, 20, 50 o 100 Bs.',
             'fecha_fin.after' => 'La fecha y hora de cierre deben ser posteriores al momento actual (hora de Bolivia).',
             'imagenes.required' => 'Debes subir al menos una foto del artículo para enviar la subasta a revisión.',
             'imagenes.min' => 'Debes subir al menos una foto del artículo.',
