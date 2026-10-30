@@ -48,7 +48,7 @@
     color: #d6e5f6;
 }
 .ini-btn-dark {
-    background: var(--navy);
+    background: var(--brand-navy);
     color: #fff;
     box-shadow: none;
 }
@@ -57,11 +57,11 @@
 }
 .ini-hero-copy .button { border-radius: 4px; min-height: 48px; padding-inline: 24px; }
 .ini-btn-light {
-    background: #fff;
+    background: var(--surface);
     color: var(--blue);
 }
 .ini-btn-light:hover {
-    background: #eaf2fb;
+    background: var(--info-surface);
 }
 .ini-hero-proof {
     display: flex;
@@ -156,7 +156,7 @@
     transform: translate(-50%, -50%) rotate(-3deg);
     border-radius: 16px;
     color: var(--ink);
-    background: #fff;
+    background: var(--surface);
     box-shadow: 0 30px 60px #01132b66;
 }
 .ini-card-media {
@@ -166,7 +166,7 @@
     margin-bottom: 14px;
     border-radius: 11px;
     color: var(--gold);
-    background: radial-gradient(circle at 30% 20%, #1c5aa8, var(--navy) 70%);
+    background: radial-gradient(circle at 30% 20%, #1c5aa8, var(--brand-navy) 70%);
 }
 .ini-card-media .icon {
     width: 64px;
@@ -204,7 +204,7 @@
     height: 26px;
     border-radius: 50%;
     color: var(--blue);
-    background: #e9f1fb;
+    background: var(--info-surface);
 }
 .ini-round .icon {
     width: 15px;
@@ -221,7 +221,7 @@
     font-size: 12px;
     font-weight: 650;
     color: var(--ink);
-    background: #fff;
+    background: var(--surface);
     box-shadow: 0 12px 30px #01132b4d;
 }
 .ini-tag .icon {
@@ -230,7 +230,7 @@
     padding: 3px;
     border-radius: 50%;
     color: #fff;
-    background: var(--green);
+    background: var(--success-solid);
 }
 .ini-tag-top {
     top: 16%;
@@ -259,7 +259,7 @@
     border: 1px solid var(--line);
     border-radius: var(--radius);
     color: var(--ink);
-    background: #fff;
+    background: var(--surface);
     transition:
         transform 0.18s,
         box-shadow 0.18s,
@@ -268,7 +268,7 @@
 .ini-category:hover {
     text-decoration: none;
     transform: translateY(-3px);
-    border-color: #b8cde3;
+    border-color: var(--control-border);
     box-shadow: 0 14px 30px #0629431a;
 }
 .ini-category-chip {
@@ -278,7 +278,7 @@
     height: 30px;
     border-radius: 8px;
     color: var(--blue);
-    background: #eaf2fb;
+    background: var(--info-surface);
 }
 .ini-category-chip .icon {
     width: 17px;
@@ -315,7 +315,7 @@
     place-items: center;
     border-radius: 50%;
     color: #8fb2d8;
-    background: radial-gradient(circle, #eef5fc 0 55%, transparent 56%);
+    background: radial-gradient(circle, var(--info-surface) 0 55%, transparent 56%);
 }
 .ini-category-art .icon {
     width: 42px;
@@ -329,7 +329,7 @@
     gap: 2px;
     border-color: transparent;
     color: #fff;
-    background: linear-gradient(135deg, var(--blue), var(--navy));
+    background: linear-gradient(135deg, var(--action-bg), var(--brand-navy));
 }
 .ini-category-all strong {
     position: static;
@@ -374,7 +374,7 @@
     border: 1px solid var(--line);
     border-radius: 50%;
     color: var(--navy);
-    background: #fff;
+    background: var(--surface);
     box-shadow: 0 8px 20px #06294326;
     transition: opacity 0.2s;
 }
@@ -395,7 +395,7 @@
     scroll-snap-align: start;
     border: 1px solid var(--line);
     border-radius: var(--radius);
-    background: #fff;
+    background: var(--surface);
     transition: box-shadow 0.2s;
 }
 .ini-auction:hover {
@@ -425,8 +425,8 @@
     border-radius: 5px;
     font-size: 10px;
     font-weight: 650;
-    color: #304558;
-    background: #fffffff0;
+    color: var(--ink);
+    background: var(--surface-overlay);
 }
 .ini-auction-body {
     display: flex;
@@ -463,7 +463,7 @@
     display: block;
     font-size: 18px;
     line-height: 1.3;
-    color: #a26d07;
+    color: var(--warning);
 }
 .ini-auction-time {
     display: flex;
@@ -484,17 +484,17 @@
     font-size: 12px;
     font-weight: 650;
     color: #fff;
-    background: var(--navy);
+    background: var(--brand-navy);
 }
 .ini-auction-button:hover {
     text-decoration: none;
-    background: var(--blue);
+    background: var(--action-bg);
 }
 
 .ini-band {
     margin-top: 32px;
     padding: 52px 0;
-    background: linear-gradient(180deg, var(--paper), #eaf1f8);
+    background: linear-gradient(180deg, var(--paper), var(--info-surface));
     border-top: 1px solid var(--line);
 }
 .ini-band-grid {
@@ -521,7 +521,7 @@
     border: 1px solid var(--line);
     border-radius: var(--radius);
     color: var(--ink);
-    background: #fff;
+    background: var(--surface);
     transition:
         transform 0.18s,
         box-shadow 0.18s;
@@ -549,7 +549,7 @@
     flex-shrink: 0;
     border-radius: 11px;
     color: #fff;
-    background: linear-gradient(135deg, var(--blue), var(--navy));
+    background: linear-gradient(135deg, var(--action-bg), var(--brand-navy));
 }
 
 @media (max-width: 1200px) {

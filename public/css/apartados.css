@@ -4,7 +4,7 @@
 .section-links { list-style:none; padding:0; margin:0; display:grid; gap:6px; }
 .section-links a { display:flex; align-items:center; min-height:46px; padding:12px 14px; border-left:3px solid transparent; border-radius:0 6px 6px 0; color:var(--muted); font-weight:600; font-size:.92rem; line-height:1.4; text-decoration:none; }
 .section-links a:hover { color:var(--blue); background:var(--paper); }
-.section-links a[aria-current] { color:var(--blue); background:#eaf2fc; border-left-color:var(--blue); }
+.section-links a[aria-current] { color:var(--blue); background:var(--info-surface); border-left-color:var(--blue); }
 .section-links a:focus-visible,.section-menu-toggle:focus-visible { outline:3px solid var(--blue); outline-offset:3px; }
 .section-nav-note { border-top:1px solid var(--line); margin:24px 0 0; padding-top:20px; color:var(--muted); font-size:.8rem; line-height:1.6; }
 .section-content { min-width:0; }
@@ -22,7 +22,7 @@
 .profile-summary-details { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px 20px; min-width:0; margin-left:0; }
 .profile-summary-details > p { grid-column:1 / -1; }
 .section-content .profile-form { border:0; padding:0; box-shadow:none; background:transparent; }
-.section-content .profile-form [data-apartado] { background:white; border:1px solid var(--line); border-radius:var(--radius); padding:28px; }
+.section-content .profile-form [data-apartado] { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:28px; }
 .section-content [data-apartado][hidden] { display:none !important; }
 .section-content .publish-layout { display:block; }
 .section-content .publish-aside { display:none; }
@@ -34,9 +34,9 @@
 .section-content .report-filters input,.section-content .report-filters select { width:100%; max-width:100%; }
 .section-content .report-filters button { margin-top:0; }
 .section-content .ratings-panel { border:0; border-bottom:1px solid var(--line); border-radius:0; box-shadow:none; padding:0 0 24px; margin:20px 0; }
-.section-menu-toggle { display:flex; align-items:center; gap:12px; width:100%; min-height:54px; padding:12px 16px; text-align:left; color:white; background:var(--blue); border:1px solid var(--blue); border-radius:8px; font-weight:700; cursor:pointer; box-shadow:0 3px 8px #06294320; }
+.section-menu-toggle { display:flex; align-items:center; gap:12px; width:100%; min-height:54px; padding:12px 16px; text-align:left; color:white; background:var(--action-bg); border:1px solid var(--blue); border-radius:8px; font-weight:700; cursor:pointer; box-shadow:0 3px 8px #06294320; }
 .section-menu-toggle[hidden] { display:none; }
-.section-menu-toggle:hover { background:var(--blue-dark); border-color:var(--blue-dark); }
+.section-menu-toggle:hover { background:var(--action-hover); border-color:var(--blue-dark); }
 .section-menu-toggle:active { box-shadow:inset 0 2px 4px #0003; }
 .section-menu-toggle > svg { width:20px; height:20px; flex-shrink:0; }
 .section-menu-label { flex:1; min-width:0; }
@@ -65,9 +65,9 @@
     .section-menu-toggle { gap:10px; padding-inline:12px; }
 }
 @media(max-width:900px) {
-    .section-sidebar:has(.section-nav.is-enhanced) { position:sticky; top:var(--header-height); z-index:30; padding:8px 0 12px; background:white; }
+    .section-sidebar:has(.section-nav.is-enhanced) { position:sticky; top:var(--header-height); z-index:30; padding:8px 0 12px; background:var(--surface); }
     .section-nav.is-enhanced { position:relative; }
-    .section-nav.is-enhanced .section-links { position:absolute; top:100%; left:0; right:0; margin:4px 0 0; padding:8px; max-height:min(50dvh,calc(100dvh - var(--header-height) - 100px)); overflow-y:auto; overscroll-behavior:contain; background:white; border:1px solid var(--line); border-radius:8px; box-shadow:0 8px 20px #06294324; }
+    .section-nav.is-enhanced .section-links { position:absolute; top:100%; left:0; right:0; margin:4px 0 0; padding:8px; max-height:min(50dvh,calc(100dvh - var(--header-height) - 100px)); overflow-y:auto; overscroll-behavior:contain; background:var(--surface); border:1px solid var(--line); border-radius:8px; box-shadow:0 8px 20px #06294324; }
     .section-sidebar.is-compact .section-menu-toggle { min-height:44px; padding-block:8px; }
     .section-sidebar.is-compact .section-menu-full { display:none; }
     .section-sidebar.is-compact .section-menu-short { display:inline; }

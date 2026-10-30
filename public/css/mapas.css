@@ -32,10 +32,10 @@
     gap: 9px;
     margin: 0;
     padding: 12px 14px;
-    border: 1px solid #f0d9a8;
+    border: 1px solid var(--warning-border);
     border-radius: 8px;
-    background: #fff8e8;
-    color: #6b4b0e;
+    background: var(--warning-surface);
+    color: var(--warning);
     font-size: 13px;
     line-height: 1.5;
 }
@@ -107,7 +107,7 @@
     padding: 4px 9px;
     border-radius: 6px;
     background: var(--paper);
-    color: #496883;
+    color: var(--muted);
     font-size: 12px;
 }
 .catalog-map .map-canvas {

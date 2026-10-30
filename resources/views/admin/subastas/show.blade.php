@@ -17,8 +17,8 @@
     </p>
 
     @if ($subasta->estado_revision === 'Rechazada' && $subasta->motivo_rechazo)
-        <div class="panel" style="border-left: 4px solid #ef4444; background: rgba(239, 68, 68, 0.05); margin-bottom: 1.5rem;">
-            <h3 style="color:#ef4444; margin-top:0;">Motivo del rechazo</h3>
+        <div class="panel" style="border-left: 4px solid var(--danger); background: var(--danger-surface); margin-bottom: 1.5rem;">
+            <h3 style="color:var(--danger); margin-top:0;">Motivo del rechazo</h3>
             <p>{{ $subasta->motivo_rechazo }}</p>
         </div>
     @endif
@@ -58,7 +58,7 @@
                 <h2>Detalles de la publicación</h2>
                 <p><strong>Categoría:</strong> {{ $subasta->categoria?->nombre_categoria ?? 'Sin categoría' }}</p>
                 <p><strong>Condición del artículo:</strong> {{ $subasta->estado_articulo }}</p>
-                <p><strong>Monto inicial:</strong> <span style="font-size:1.25rem; font-weight:700; color:var(--primary, #0284c7);">Bs {{ number_format($subasta->monto_inicial, 2, ',', '.') }}</span></p>
+                <p><strong>Monto inicial:</strong> <span style="font-size:1.25rem; font-weight:700; color:var(--blue);">Bs {{ number_format($subasta->monto_inicial, 2, ',', '.') }}</span></p>
                 <p><strong>Periodo de subasta:</strong> {{ $subasta->fecha_inicio->diffInDays($subasta->fecha_fin) }} días</p>
                 <p><strong>Incremento de puja:</strong> Bs {{ $subasta->incremento_puja }}</p>
             </div>
@@ -108,18 +108,18 @@
                         @method('PATCH')
                         <input type="hidden" name="decision" value="Rechazada">
                         <label for="motivo" style="font-weight:600; display:block; margin-bottom:0.25rem;">
-                            Motivo del rechazo <span style="color:#ef4444;">*</span>
+                            Motivo del rechazo <span style="color:var(--danger);">*</span>
                         </label>
                         <textarea id="motivo" name="motivo" required minlength="1" maxlength="1000" rows="3"
                             placeholder="Indica al vendedor qué debe corregir (ej. fotografías poco claras, precio irreal, artículo prohibido)..."
                             style="width:100%; margin-bottom:0.75rem;">{{ old('motivo') }}</textarea>
-                        <button class="button secondary" type="submit" style="width:100%; justify-content:center; color:#ef4444; border-color:#ef4444;">
+                        <button class="button secondary" type="submit" style="width:100%; justify-content:center; color:var(--danger); border-color:var(--danger);">
                             Rechazar solicitud
                         </button>
                     </form>
                 </section>
             @else
-                <section class="panel" style="background: rgba(0,0,0,0.02);">
+                <section class="panel" style="background: var(--paper);">
                     <h3>Estado resuelto</h3>
                     <p class="muted">Esta solicitud ya fue resuelta como <strong>{{ $subasta->estado_revision }}</strong> y no admite nuevas modificaciones.</p>
                     @if ($subasta->id_revisor && $subasta->fecha_decision)

@@ -36,10 +36,10 @@
                 <line x1="50" x2="520" y1="{{ 210 - $proporcion * 160 }}" y2="{{ 210 - $proporcion * 160 }}" class="line-grid" />
                 <text x="40" y="{{ 214 - $proporcion * 160 }}" text-anchor="end">{{ round($maximo * $proporcion) }}</text>
             @endforeach
-            <polyline points="{{ implode(' ', $puntos) }}" fill="none" stroke="#3478c6" stroke-width="3" />
+            <polyline points="{{ implode(' ', $puntos) }}" fill="none" stroke="var(--chart-1)" stroke-width="3" />
             @foreach ($meses as $i => $mes)
                 @php [$x, $y] = explode(',', $puntos[$i]); @endphp
-                <circle cx="{{ $x }}" cy="{{ $y }}" r="4" fill="#3478c6"><title>{{ $mes['mes'] }}: {{ $mes['cantidad'] }} usuarios</title></circle>
+                <circle cx="{{ $x }}" cy="{{ $y }}" r="4" fill="var(--chart-1)"><title>{{ $mes['mes'] }}: {{ $mes['cantidad'] }} usuarios</title></circle>
                 @if ($i % $paso === 0 || $loop->last)<text x="{{ $x }}" y="240" text-anchor="middle">{{ \Carbon\Carbon::parse($mes['mes'].'-01')->translatedFormat('M y') }}</text>@endif
             @endforeach
         </svg>

@@ -12,8 +12,8 @@
 .gestion-tabla td:nth-child(2) { overflow-wrap: anywhere; }
 .gestion-historial .gestion-tabla td:nth-child(2) { overflow-wrap: normal; white-space: nowrap; }
 .gestion-estado { display: inline-block; border-radius: 20px; padding: 5px 10px; font-weight: 600; font-size: .8rem; }
-.gestion-activa { background: #e5f5e9; color: #246137; }
-.gestion-inactiva { background: #f2e9e9; color: #853636; }
+.gestion-activa { background: var(--success-surface); color: var(--green); }
+.gestion-inactiva { background: var(--danger-surface); color: var(--danger); }
 .gestion-vacio { padding: 32px !important; text-align: center; color: var(--muted); }
 .gestion-identidad-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 24px; margin: 24px 0; }
 .gestion-documento { display: block; width: 100%; max-height: 650px; object-fit: contain; }

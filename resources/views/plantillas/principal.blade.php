@@ -7,10 +7,13 @@
     <meta name="description"
         content="SubastaYA: descubre artículos, publica tus subastas y encuentra oportunidades cerca de ti.">
     <title>@yield('title', 'Dale una nueva historia a lo que te gusta') · SubastaYA</title>
+    <meta name="color-scheme" content="light dark">
+    <script src="{{ asset('js/apariencia.js') }}"></script>
     <link rel="icon" href="{{ asset('imagenes/favicon.svg') }}" type="image/svg+xml">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <link rel="stylesheet" href="{{ asset('css/apartados.css') }}">
     @stack('styles')
+    <link rel="stylesheet" href="{{ asset('css/apariencia.css') }}">
     <script src="{{ asset('js/app.js') }}" defer></script>
     <script src="{{ asset('js/apartados.js') }}" defer></script>
     @stack('scripts')
@@ -61,6 +64,11 @@
                 @endif
             </nav>
             <div class="account-nav">
+                <button class="theme-toggle" type="button" data-tema-selector aria-label="Modo oscuro" aria-pressed="false" hidden>
+                    <svg class="icon theme-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20.9 13a9 9 0 0 1-9.9-9.9A9 9 0 1 0 20.9 13Z" /></svg>
+                    <svg class="icon theme-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" /></svg>
+                    <span data-tema-texto>Claro</span>
+                </button>
                 @auth
                     @php
                         $cuenta = auth()->user();

@@ -16,7 +16,7 @@
     <section class="panel report-chart"><h2>Subastas por categoría</h2>
         @if ($datos['categorias'])
             @php
-                $colores = ['#3478c6', '#219c86', '#efad3b', '#8b68c7', '#e47b55', '#58a1b4', '#c16ca3', '#657993', '#689b47', '#b5914d', '#805c63', '#58616a'];
+                $colores = array_map(fn ($indice) => 'var(--chart-'.$indice.')', range(1, 12));
                 $acumulado = 0; $segmentos = [];
                 foreach ($datos['categorias'] as $i => $categoria) {
                     $fin = $acumulado + $categoria['cantidad'] / max(1, $datos['total']) * 100;
