@@ -27,7 +27,7 @@ class NavegacionVisitanteTest extends TestCase
     public function test_signed_in_users_keep_their_personal_navigation(): void
     {
         $this->actingAs(User::factory()->create())->get('/')->assertOk()
-            ->assertSee('Mis subastas')->assertSee('Notificaciones')->assertSee('Mi perfil:');
+            ->assertSee('Mis subastas')->assertSee('Notificaciones')->assertSee('Mi cuenta:');
         $this->get('/como-funciona')->assertOk()->assertDontSee('Crear una cuenta');
     }
 

@@ -14,9 +14,11 @@
     <link rel="stylesheet" href="{{ asset('css/apartados.css') }}">
     @stack('styles')
     <link rel="stylesheet" href="{{ asset('css/apariencia.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/cuenta.css') }}">
     <script src="{{ asset('js/app.js') }}" defer></script>
     <script src="{{ asset('js/apartados.js') }}" defer></script>
     @stack('scripts')
+    <script src="{{ asset('js/cuenta.js') }}" defer></script>
 </head>
 
 <body>
@@ -78,7 +80,8 @@
                         $iniciales = mb_strtoupper(mb_substr($partesNombre[0] ?? '', 0, 1)
                             . ($apellido !== '' ? mb_substr($apellido, 0, 1) : (count($partesNombre) > 1 ? mb_substr(end($partesNombre), 0, 1) : '')));
                     @endphp
-                    <a class="account-name" href="{{ route('perfil.edit') }}" aria-label="Mi perfil: {{ $cuenta->nombre }}">
+                    <details class="account-menu" data-cuenta-menu>
+                    <summary class="account-name" aria-label="Mi cuenta: {{ $cuenta->nombre }}">
                         <span class="account-avatar" aria-hidden="true">
                             @if ($cuenta->imagen)
                                 <img src="{{ $cuenta->imagen->url }}" alt="" width="32" height="32">
@@ -87,16 +90,36 @@
                             @endif
                         </span>
                         <span class="account-label">{{ $nombresCabecera }}</span>
-                    </a>
-                    <form action="{{ route('cerrar-sesion') }}" method="post">@csrf<button class="logout"
-                            type="submit">Salir</button></form>
+                    </summary>
+                    <nav class="account-popover" aria-label="Opciones de tu cuenta">
+                        <p class="account-menu-name">{{ $cuenta->nombre }}</p>
+                        <a class="account-option" href="{{ route('perfil.edit') }}"><x-icono nombre="user" />Mi perfil</a>
+                        <button class="account-option" type="button" data-tema-selector aria-label="Modo oscuro" aria-pressed="false" hidden>
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v18M12 3a9 9 0 0 0 0 18M12 3a9 9 0 0 1 0 18" /></svg>
+                            <span>Apariencia</span><span class="account-option-state" data-tema-texto>Claro</span>
+                        </button>
+                        <form class="account-logout" action="{{ route('cerrar-sesion') }}" method="post" data-cerrar-sesion>@csrf
+                            <button class="account-option" type="submit"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 4H4v16h5m5-12 4 4-4 4m-6-4h10" /></svg>Cerrar sesión</button>
+                        </form>
+                    </nav>
+                    </details>
                 @else
                     <a class="login-link" href="{{ route('iniciar-sesion') }}"><x-icono nombre="user" /> Iniciar sesión</a>
                 @endauth
             </div>
         </div>
     </header>
-    <main id="contenido">
+    @auth
+        <dialog class="logout-dialog" data-confirmar-salida aria-labelledby="salida-titulo" aria-describedby="salida-descripcion">
+            <h2 id="salida-titulo">Tienes cambios sin guardar</h2>
+            <p id="salida-descripcion">Si cierras sesión, perderás los cambios pendientes de tus formularios. ¿Quieres cerrar sesión?</p>
+            <div class="logout-dialog-actions">
+                <button class="button secondary" type="button" data-seguir-editando autofocus>Seguir editando</button>
+                <button class="button primary" type="button" data-confirmar-cierre>Cerrar sesión</button>
+            </div>
+        </dialog>
+    @endauth
+    <main id="contenido" data-campos-pendientes="{{ json_encode(array_keys(session()->getOldInput())) }}">
         @if (session('status'))
             <div class="container" data-aviso-exito>
                 <div class="alert success" role="status">

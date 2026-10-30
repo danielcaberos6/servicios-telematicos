@@ -1,0 +1,27 @@
+.account-menu { position: relative; flex-shrink: 0; }
+.account-menu > summary { cursor: pointer; list-style: none; padding: 4px; min-width: 44px; justify-content: center; border: 1px solid transparent; border-radius: 7px; }
+.account-menu > summary::-webkit-details-marker { display: none; }
+.account-menu[open] > summary, .account-menu > summary:hover { background: #19415e; border-color: #789ab4; text-decoration: none; }
+.account-popover {
+    position: absolute; right: 0; top: calc(100% + 10px); z-index: 60;
+    width: min(280px, calc(100vw - 32px)); padding: 10px;
+    background: var(--surface); color: var(--ink); border: 1px solid var(--control-border);
+    border-radius: 10px; box-shadow: 0 12px 32px #06294330; white-space: normal;
+    max-height: calc(100dvh - var(--header-height) - 24px); overflow-y: auto;
+}
+.account-menu-name { margin: 2px 0 8px; padding: 8px 10px 12px; border-bottom: 1px solid var(--line); font-weight: 600; overflow-wrap: anywhere; line-height: 1.5; }
+.account-option { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 46px; padding: 10px; background: transparent; color: var(--ink); border: 0; border-radius: 5px; text-align: left; font-size: 14px; line-height: 1.4; cursor: pointer; text-decoration: none; }
+.account-option:hover { background: var(--info-surface); color: var(--blue); text-decoration: none; }
+.account-option[hidden] { display: none; }
+.account-option-state { margin-left: auto; font-size: 12px; color: var(--muted); }
+.account-logout { margin: 8px 0 0; padding-top: 8px; border-top: 1px solid var(--line); }
+.logout-dialog { width: min(480px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto; margin: auto; padding: 28px; border: 1px solid var(--control-border); border-radius: var(--radius); background: var(--surface); color: var(--ink); }
+.logout-dialog::backdrop { background: #062943b8; }
+.logout-dialog h2 { font-size: 1.4rem; margin-bottom: 16px; }
+.logout-dialog p { line-height: 1.7; }
+.logout-dialog-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+@media (max-width: 500px) {
+    .logout-dialog { padding: 24px 20px; }
+    .logout-dialog-actions { display: grid; grid-template-columns: 1fr; }
+    .logout-dialog-actions .button { width: 100%; white-space: normal; }
+}
