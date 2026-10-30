@@ -136,6 +136,9 @@
                                 </div>
                             @elseif ($subasta->modelo_puja === 2 && $subasta->siguienteOfertaMinima() > 9999999999)
                                 <p class="info-note">Esta subasta alcanzó el monto máximo permitido y ya no admite nuevas ofertas.</p>
+                            @elseif (!app(\App\Services\NormativaService::class)->aceptada(auth()->id()))
+                                <p>Antes de tu primera oferta, lee y acepta las normas de participación.</p>
+                                <a class="button primary full-width" href="{{ route('normas.show', ['volver' => route('subastas.show', $subasta, false)]) }}">Leer y aceptar las normas</a>
                             @else<form method="post" action="{{ route('pujas.store', $subasta) }}"
                                     data-confirm="¿Confirmas tu oferta{{ $subasta->modelo_puja === 2 ? ' de Bs '.number_format($subasta->siguienteOfertaMinima(), 0, ',', '.') : '' }}? Las ofertas registradas no pueden retirarse.">
                                     @if ($subasta->modelo_puja === 2)

@@ -64,6 +64,7 @@ create trigger usuario_bienvenida after insert on usuario for each row execute f
 create or replace function crear_subasta(p_actor bigint, p_datos jsonb) returns subasta language plpgsql as $$
 declare resultado subasta;
 begin
+    perform exigir_normas(p_actor);
     if (p_datos->>'monto_inicial')::numeric <= 0 or mod((p_datos->>'monto_inicial')::numeric,5) <> 0 then
         raise exception 'El monto inicial debe ser un múltiplo entero positivo de Bs 5.';
     end if;
@@ -94,6 +95,7 @@ $$;
 create or replace function registrar_puja(p_actor bigint, p_id bigint, p_monto numeric) returns puja language plpgsql as $$
 declare resultado puja;
 begin
+    perform exigir_normas(p_actor);
     if exists(select 1 from subasta where id_subasta=p_id and modelo_puja=2) and p_monto <> trunc(p_monto) then
         raise exception 'La oferta debe ser un monto entero, sin centavos.';
     end if;

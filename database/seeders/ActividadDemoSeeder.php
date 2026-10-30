@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Subasta;
 use App\Models\User;
-use App\Services\PujaService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -36,7 +35,9 @@ class ActividadDemoSeeder extends Seeder
             if ($auction && $auction->estado === 'Activa' && ! $auction->pujas()->exists()) {
                 foreach ([0, 1, 0, 2, 1] as $i => $personIndex) {
                     $amount = number_format((float) $auction->monto_inicial + ($i + 1) * 100, 2, '.', '');
-                    app(PujaService::class)->registrar($people[$personIndex]->id_usuario, $auction->id_subasta, $amount);
+                    // Datos sintéticos del historial, igual que ReportesDemoSeeder.
+                    // Nunca registrar una aceptación de normas en nombre de una cuenta.
+                    DB::table('puja')->insert(['id_usuario' => $people[$personIndex]->id_usuario, 'id_subasta' => $auction->id_subasta, 'monto' => $amount]);
                 }
             }
         });

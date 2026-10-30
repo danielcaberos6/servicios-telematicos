@@ -119,6 +119,7 @@ $$;
 create or replace function actualizar_subasta(p_actor bigint, p_id bigint, p_datos jsonb) returns subasta language plpgsql as $$
 declare resultado subasta; reenviar boolean; instante timestamptz;
 begin
+    perform exigir_normas(p_actor);
     resultado := exigir_subasta_propia(p_actor,p_id);
     reenviar := resultado.estado_revision='Rechazada';
     if coalesce((p_datos->>'reenviar')::boolean,false) and not reenviar then

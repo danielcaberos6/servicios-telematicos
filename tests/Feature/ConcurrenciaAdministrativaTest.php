@@ -31,6 +31,7 @@ class ConcurrenciaAdministrativaTest extends TestCase
             DB::table('subasta')->whereIn('id_usuario', $this->usuarios)->delete();
             DB::table('usuario_rol')->whereIn('id_usuario', $this->usuarios)->delete();
             DB::table('imagen')->whereIn('id_usuario', $this->usuarios)->delete();
+            DB::table('aceptacion_normas')->whereIn('id_usuario', $this->usuarios)->delete();
             DB::table('usuario')->whereIn('id_usuario', $this->usuarios)->delete();
         } finally {
             parent::tearDown();

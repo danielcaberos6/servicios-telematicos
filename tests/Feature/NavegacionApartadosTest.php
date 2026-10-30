@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Subasta;
 use App\Models\User;
+use App\Services\NormativaService;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -34,6 +35,9 @@ class NavegacionApartadosTest extends TestCase
         $this->actingAs(User::where('correo', 'demo@subastaya.test')->sole())->get('/perfil')
             ->assertOk()->assertSee('href="#seguridad"', false)->assertSee('href="#identidad"', false)
             ->assertSee('id="resenas" data-apartado', false);
+        $this->post('/normas-y-politicas/aceptar', [
+            'acepto' => 1, 'version' => app(NormativaService::class)->version(),
+        ])->assertSessionHasNoErrors();
         $this->get('/subastas/crear')->assertOk()->assertSee('href="#encuentro"', false)
             ->assertSee('id="encuentro" data-apartado', false);
 

@@ -3,7 +3,9 @@
 namespace Database\Factories;
 
 use App\Models\User;
+use App\Services\NormativaService;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -12,6 +14,25 @@ use Illuminate\Support\Str;
  */
 class UserFactory extends Factory
 {
+    // Las cuentas de las pruebas previas representan participantes preparados.
+    // No se usa en registro ni en seeders; las cuentas reales nunca se aceptan solas.
+    public function configure(): static
+    {
+        return $this->afterCreating(function (User $usuario) {
+            if (app()->environment('testing')) {
+                DB::table('aceptacion_normas')->insert([
+                    'id_usuario' => $usuario->id_usuario,
+                    'version' => app(NormativaService::class)->version(),
+                ]);
+            }
+        });
+    }
+
+    public function sinAceptarNormas(): static
+    {
+        return $this->afterCreating(fn (User $usuario) => DB::table('aceptacion_normas')->where('id_usuario', $usuario->id_usuario)->delete());
+    }
+
     /**
      * The current password being used by the factory.
      */

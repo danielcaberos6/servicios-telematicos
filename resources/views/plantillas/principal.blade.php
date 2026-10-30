@@ -112,7 +112,9 @@
     <footer class="site-footer">
         <div class="container footer-content"><a class="brand footer-brand" href="{{ route($rutaPrincipal) }}"><x-icono
                     nombre="gavel" /><span>subasta<span>YA</span></span></a>
-            <p>Una nueva oportunidad para cada artículo.</p><span>© {{ date('Y') }} SubastaYA · Bolivia</span>
+            <p>Una nueva oportunidad para cada artículo.</p>
+            <a class="footer-normas" href="{{ route('normas.show') }}">Normas y políticas</a>
+            <span>© {{ date('Y') }} SubastaYA · Bolivia</span>
         </div>
     </footer>
 </body>
