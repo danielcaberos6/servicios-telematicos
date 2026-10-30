@@ -1,5 +1,6 @@
 @extends('plantillas.principal')
 @section('title', $subasta->titulo)
+@push('styles')<link rel="stylesheet" href="{{ asset('css/consultas.css') }}">@endpush
 @section('content')
 
     <div class="container section">
@@ -117,6 +118,9 @@
                         </div>
                     </div>
                     <p class="muted">{{ $subasta->modelo_puja === 1 ? 'Modelo anterior: conserva sus importes y reglas originales. No tiene fondos reservados.' : 'Incremento de puja: Bs '.$subasta->incremento_puja.'. Cada oferta confirma el siguiente monto exacto.' }}</p>
+                    @if ($subasta->publicada() && $subasta->usuario->activo)
+                        <p><a class="consulta-acceso" href="#preguntas-articulo">Preguntas sobre el artículo ({{ $consultas->total() }})</a></p>
+                    @endif
                     @if ($subasta->publicada() && auth()->check() && !auth()->user()->esAdministrador())
                         <form method="post" action="{{ route($esFavorito ? 'favoritos.retirar' : 'favoritos.guardar', $subasta) }}">
                             @csrf @method($esFavorito ? 'DELETE' : 'PUT')
@@ -208,4 +212,7 @@
             </div>
         </div>
     </div>
+    @if ($subasta->publicada() && $subasta->usuario->activo)
+        @include('subastas.consultas')
+    @endif
 @endsection

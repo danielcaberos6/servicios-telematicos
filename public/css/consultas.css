@@ -1,0 +1,34 @@
+.consultas-section { border-top: 1px solid var(--line); scroll-margin-top: calc(var(--header-height) + 24px); }
+.consultas-heading { display: flex; justify-content: space-between; gap: 24px; align-items: start; }
+.consultas-heading h2 { font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.25; color: var(--navy); margin: 10px 0; }
+.consultas-heading p { max-width: 740px; line-height: 1.7; }
+.consultas-total { color: var(--blue); font-weight: 600; white-space: nowrap; padding-top: 28px; }
+.consulta-form { max-width: 760px; display: grid; gap: 10px; padding: 18px 0 24px; }
+.consulta-form label { font-weight: 600; }
+.consulta-form textarea, .consulta-form select { width: 100%; min-width: 0; }
+.consulta-form textarea { resize: vertical; min-height: 90px; }
+.consulta-form .button { justify-self: start; }
+.consulta-ayuda { font-size: .9rem; color: var(--muted); line-height: 1.6; margin: 4px 0 12px; }
+.consultas-lista, .consultas-moderacion { max-width: 1050px; }
+.consulta-item { padding: 28px 0; border-top: 1px solid var(--line); min-width: 0; }
+.consulta-item h2 { font-size: 1.25rem; line-height: 1.4; overflow-wrap: anywhere; }
+.consulta-meta { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: baseline; }
+.consulta-meta time { font-size: .85rem; color: var(--muted); }
+.consulta-texto { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 16px; line-height: 1.75; }
+.consulta-respuesta { margin: 20px 0 10px 20px; border-left: 3px solid var(--blue); padding: 6px 0 6px 20px; }
+.consulta-vendedor { color: var(--blue); font-size: .85rem; margin-left: 8px; }
+.consulta-acciones summary { color: var(--blue); cursor: pointer; min-height: 44px; padding: 12px 0; width: fit-content; }
+.consulta-acciones[open] summary { font-weight: 600; }
+.consulta-acceso { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; }
+.consultas-vacio { padding: 28px 0; }
+.consultas-vacio h3 { font-size: 1.2rem; }
+.consultas-filtros { display: flex; gap: 20px; flex-wrap: wrap; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
+.consultas-filtros a { min-height: 44px; display: inline-flex; align-items: center; padding: 10px 0; }
+.consultas-filtros [aria-current] { border-bottom: 3px solid var(--blue); font-weight: 700; }
+@media (max-width: 650px) {
+    .consultas-heading { flex-direction: column; gap: 4px; }
+    .consultas-total { padding: 0 0 16px; }
+    .consulta-respuesta { margin-left: 0; padding-left: 14px; }
+    .consulta-form .button { width: 100%; }
+    .consulta-meta { display: grid; gap: 5px; }
+}

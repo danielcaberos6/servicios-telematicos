@@ -55,6 +55,7 @@
                     </a>
                 @endforeach
                 @if ($esAdministrador)
+                    <a href="{{ route('admin.consultas.index') }}" @class(['nav-link', 'active' => request()->routeIs('admin.consultas.*')]) @if(request()->routeIs('admin.consultas.*')) aria-current="page" @endif>Consultas</a>
                     <a href="{{ route('reportes.subastas') }}" @class(['nav-link', 'active' => request()->routeIs('reportes.*')])
                         @if (request()->routeIs('reportes.*')) aria-current="page" @endif>Reportes</a>
                 @endif

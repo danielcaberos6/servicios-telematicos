@@ -6,6 +6,7 @@ use App\Http\Requests\FiltroSubastasRequest;
 use App\Http\Requests\SubastaRequest;
 use App\Models\Subasta;
 use App\Services\CatalogoService;
+use App\Services\ConsultaArticuloService;
 use App\Services\ImagenService;
 use App\Services\PujaService;
 use App\Services\SubastaService;
@@ -67,6 +68,7 @@ class SubastaController extends Controller
 
     public function show(Request $request, Subasta $subasta)
     {
+        $request->validate(['preguntas' => ['sometimes', 'integer', 'min:1', 'max:100000']]);
         // 404 en vez de 403 para no revelar a terceros que la solicitud existe.
         abort_unless($subasta->visiblePara($request->user()), 404);
         $subasta->load(['imagenes', 'categoria', 'usuario'])->loadCount('pujas')->loadMax('pujas', 'monto');
@@ -83,7 +85,9 @@ class SubastaController extends Controller
 
         $esFavorito = $request->user() && DB::table('favorito_subasta')->where('id_usuario', $request->user()->id_usuario)->where('id_subasta', $subasta->id_subasta)->exists();
 
-        return view('subastas.show', compact('subasta', 'ganadora', 'ranking', 'canViewRanking', 'historialOfertas', 'esFavorito'));
+        $consultas = app(ConsultaArticuloService::class)->publicas($subasta);
+
+        return view('subastas.show', compact('subasta', 'ganadora', 'ranking', 'canViewRanking', 'historialOfertas', 'esFavorito', 'consultas'));
     }
 
     public function misSubastas(Request $request)
