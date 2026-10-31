@@ -1,6 +1,6 @@
 # HU23 · Gestión de operaciones
 
-Rama: `HU-23/Gestion-operaciones/Brayan`. Comisión aprobada: **5 %**.
+Rama: `HU-23-25/Gestion-operaciones-reputacion/Brayan`. Comisión aprobada: **5 %**.
 
 ## Flujo
 

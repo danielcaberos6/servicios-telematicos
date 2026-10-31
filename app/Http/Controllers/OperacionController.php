@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\OperacionService;
+use App\Services\ReputacionService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -48,7 +49,7 @@ class OperacionController extends Controller
         $eventos = DB::table('evento_operacion')->where('id_operacion', $operacion)->orderByDesc('id_evento')->paginate(15, ['*'], 'eventos')->withQueryString();
         $casos = DB::table('incidencia_operacion')->where('id_operacion', $operacion)->orderByDesc('id_incidencia')->get();
 
-        return response()->view('operaciones.show', ['op' => $op, 'mensajes' => $mensajes, 'acuerdos' => $acuerdos, 'eventos' => $eventos, 'casos' => $casos, 'referencia' => (string) Str::uuid()])->header('Cache-Control', 'no-store, private');
+        return response()->view('operaciones.show', ['op' => $op, 'mensajes' => $mensajes, 'acuerdos' => $acuerdos, 'eventos' => $eventos, 'casos' => $casos, 'referencia' => (string) Str::uuid(), 'valoracion' => app(ReputacionService::class)->valorarDisponible($r->user()->id_usuario, $operacion)])->header('Cache-Control', 'no-store, private');
     }
 
     public function mensajes(Request $r, int $operacion, OperacionService $s)

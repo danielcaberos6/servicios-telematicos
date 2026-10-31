@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\VerificacionIdentidad;
 use App\Services\IdentidadService;
 use App\Services\ImagenService;
+use App\Services\ReputacionService;
 use App\Services\UsuarioService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,14 +23,19 @@ class PerfilController extends Controller
 
     public function edit(Request $request, IdentidadService $identidad)
     {
+        $request->validate(['resenas' => ['sometimes', 'integer', 'min:1', 'max:100000'], 'historicas' => ['sometimes', 'integer', 'min:1', 'max:100000']]);
         $user = $request->user()->fresh('imagen');
         $reviews = $this->usuarioService->resenas($user->id_usuario);
         $ratings = $this->usuarioService->valoraciones($user->id_usuario);
 
+        $reputacion = app(ReputacionService::class);
+        $resumen = $reputacion->resumen($user->id_usuario);
+        $resenas = $reputacion->resenas($user->id_usuario)->fragment('resenas');
+        $historicas = $reputacion->resenas($user->id_usuario, true)->fragment('resenas');
         $solicitudes = $identidad->historial($user->id_usuario);
         $pendiente = VerificacionIdentidad::where('id_usuario', $user->id_usuario)->where('estado', 'En revisión')->exists();
 
-        return view('perfil.edit', compact('user', 'reviews', 'ratings', 'solicitudes', 'pendiente'));
+        return view('perfil.edit', compact('user', 'reviews', 'ratings', 'solicitudes', 'pendiente', 'resumen', 'resenas', 'historicas'));
     }
 
     public function update(PerfilRequest $request)
@@ -40,7 +46,7 @@ class PerfilController extends Controller
         try {
             DB::transaction(function () use ($request, $data, &$path, &$old) {
                 $user = User::whereKey($request->user()->id_usuario)->lockForUpdate()->firstOrFail();
-                $this->usuarioService->actualizar($user->id_usuario, collect($data)->only(['nombre', 'nombres', 'apellidos', 'correo', 'biografia', 'ciudad', 'telefono', 'password'])->all());
+                $this->usuarioService->actualizar($user->id_usuario, collect($data)->only(['nombre', 'nombres', 'apellidos', 'correo', 'biografia', 'ciudad', 'ciudad_publica', 'telefono', 'password'])->all());
                 if ($request->hasFile('foto') || $request->boolean('quitar_foto')) {
                     $old = $user->imagen?->ruta;
                     if ($user->imagen) {

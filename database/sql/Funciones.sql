@@ -41,6 +41,7 @@ begin
         apellidos = case when p_datos ? 'apellidos' then p_datos->>'apellidos' else apellidos end,
         correo = case when p_datos ? 'correo' then lower(trim(p_datos->>'correo')) else correo end,
         ciudad = case when p_datos ? 'ciudad' then p_datos->>'ciudad' else ciudad end,
+        ciudad_publica = case when p_datos ? 'ciudad_publica' then (p_datos->>'ciudad_publica')::boolean else ciudad_publica end,
         telefono = case when p_datos ? 'telefono' then p_datos->>'telefono' else telefono end,
         biografia = case when p_datos ? 'biografia' then p_datos->>'biografia' else biografia end,
         contrasena = coalesce(p_datos->>'contrasena', contrasena)
@@ -148,18 +149,22 @@ $$;
 
 create or replace function listar_resenas(p_usuario bigint)
 returns table(id_resena bigint,nombre text,calificacion numeric,comentario text,fecha_creacion timestamptz)
-language sql stable as $$
-    select r.id_resena,u.nombre,r.calificacion,r.comentario,r.fecha_creacion
-    from resenas r join usuario u on u.id_usuario=r.id_usuario_resenador
+language plpgsql stable as $$
+begin
+    return query select r.id_resena,u.nombre,r.calificacion,r.comentario,r.fecha_creacion
+    from resenas_publicadas r join usuario u on u.id_usuario=r.id_usuario_resenador
     where r.id_usuario_resenado=p_usuario order by r.fecha_creacion desc,r.id_resena desc;
+end;
 $$;
 
 -- Se conservan valoraciones fraccionarias existentes; se agrupan por la estrella más cercana.
 create or replace function resumen_valoraciones(p_usuario bigint)
-returns table(estrellas integer,cantidad bigint) language sql stable as $$
-    select e,count(r.id_resena) from generate_series(1,5) e
-    left join resenas r on r.id_usuario_resenado=p_usuario and round(r.calificacion)::integer=e
+returns table(estrellas integer,cantidad bigint) language plpgsql stable as $$
+begin
+    return query select e,count(r.id_resena) from generate_series(1,5) e
+    left join resenas_publicadas r on r.id_usuario_resenado=p_usuario and round(r.calificacion)::integer=e
     group by e order by e;
+end;
 $$;
 
 -- Integridad y eventos
@@ -305,7 +310,7 @@ begin
         select u.id_usuario,u.nombre,coalesce(nullif(trim(u.ciudad),''),'Sin ciudad') as ciudad,u.fecha_registro,
             (select count(*) from subasta s where s.id_usuario=u.id_usuario and s.estado_revision='Aceptada' and s.fecha_inicio<t_fin) as publicaciones,
             (select count(*) from puja p where p.id_usuario=u.id_usuario and p.fecha_puja<t_fin) as pujas,
-            (select avg(r.calificacion) from resenas r where r.id_usuario_resenado=u.id_usuario and r.fecha_creacion<t_fin) as valoracion
+            (select avg(r.calificacion) from resenas_publicadas r where r.id_usuario_resenado=u.id_usuario and r.fecha_creacion<t_fin) as valoracion
         from usuario u where u.fecha_registro<t_fin
     ), filtrados as materialized (
         select * from base b where
@@ -317,7 +322,7 @@ begin
                 or (p_filtros->>'actividad'='postores' and b.pujas>0)
                 or (p_filtros->>'actividad'='sin_actividad' and b.publicaciones+b.pujas=0))
     ), resenas_filtradas as materialized (
-        select r.* from resenas r join filtrados u on u.id_usuario=r.id_usuario_resenado where r.fecha_creacion<t_fin
+        select r.* from resenas_publicadas r join filtrados u on u.id_usuario=r.id_usuario_resenado where r.fecha_creacion<t_fin
     ), resumen as (
         select count(*) as total,count(*) filter(where fecha_registro>=t_inicio) as nuevos,
             count(*) filter(where fecha_registro>=t_anterior and fecha_registro<t_inicio) as anteriores,

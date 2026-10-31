@@ -124,3 +124,6 @@ Tras modificar funciones o triggers, crea una migración que instale el cambio. 
 ```sh
 docker compose down
 ```
+
+
+HU25 incorpora la **reputación de participantes**: valoración de la contraparte tras completar la entrega, publicación al valorar ambas partes o al cumplir 14 días, promedios como comprador/vendedor, moderación motivada y perfil público desde el nombre del vendedor o del autor de una reseña. La ciudad se muestra solo con consentimiento desde Mi perfil. Las reseñas previas se conservan como históricas. Consulta `docs/HU25-reputacion.md`; esta es la numeración vigente del Sprint Planning 3.

@@ -195,7 +195,7 @@
                 </div>
                 <div class="seller"><span
                         class="avatar small">{{ mb_strtoupper(mb_substr($subasta->usuario->nombre, 0, 1)) }}</span>
-                    <div><small>Publicado por</small><strong>{{ $subasta->usuario->nombre }}</strong><x-distintivo-identidad :usuario="$subasta->usuario" /></div>
+                    <div><small>Publicado por</small><strong><a href="{{ route('participantes.show',$subasta->id_usuario) }}">{{ $subasta->usuario->nombre }}</a></strong><x-distintivo-identidad :usuario="$subasta->usuario" /></div>
                 </div>
                 @if (
                     $subasta->estado === 'Finalizada' &&

@@ -1,5 +1,6 @@
 @extends('plantillas.principal')
 @section('title', 'Mi perfil')
+@push('styles')<link rel="stylesheet" href="{{ asset('css/operaciones.css') }}"><link rel="stylesheet" href="{{ asset('css/reputacion.css') }}">@endpush
 @section('content')
     <div class="container section">
         <div class="section-heading">
@@ -40,7 +41,7 @@
                         <div><label for="telefono">Teléfono</label><input id="telefono" name="telefono" type="tel"
                                 value="{{ old('telefono', $user->telefono) }}" maxlength="25" pattern="(?:[\+\(\)\s\-]*[0-9]){7,15}[\+\(\)\s\-]*"></div>
                     </div><label for="ciudad">Ciudad</label><input id="ciudad" name="ciudad"
-                        value="{{ old('ciudad', $user->ciudad) }}" maxlength="100"><label for="biografia">Biografía</label>
+                        value="{{ old('ciudad', $user->ciudad) }}" maxlength="100"><input type="hidden" name="ciudad_publica" value="0"><label class="checkbox-label"><input type="checkbox" name="ciudad_publica" value="1" @checked(old('ciudad_publica',$user->ciudad_publica))>Mostrar mi ciudad en el perfil público</label><label for="biografia">Biografía</label>
                     <textarea id="biografia" name="biografia" rows="3" maxlength="1000">{{ old('biografia', $user->biografia) }}</textarea><label for="foto">Foto de perfil</label><input id="foto"
                         name="foto" type="file" accept="image/jpeg,image/png,image/webp"
                         data-preview="profile-preview"><small>JPG, PNG o WebP. Hasta 5 MB.</small>
@@ -72,9 +73,11 @@
 @endunless
                 <section class="panel" id="resenas" data-apartado aria-labelledby="resenas-titulo">
                     <h2 id="resenas-titulo">Reseñas y valoraciones</h2>
+                    @unless($user->esAdministrador())<p><a href="{{ route('participantes.show',$user->id_usuario) }}">Ver mi perfil público</a></p>@endunless
+                    @include('reputacion.resumen')
                     <section class="ratings-panel" aria-labelledby="ratings-title">
-                    <h2 id="ratings-title">Mis valoraciones</h2>
-                    <p class="rating-average"><strong>{{ $reviews->isNotEmpty() ? number_format($reviews->avg('calificacion'), 1) : '—' }}</strong><span> / 5 ★</span></p>
+                    <h2 id="ratings-title">Mis valoraciones públicas</h2>
+                    <p class="muted">Distribución de reseñas públicas, incluidas las históricas. Los promedios verificados por rol se muestran arriba.</p><p class="rating-average"><strong>{{ $reviews->isNotEmpty() ? number_format($reviews->avg('calificacion'), 1) : '—' }}</strong><span> / 5 ★</span></p>
                     <p class="muted">{{ $reviews->count() }} {{ $reviews->count() === 1 ? 'valoración recibida' : 'valoraciones recibidas' }}</p>
                     <div class="ratings-chart" role="list" aria-label="Cantidad de valoraciones por estrellas">
                         @foreach ($ratings as $rating)
@@ -87,14 +90,10 @@
                     </div>
                     @if ($reviews->isEmpty())<p class="muted">Tus valoraciones aparecerán aquí cuando recibas reseñas.</p>@endif
                 </section>
-
-                    @forelse($reviews as $review)
-                        <article class="review"><strong>{{ $review->nombre }}</strong><span class="rating">★
-                                {{ number_format($review->calificacion, 1) }}/5</span>
-                            <p>{{ $review->comentario }}</p>
-                            <small>{{ \Carbon\Carbon::parse($review->fecha_creacion)->diffForHumans() }}</small>
-                    </article>@empty<p class="muted">Todavía no recibiste reseñas.</p>
-                    @endforelse
+                    <h3>Experiencias verificadas</h3>
+                    @include('reputacion.resenas',['historica'=>false])
+                    <h3>Reseñas históricas</h3><p class="muted">Registros anteriores, sin operación asociada. No cuentan en el promedio por rol.</p>
+                    @include('reputacion.resenas',['resenas'=>$historicas,'historica'=>true])
                 </section>
     </div>
 @endsection

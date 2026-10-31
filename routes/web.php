@@ -14,6 +14,7 @@ use App\Http\Controllers\ParticipacionController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PujaController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\ReputacionController;
 use App\Http\Controllers\RevisionSubastaController;
 use App\Http\Controllers\SubastaController;
 use App\Http\Middleware\NormasAceptadas;
@@ -25,9 +26,12 @@ Route::get('/', [SubastaController::class, 'inicio'])->middleware(SoloUsuario::c
 Route::get('/buscar', [SubastaController::class, 'index'])->middleware(SoloUsuario::class)->name('subastas.index');
 Route::view('/como-funciona', 'como-funciona')->name('como-funciona');
 Route::get('/normas-y-politicas', [NormativaController::class, 'show'])->name('normas.show');
+Route::get('/participantes/{usuario}', [ReputacionController::class, 'show'])->whereNumber('usuario')->name('participantes.show');
 Route::get('/imagenes/{imagen}', [ImagenController::class, 'show'])->name('imagenes.show');
 
 Route::middleware(['auth', SoloAdministrador::class])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/resenas/reportes', [ReputacionController::class, 'index'])->name('resenas.index');
+    Route::post('/resenas/reportes/{reporte}', [ReputacionController::class, 'moderar'])->whereNumber('reporte')->middleware('throttle:30,1')->name('resenas.moderar');
     Route::get('/operaciones/incidencias', [OperacionController::class, 'incidencias'])->name('operaciones.index');
     Route::get('/operaciones/incidencias/{incidencia}', [OperacionController::class, 'caso'])->whereNumber('incidencia')->name('operaciones.caso');
     Route::post('/operaciones/incidencias/{incidencia}', [OperacionController::class, 'gestionarCaso'])->whereNumber('incidencia')->middleware('throttle:30,1')->name('operaciones.gestionar');
@@ -69,6 +73,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
     Route::put('/perfil', [PerfilController::class, 'update'])->middleware('throttle:10,1')->name('perfil.update');
     Route::middleware(SoloUsuario::class)->group(function () {
+        Route::post('/operaciones/{operacion}/valoracion', [ReputacionController::class, 'valorar'])->whereNumber('operacion')->middleware('throttle:20,1')->name('reputacion.valorar');
+        Route::post('/resenas/{resena}/reportes', [ReputacionController::class, 'reportar'])->whereNumber('resena')->middleware('throttle:10,1')->name('reputacion.reportar');
         Route::get('/mis-operaciones', [OperacionController::class, 'index'])->name('operaciones.index');
         Route::post('/operaciones/subasta/{subasta}', [OperacionController::class, 'abrir'])->whereNumber('subasta')->name('operaciones.abrir');
         Route::get('/operaciones/{operacion}', [OperacionController::class, 'show'])->whereNumber('operacion')->name('operaciones.show');

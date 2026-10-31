@@ -1,6 +1,6 @@
 @extends('plantillas.principal')
 @section('title','Entrega de '.$op->titulo)
-@push('styles')<link rel="stylesheet" href="{{ asset('css/operaciones.css') }}">@endpush
+@push('styles')<link rel="stylesheet" href="{{ asset('css/operaciones.css') }}"><link rel="stylesheet" href="{{ asset('css/reputacion.css') }}">@endpush
 @push('scripts')<script src="{{ asset('js/operaciones.js') }}" defer></script>@endpush
 @section('content')
 @php($comprador=auth()->id()===$op->id_comprador)
@@ -46,6 +46,7 @@
         <a data-chat-anteriores href="{{ route('operaciones.show',[$op->id_operacion,'mensajes'=>2]) }}#conversacion" @if($mensajes->total()<=15 || $mensajes->currentPage()!==1) hidden @endif>Consultar mensajes anteriores</a>
         @if($op->estado!=='Reembolsada')<form method="POST" class="ops-form" data-mensaje-form action="{{ route('operaciones.accion',[$op->id_operacion,'mensaje']) }}">@csrf<input name="referencia" type="hidden" value="{{ $referencia }}"><label for="texto">Mensaje</label><textarea id="texto" name="texto" required maxlength="2000" rows="4">{{ old('texto') }}</textarea><button class="button primary">Enviar mensaje</button></form>@else<p>Conversación cerrada. El historial se conserva.</p>@endif
     </section></div>
+    @include('reputacion.valorar')
     <section id="historial" class="ops-block"><h2>Historial de la operación</h2><ul class="ops-history">@foreach($eventos as $e)<li><strong>{{ $e->accion }}</strong> · {{ $fecha($e->fecha_creacion) }}<p>{{ $e->detalle }}</p></li>@endforeach</ul><x-paginacion :elementos="$eventos" /></section>
 </section>
 @endsection
