@@ -60,6 +60,9 @@ begin
     elsif new.monto < articulo.monto_inicial or (mayor is not null and new.monto <= mayor) then
         raise exception 'La oferta debe superar la puja actual y alcanzar el monto inicial.';
     end if;
+    if articulo.requiere_fondos then
+        perform reservar_fondos_puja(new.id_subasta,new.id_usuario,new.monto,new.id_puja);
+    end if;
     return new;
 end;
 $$;

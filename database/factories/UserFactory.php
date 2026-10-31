@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\User;
+use App\Services\FondosService;
 use App\Services\NormativaService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\DB;
@@ -31,6 +32,19 @@ class UserFactory extends Factory
     public function sinAceptarNormas(): static
     {
         return $this->afterCreating(fn (User $usuario) => DB::table('aceptacion_normas')->where('id_usuario', $usuario->id_usuario)->delete());
+    }
+
+    public function conFondos(int $monto = 10000): static
+    {
+        // Preparación explícita de cuentas de prueba mediante el flujo real de recarga.
+        return $this->afterCreating(function (User $usuario) use ($monto) {
+            if (! app()->environment('testing')) {
+                throw new \RuntimeException('conFondos solo se permite en pruebas.');
+            }
+            $fondos = app(FondosService::class);
+            $recarga = $fondos->solicitar($usuario->id_usuario, (string) Str::uuid(), (string) $monto);
+            $fondos->resolver($usuario->id_usuario, $recarga->id_recarga, 'Aprobada');
+        });
     }
 
     /**

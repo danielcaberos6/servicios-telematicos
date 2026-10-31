@@ -30,9 +30,9 @@ class ParticipacionPujasTest extends TestCase
 
     public function test_historial_muestra_cada_oferta_y_fecha_incluso_del_mismo_postor(): void
     {
-        $vendedor = User::factory()->create();
-        $uno = User::factory()->create();
-        $dos = User::factory()->create();
+        $vendedor = User::factory()->conFondos()->create();
+        $uno = User::factory()->conFondos()->create();
+        $dos = User::factory()->conFondos()->create();
         $subasta = $this->subasta($vendedor);
         $servicio = app(PujaService::class);
         foreach ([[$uno, '100.00'], [$dos, '110.00'], [$uno, '120.00']] as [$postor, $monto]) {
@@ -50,11 +50,11 @@ class ParticipacionPujasTest extends TestCase
 
     public function test_historial_vacio_y_paginacion_conservan_todas_las_ofertas(): void
     {
-        $vendedor = User::factory()->create();
+        $vendedor = User::factory()->conFondos()->create();
         $subasta = $this->subasta($vendedor);
         $url = '/subastas/'.$subasta->id_subasta;
         $this->actingAs($vendedor)->get($url)->assertSee('Todavía no hay ofertas.');
-        $postor = User::factory()->create();
+        $postor = User::factory()->conFondos()->create();
         for ($monto = 100; $monto <= 250; $monto += 10) {
             app(PujaService::class)->registrar($postor->id_usuario, $subasta->id_subasta, (string) $monto);
         }
@@ -65,12 +65,12 @@ class ParticipacionPujasTest extends TestCase
 
     public function test_terceros_y_visitantes_no_reciben_el_historial_ni_consultandolo_directamente(): void
     {
-        $subasta = $this->subasta(User::factory()->create());
-        $postor = User::factory()->create(['telefono' => '71234567']);
+        $subasta = $this->subasta(User::factory()->conFondos()->create());
+        $postor = User::factory()->conFondos()->create(['telefono' => '71234567']);
         app(PujaService::class)->registrar($postor->id_usuario, $subasta->id_subasta, '100.00');
         $url = '/subastas/'.$subasta->id_subasta.'?ofertas=1';
         $this->get($url)->assertDontSee('Historial de ofertas')->assertDontSee($postor->correo)->assertDontSee($postor->telefono);
-        $ajeno = User::factory()->create();
+        $ajeno = User::factory()->conFondos()->create();
         $this->actingAs($ajeno)->get($url)->assertDontSee('Historial de ofertas')->assertViewHas('historialOfertas', null);
         foreach ([null, $ajeno] as $usuario) {
             try {
@@ -84,9 +84,9 @@ class ParticipacionPujasTest extends TestCase
 
     public function test_ofertas_rechazadas_no_cambian_monto_ni_generan_avisos(): void
     {
-        $vendedor = User::factory()->create();
-        $uno = User::factory()->create();
-        $dos = User::factory()->create();
+        $vendedor = User::factory()->conFondos()->create();
+        $uno = User::factory()->conFondos()->create();
+        $dos = User::factory()->conFondos()->create();
         $subasta = $this->subasta($vendedor);
         $url = '/subastas/'.$subasta->id_subasta.'/pujas';
         $this->actingAs($uno)->post($url, ['monto' => '100.00'])->assertSessionHasNoErrors();
@@ -106,9 +106,9 @@ class ParticipacionPujasTest extends TestCase
 
     public function test_las_pujas_avisan_solo_al_postor_desplazado_y_conservan_los_avisos_anteriores(): void
     {
-        $vendedor = User::factory()->create();
-        $uno = User::factory()->create();
-        $dos = User::factory()->create();
+        $vendedor = User::factory()->conFondos()->create();
+        $uno = User::factory()->conFondos()->create();
+        $dos = User::factory()->conFondos()->create();
         $subasta = $this->subasta($vendedor);
         $anterior = $vendedor->notificaciones()->create([
             'id_subasta' => $subasta->id_subasta,

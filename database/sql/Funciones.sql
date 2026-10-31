@@ -68,11 +68,11 @@ begin
     if (p_datos->>'monto_inicial')::numeric <= 0 or mod((p_datos->>'monto_inicial')::numeric,5) <> 0 then
         raise exception 'El monto inicial debe ser un múltiplo entero positivo de Bs 5.';
     end if;
-    insert into subasta(titulo,descripcion,ubicacion,estado_articulo,monto_inicial,fecha_inicio,fecha_fin,id_usuario,id_categoria,latitud,longitud,incremento_puja,modelo_puja)
+    insert into subasta(titulo,descripcion,ubicacion,estado_articulo,monto_inicial,fecha_inicio,fecha_fin,id_usuario,id_categoria,latitud,longitud,incremento_puja,modelo_puja,requiere_fondos)
     values(p_datos->>'titulo', p_datos->>'descripcion', p_datos->>'ubicacion', p_datos->>'estado_articulo',
         (p_datos->>'monto_inicial')::numeric, clock_timestamp(), (p_datos->>'fecha_fin')::timestamptz, p_actor,
         (p_datos->>'id_categoria')::bigint, (p_datos->>'latitud')::numeric, (p_datos->>'longitud')::numeric,
-        coalesce((p_datos->>'incremento_puja')::integer,5),2)
+        coalesce((p_datos->>'incremento_puja')::integer,5),2,true)
     returning * into resultado;
     return resultado;
 end;
@@ -166,6 +166,10 @@ $$;
 create or replace function proteger_subasta() returns trigger language plpgsql as $$
 begin
     if TG_OP = 'UPDATE' then
+        if new.requiere_fondos is distinct from old.requiere_fondos then raise exception 'La condición de fondos no puede modificarse.'; end if;
+        if old.requiere_fondos and old.estado_subasta in ('Finalizada','Cancelada') and new.estado_subasta<>old.estado_subasta then
+            raise exception 'La subasta ya terminó. Los fondos se resuelven mediante la gestión de entrega.';
+        end if;
         if new.modelo_puja <> old.modelo_puja then raise exception 'El modelo de puja de esta subasta no puede cambiarse.'; end if;
         if old.modelo_puja=2 and (old.condiciones_fijadas or old.estado_revision='Aceptada') and
             row(new.monto_inicial,new.incremento_puja) is distinct from row(old.monto_inicial,old.incremento_puja) then
@@ -177,7 +181,7 @@ begin
         if TG_OP = 'DELETE' then raise exception 'Una subasta con pujas no puede eliminarse.'; end if;
         if row(new.titulo,new.descripcion,new.ubicacion,new.estado_articulo,new.monto_inicial,new.incremento_puja,new.fecha_inicio,new.fecha_fin,new.id_usuario,new.id_categoria,new.latitud,new.longitud)
            is distinct from row(old.titulo,old.descripcion,old.ubicacion,old.estado_articulo,old.monto_inicial,old.incremento_puja,old.fecha_inicio,old.fecha_fin,old.id_usuario,old.id_categoria,old.latitud,old.longitud)
-           or new.estado_subasta = 'Cancelada' then
+           or (new.estado_subasta = 'Cancelada' and not old.requiere_fondos) then
             raise exception 'Una subasta con pujas no puede modificarse.';
         end if;
     end if;

@@ -47,9 +47,9 @@ class OperacionesSqlTest extends TestCase
 
     public function test_ranking_groups_each_users_best_bid_and_is_private_to_participants_and_owner(): void
     {
-        $owner = User::factory()->create();
-        $one = User::factory()->create(['nombre' => 'Postor Uno']);
-        $two = User::factory()->create(['nombre' => 'Postor Dos']);
+        $owner = User::factory()->conFondos()->create();
+        $one = User::factory()->conFondos()->create(['nombre' => 'Postor Uno']);
+        $two = User::factory()->conFondos()->create(['nombre' => 'Postor Dos']);
         $auction = $this->auction($owner);
         app(PujaService::class)->registrar($one->id_usuario, $auction->id_subasta, '100.00');
         app(PujaService::class)->registrar($two->id_usuario, $auction->id_subasta, '110.00');
@@ -63,7 +63,7 @@ class OperacionesSqlTest extends TestCase
         $this->get($url)->assertOk()->assertDontSee('Ranking de participantes');
         $this->actingAs($owner)->get($url)->assertOk()->assertSee('Ranking de participantes')->assertSee('Líder')->assertSee('Finaliza el');
         $this->actingAs($two)->get($url)->assertSee('Postor Uno')->assertDontSee($one->correo);
-        $outsider = User::factory()->create();
+        $outsider = User::factory()->conFondos()->create();
         $this->actingAs($outsider)->get($url)->assertDontSee('Ranking de participantes');
         $this->expectException(HttpException::class);
         app(SubastaService::class)->ranking($auction->id_subasta, $outsider->id_usuario);
@@ -71,9 +71,9 @@ class OperacionesSqlTest extends TestCase
 
     public function test_welcome_and_outbid_notifications_are_created_in_database_exactly_once(): void
     {
-        $owner = User::factory()->create();
-        $one = User::factory()->create();
-        $two = User::factory()->create();
+        $owner = User::factory()->conFondos()->create();
+        $one = User::factory()->conFondos()->create();
+        $two = User::factory()->conFondos()->create();
         $this->assertSame(1, $one->notificaciones()->where('titulo', '¡Bienvenido a SubastaYA!')->count());
         $this->assertDatabaseHas('usuario_rol', ['id_usuario' => $one->id_usuario]);
         $auction = $this->auction($owner);
@@ -88,8 +88,8 @@ class OperacionesSqlTest extends TestCase
 
     public function test_rating_chart_uses_actual_distribution_including_empty_bins(): void
     {
-        $user = User::factory()->create();
-        $reviewer = User::factory()->create();
+        $user = User::factory()->conFondos()->create();
+        $reviewer = User::factory()->conFondos()->create();
         foreach ([1, 4, 4.5, 5] as $stars) {
             DB::table('resenas')->insert(['id_usuario_resenado' => $user->id_usuario, 'id_usuario_resenador' => $reviewer->id_usuario, 'calificacion' => $stars]);
         }
@@ -101,7 +101,7 @@ class OperacionesSqlTest extends TestCase
 
     public function test_profile_update_keeps_missing_fields_and_clears_explicit_nulls(): void
     {
-        $user = User::factory()->create(['ciudad' => 'Sucre', 'telefono' => '71234567', 'biografia' => 'Coleccionista de cámaras.']);
+        $user = User::factory()->conFondos()->create(['ciudad' => 'Sucre', 'telefono' => '71234567', 'biografia' => 'Coleccionista de cámaras.']);
         app(UsuarioService::class)->actualizar($user->id_usuario, ['nombre' => 'Nombre actualizado', 'correo' => $user->correo]);
         $fresh = $user->fresh();
         $this->assertSame('Nombre actualizado', $fresh->nombre);
@@ -113,7 +113,7 @@ class OperacionesSqlTest extends TestCase
 
     public function test_coordinates_are_optional_but_must_form_a_valid_pair(): void
     {
-        $auction = $this->auction(User::factory()->create());
+        $auction = $this->auction(User::factory()->conFondos()->create());
         $this->assertNull($auction->latitud);
         $this->assertNull($auction->longitud);
         $auction->update(['latitud' => -16.5, 'longitud' => -68.15]);
@@ -130,8 +130,8 @@ class OperacionesSqlTest extends TestCase
 
     public function test_sql_mutations_check_ownership_even_without_controller_checks(): void
     {
-        $auction = $this->auction(User::factory()->create());
-        $intruder = User::factory()->create();
+        $auction = $this->auction(User::factory()->conFondos()->create());
+        $intruder = User::factory()->conFondos()->create();
         try {
             app(SubastaService::class)->eliminar($intruder->id_usuario, $auction->id_subasta);
             $this->fail('Debe impedir la eliminación.');

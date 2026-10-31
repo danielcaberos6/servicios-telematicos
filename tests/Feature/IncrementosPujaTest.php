@@ -31,7 +31,7 @@ class IncrementosPujaTest extends TestCase
 
     private function publicada(int $incremento = 10): Subasta
     {
-        $subasta = app(SubastaService::class)->crear(User::factory()->create()->id_usuario, $this->datos(['incremento_puja' => $incremento]));
+        $subasta = app(SubastaService::class)->crear(User::factory()->conFondos()->create()->id_usuario, $this->datos(['incremento_puja' => $incremento]));
         $subasta->forceFill(['estado_revision' => 'Aceptada'])->save();
 
         return $subasta->refresh();
@@ -39,7 +39,7 @@ class IncrementosPujaTest extends TestCase
 
     public function test_every_increment_accepts_only_the_next_exact_bid(): void
     {
-        $postor = User::factory()->create();
+        $postor = User::factory()->conFondos()->create();
         foreach (Subasta::INCREMENTOS as $incremento) {
             $subasta = $this->publicada($incremento);
             $url = '/subastas/'.$subasta->id_subasta;
@@ -54,7 +54,7 @@ class IncrementosPujaTest extends TestCase
     public function test_invalid_amounts_are_rejected_without_bids_or_notifications(): void
     {
         $subasta = $this->publicada();
-        $postor = User::factory()->create();
+        $postor = User::factory()->conFondos()->create();
         $url = '/subastas/'.$subasta->id_subasta.'/pujas';
         $this->actingAs($postor)->post($url, ['monto' => 101])->assertSessionHasErrors('monto');
         $this->post($url, ['monto' => 100])->assertSessionHasNoErrors();
@@ -83,7 +83,7 @@ class IncrementosPujaTest extends TestCase
     public function test_creation_and_editing_validate_and_preserve_the_increment(): void
     {
         Storage::fake('public');
-        $owner = User::factory()->create();
+        $owner = User::factory()->conFondos()->create();
         $this->actingAs($owner)->get('/subastas/crear')->assertOk()->assertSee('Incremento de puja (Bs)');
         $this->post('/subastas', [...$this->datos(), 'imagenes' => [UploadedFile::fake()->image('foto.jpg')]])->assertSessionHasNoErrors();
         $subasta = $owner->subastas()->sole();
@@ -100,7 +100,7 @@ class IncrementosPujaTest extends TestCase
 
     public function test_database_prevents_invalid_increments_and_changing_them_after_a_bid(): void
     {
-        $subasta = app(SubastaService::class)->crear(User::factory()->create()->id_usuario, $this->datos());
+        $subasta = app(SubastaService::class)->crear(User::factory()->conFondos()->create()->id_usuario, $this->datos());
         foreach ([0, 7] as $incremento) {
             try {
                 DB::transaction(fn () => $subasta->update(['incremento_puja' => $incremento]));
@@ -110,7 +110,7 @@ class IncrementosPujaTest extends TestCase
             }
         }
         $subasta->refresh()->forceFill(['estado_revision' => 'Aceptada'])->save();
-        app(PujaService::class)->registrar(User::factory()->create()->id_usuario, $subasta->id_subasta, '100');
+        app(PujaService::class)->registrar(User::factory()->conFondos()->create()->id_usuario, $subasta->id_subasta, '100');
         try {
             DB::transaction(fn () => $subasta->update(['incremento_puja' => 20]));
             $this->fail('Una subasta con pujas debe conservar su incremento.');
@@ -122,11 +122,11 @@ class IncrementosPujaTest extends TestCase
 
     public function test_legacy_auctions_keep_decimal_bids_and_their_original_rules(): void
     {
-        $subasta = User::factory()->create()->subastas()->forceCreate([
+        $subasta = User::factory()->conFondos()->create()->subastas()->forceCreate([
             ...$this->datos(), 'modelo_puja' => 1, 'monto_inicial' => '100.50',
             'fecha_inicio' => now()->subHour(), 'estado_revision' => 'Aceptada',
         ])->refresh();
-        $postor = User::factory()->create();
+        $postor = User::factory()->conFondos()->create();
         $this->artisan('subastas:instalar-funciones')->assertSuccessful();
         $this->actingAs($postor)->get('/subastas/'.$subasta->id_subasta)->assertSee('Modelo anterior');
         foreach (['100.50', '100.51'] as $monto) {

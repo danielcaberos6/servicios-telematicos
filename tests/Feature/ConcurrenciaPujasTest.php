@@ -27,9 +27,9 @@ class ConcurrenciaPujasTest extends TestCase
     public function test_ofertas_simultaneas_revalidan_el_monto_despues_del_bloqueo(): void
     {
         foreach (['100.00' => 'P0001', '99.00' => 'P0001', '105.00' => 'P0001', '110.00' => 'aceptada'] as $monto => $resultado) {
-            $vendedor = User::factory()->create();
-            $uno = User::factory()->create();
-            $dos = User::factory()->create();
+            $vendedor = User::factory()->conFondos()->create();
+            $uno = User::factory()->conFondos()->create();
+            $dos = User::factory()->conFondos()->create();
             $subasta = app(SubastaService::class)->crear($vendedor->id_usuario, [
                 'titulo' => 'Pujas simultáneas', 'descripcion' => 'Artículo para comprobar concurrencia.',
                 'ubicacion' => 'La Paz', 'estado_articulo' => 'Usado', 'monto_inicial' => '100.00', 'incremento_puja' => 10,
