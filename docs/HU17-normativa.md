@@ -33,3 +33,12 @@ Ejecutar las pruebas exclusivamente en `subastaya_test`, con la protección orig
 La revisión visual debe incluir escritorio y móvil, enlaces del índice, pie de página y lectura de las secciones. El contenido no ofrece garantías legales o financieras ni promete servicios que todavía no existen.
 
 Resultado de esta entrega: 209 pruebas y 2033 comprobaciones aprobadas con `docker compose exec -T laravel php artisan test --compact`; formato PHP verificado con Pint. Revisión visual realizada en escritorio de 1440 × 900 y móvil de 390 × 844 y 375 × 812, incluyendo índice, lectura y pie de página, sin desbordamiento horizontal. La migración nueva fue aplicada localmente con `migrate --force`, sin reconstruir la base local. `tests/TestCase.php` permanece intacto.
+
+
+## Cierre de integración de HU17
+
+Rama vigente de Juan: `HU-17-18/Normas-participacionSubastas/Juan`. HU17 cubre sus cuatro criterios del Sprint Planning 3. La versión vigente `2026-10-31.3` incluye las condiciones económicas aprobadas, los conflictos de entrega y la reputación, además del tratamiento de datos y la privacidad del perfil público.
+
+La lectura sigue siendo pública. Publicar, ofertar y recargar exigen aceptación explícita vigente tanto en HTTP como en PostgreSQL; se conservan usuario, versión y fecha. Las condiciones explican reservas, saldo de demostración, ausencia de préstamos/dinero real, comisión del 5 % exclusivamente al completar la venta y devolución sin comisión. Los conflictos retienen fondos hasta una decisión motivada, sin confiscaciones automáticas. Estas condiciones ya no están pendientes de la consulta al ingeniero.
+
+`NormativaTest` y `GestionFondosTest` verifican la lectura, aceptación y bloqueo de acciones sin normas vigentes, incluidos el retorno a Mi billetera y el rechazo de recargas sin aceptación. Los resultados históricos de la sección anterior corresponden a aquella entrega, no al recuento actual de la suite.
