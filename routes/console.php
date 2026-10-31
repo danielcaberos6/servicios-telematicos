@@ -23,6 +23,7 @@ Artisan::command('subastas:instalar-funciones', function () {
         DB::unprepared(file_get_contents(database_path('sql/Normativa.sql')));
         DB::unprepared(file_get_contents(database_path('sql/ConsultasArticulos.sql')));
         DB::unprepared(file_get_contents(database_path('sql/Fondos.sql')));
+        DB::unprepared(file_get_contents(database_path('sql/Operaciones.sql')));
     });
     $this->info('Funciones.sql, BusquedaGeografica.sql y PublicacionSubastas.sql instalados. Las tablas y sus datos se conservaron.');
 })->purpose('Instala o actualiza las funciones y triggers de PostgreSQL');
@@ -57,3 +58,9 @@ use Illuminate\Foundation\Inspiring;
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+Artisan::command('subastas:revisar-entregas', function () {
+    $resultado = DB::selectOne('select revisar_operaciones_vencidas() as total');
+    $this->info("Entregas derivadas a revisión: {$resultado->total}");
+})->purpose('Deriva entregas pendientes de 72 horas a revisión sin liberar fondos');
+Schedule::command('subastas:revisar-entregas')->everyMinute()->withoutOverlapping();

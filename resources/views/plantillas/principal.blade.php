@@ -94,6 +94,7 @@
                     <nav class="account-popover" aria-label="Opciones de tu cuenta">
                         <p class="account-menu-name">{{ $cuenta->nombre }}</p>
                         <a class="account-option" href="{{ route('perfil.edit') }}"><x-icono nombre="user" />Mi perfil</a>
+                        <a class="account-option" href="{{ route($esAdministrador ? 'admin.operaciones.index' : 'operaciones.index') }}"><x-icono nombre="gavel" />{{ $esAdministrador ? 'Incidencias de entrega' : 'Mis operaciones' }}</a>
                         <a class="account-option" href="{{ route($esAdministrador ? 'admin.fondos.index' : 'billetera.index') }}"><x-icono nombre="box" />{{ $esAdministrador ? 'Control de fondos' : 'Mi billetera' }}</a>
                         <button class="account-option" type="button" data-tema-selector aria-label="Modo oscuro" aria-pressed="false" hidden>
                             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v18M12 3a9 9 0 0 0 0 18M12 3a9 9 0 0 1 0 18" /></svg>

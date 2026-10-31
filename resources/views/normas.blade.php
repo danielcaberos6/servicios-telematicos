@@ -48,7 +48,7 @@
             <section id="entrega" aria-labelledby="entrega-titulo">
                 <span class="normas-numero" aria-hidden="true">05</span><h2 id="entrega-titulo">Acuerden una entrega segura</h2>
                 <p>Vendedor y ganador son responsables de coordinar la entrega. Elijan un lugar público, confirmen las condiciones y revisen el artículo antes de completar el intercambio. No compartas contraseñas, documentos ni información bancaria en las descripciones.</p>
-                <p>Ante un desacuerdo, conserva los datos de la publicación y comunícalo al equipo administrador por los medios de coordinación del proyecto. Actualmente no hay un formulario de incidencias ni seguimiento de entrega dentro de SubastaYA.</p>
+                <p>Coordina el encuentro mediante la conversación privada de Mis operaciones. Cada parte confirma su propia entrega o recepción. Si hay un desacuerdo, abre una incidencia antes del pago: se retienen los fondos y un administrador asignado puede consultar la conversación dejando registro de su acceso.</p>
                 <p>Las decisiones administrativas deben basarse en la revisión del caso. SubastaYA no realiza confiscaciones ni cobros automáticos como sanción.</p>
             </section>
             <section id="privacidad" aria-labelledby="privacidad-titulo">
@@ -62,7 +62,7 @@
                 <span class="normas-numero" aria-hidden="true">07</span><h2 id="alcance-titulo">Qué incluye el sistema actual</h2>
                 <p>La billetera utiliza saldos y recargas simulados en bolivianos para la demostración del proyecto. No se mueve dinero real, no se solicitan comprobantes ni datos bancarios y no se ofrecen préstamos, retiros o transferencias bancarias.</p>
                 <p>En las nuevas publicaciones se reserva el importe del líder; si otra persona lo supera, recupera su disponibilidad. Si el líder aumenta su oferta, solo se reserva la diferencia. Al cierre, la reserva del ganador permanece retenida hasta la gestión de entrega. Las publicaciones anteriores conservan sus importes y no adquieren reservas retroactivas.</p>
-                <p>La liquidación, las devoluciones por incidencias y la comisión se incorporarán mediante la gestión de operaciones. Actualmente no se cobra comisión. Aceptar estas normas no autoriza cargos reales; si cambian las reglas, se publicará una nueva versión.</p>
+                <p>Al confirmar ambas partes la entrega sin incidencias abiertas, se consume la reserva del comprador: el vendedor recibe el 95 % y se registra una comisión del 5 %, redondeada a dos decimales. Un administrador asignado puede autorizar la liquidación o devolver la reserva completa, sin comisión, mediante una resolución motivada. A las 72 horas pendientes se deriva el caso a revisión, sin liberar fondos automáticamente. Aceptar estas normas no autoriza cargos reales.</p>
             </section>
             <section id="aceptacion" class="normas-aceptacion" aria-labelledby="aceptacion-titulo">
                 <h2 id="aceptacion-titulo">Lee, acepta y continúa</h2>

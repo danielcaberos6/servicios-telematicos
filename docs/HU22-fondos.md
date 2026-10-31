@@ -23,7 +23,7 @@ La validación bloquea primero la subasta, comprueba normas, identidad de cuenta
 5. Finalización: la reserva cambia a Retenida; no se acredita todavía al vendedor.
 6. Cancelación de una subasta activa con fondos: el cambio de estado libera la reserva una sola vez. Esta historia prepara la consistencia del evento; no añade una pantalla de resolución de incidencias ni permite al vendedor retirar pujas. Las operaciones posteriores al cierre corresponden a HU23.
 
-Las reservas referencian la puja mediante una clave foránea diferida hasta el fin de la transacción. La liquidación al vendedor, comisión y devolución tras revisar incidencias se integrarán desde HU23; no se simula que estén completadas.
+Las reservas referencian la puja mediante una clave foránea diferida hasta el fin de la transacción. HU23 ya integra liquidación al vendedor, comisión del 5 % y devolución tras revisar incidencias; consulta `HU23-operaciones.md`.
 
 ## Accesos
 

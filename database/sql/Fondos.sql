@@ -44,6 +44,8 @@ begin
         raise exception 'Saldo disponible insuficiente para esta operación.';
     end if;
     if (new.tipo='Recarga' and (new.disponible<>new.importe or new.reservado<>0))
+       or (new.tipo='Pago' and (new.disponible<>0 or new.reservado<>-new.importe))
+       or (new.tipo='Liquidación' and (new.disponible<>new.importe or new.reservado<>0))
        or (new.tipo='Reserva' and (new.disponible<>-new.importe or new.reservado<>new.importe))
        or (new.tipo in ('Liberación','Devolución') and (new.disponible<>new.importe or new.reservado<>-new.importe)) then
         raise exception 'El movimiento no coincide con su importe y tipo.';

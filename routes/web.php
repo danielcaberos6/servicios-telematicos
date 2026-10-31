@@ -9,6 +9,7 @@ use App\Http\Controllers\IdentidadController;
 use App\Http\Controllers\ImagenController;
 use App\Http\Controllers\NormativaController;
 use App\Http\Controllers\NotificacionController;
+use App\Http\Controllers\OperacionController;
 use App\Http\Controllers\ParticipacionController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\PujaController;
@@ -27,6 +28,10 @@ Route::get('/normas-y-politicas', [NormativaController::class, 'show'])->name('n
 Route::get('/imagenes/{imagen}', [ImagenController::class, 'show'])->name('imagenes.show');
 
 Route::middleware(['auth', SoloAdministrador::class])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/operaciones/incidencias', [OperacionController::class, 'incidencias'])->name('operaciones.index');
+    Route::get('/operaciones/incidencias/{incidencia}', [OperacionController::class, 'caso'])->whereNumber('incidencia')->name('operaciones.caso');
+    Route::post('/operaciones/incidencias/{incidencia}', [OperacionController::class, 'gestionarCaso'])->whereNumber('incidencia')->middleware('throttle:30,1')->name('operaciones.gestionar');
+    Route::get('/operaciones/incidencias/{incidencia}/conversacion', [OperacionController::class, 'chatCaso'])->whereNumber('incidencia')->name('operaciones.chat');
     Route::get('/fondos', [FondosController::class, 'control'])->name('fondos.index');
     Route::get('/fondos/{usuario}', [FondosController::class, 'control'])->whereNumber('usuario')->name('fondos.show');
     Route::get('/consultas', [ConsultaArticuloController::class, 'index'])->name('consultas.index');
@@ -64,6 +69,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
     Route::put('/perfil', [PerfilController::class, 'update'])->middleware('throttle:10,1')->name('perfil.update');
     Route::middleware(SoloUsuario::class)->group(function () {
+        Route::get('/mis-operaciones', [OperacionController::class, 'index'])->name('operaciones.index');
+        Route::post('/operaciones/subasta/{subasta}', [OperacionController::class, 'abrir'])->whereNumber('subasta')->name('operaciones.abrir');
+        Route::get('/operaciones/{operacion}', [OperacionController::class, 'show'])->whereNumber('operacion')->name('operaciones.show');
+        Route::get('/operaciones/{operacion}/mensajes', [OperacionController::class, 'mensajes'])->whereNumber('operacion')->name('operaciones.mensajes');
+        Route::post('/operaciones/{operacion}/{accion}', [OperacionController::class, 'accion'])->whereNumber('operacion')->whereIn('accion', ['confirmar', 'incidencia', 'proponer', 'responder', 'mensaje', 'leer'])->middleware('throttle:60,1')->name('operaciones.accion');
         Route::get('/mi-billetera', [FondosController::class, 'index'])->name('billetera.index');
         Route::get('/mi-billetera/saldo', [FondosController::class, 'saldo'])->name('billetera.saldo');
         Route::post('/mi-billetera/recargas', [FondosController::class, 'solicitar'])->middleware([NormasAceptadas::class, 'throttle:20,1'])->name('billetera.solicitar');

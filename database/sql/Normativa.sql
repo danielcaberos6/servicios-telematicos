@@ -1,6 +1,6 @@
 -- La versión se cambia mediante una migración nueva y junto con el texto publicado.
 create or replace function normas_version_vigente() returns text language sql immutable as $$
-    select '2026-10-31.1'::text;
+    select '2026-10-31.2'::text;
 $$;
 
 create or replace function exigir_normas(p_actor bigint) returns void language plpgsql as $$

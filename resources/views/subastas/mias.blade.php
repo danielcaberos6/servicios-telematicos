@@ -11,6 +11,7 @@
         </div>
         <p class="muted">{{ $subastas->total() }} publicaciones · Cada solicitud queda En revisión hasta que un
             administrador la acepte o la rechace. Puedes editar o eliminar las que aún no recibieron ofertas.</p>
+        <p><a href="{{ route('operaciones.index') }}">Gestionar entregas en Mis operaciones</a></p>
         <div class="auction-grid">
             @forelse($subastas as $subasta)
             <x-tarjeta-subasta :subasta="$subasta" :gestionar="true" />@empty<div class="empty-state"><x-icono

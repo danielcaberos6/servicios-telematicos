@@ -86,6 +86,7 @@ begin
                     translate(to_char(monto_ganador,'FM9,999,999,990.00'),',.','.,') ||
                     '. Consulta el detalle para coordinar la entrega.' end);
         if ganador is not null then
+            if to_regclass('operacion_subasta') is not null then perform crear_operacion_cierre(articulo.id_subasta); end if;
             insert into notificacion (id_usuario,id_subasta,titulo,contenido) values
                 (ganador,articulo.id_subasta,'¡Ganaste una subasta!','Ganaste «' || articulo.titulo || '». Consulta el detalle para coordinar la entrega.');
             insert into notificacion (id_usuario,id_subasta,titulo,contenido)

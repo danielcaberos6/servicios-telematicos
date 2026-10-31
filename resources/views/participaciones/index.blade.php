@@ -6,6 +6,7 @@
     <p class="eyebrow">TUS OFERTAS</p>
     <h1 class="page-title">Mis participaciones</h1>
     <p class="muted">Sigue las subastas en las que participas. Cada artículo aparece una sola vez, aunque hayas ofertado varias veces.</p>
+    <p><a href="{{ route('operaciones.index') }}">Coordinar entregas en Mis operaciones</a></p>
     <p>{{ $subastas->total() }} {{ $subastas->total() === 1 ? 'participación' : 'participaciones' }} · {{ \App\Services\ParticipacionService::APARTADOS[request('apartado', '')] }}</p>
     <ul class="participation-list">
         @forelse ($subastas as $subasta)

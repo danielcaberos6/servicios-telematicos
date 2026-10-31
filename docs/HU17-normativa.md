@@ -12,7 +12,7 @@
 
 ## Reglas de billetera
 
-Tras la autorización del modelo simulado por el docente, HU22 incorpora billetera, recargas y reservas. La versión `2026-10-31.1` explica el uso de saldos simulados y sus reservas, sin QR manual ni dinero real. Las liquidaciones, incidencias y comisión corresponden a Gestión de operaciones (HU23 en la numeración actual) y no se presentan como disponibles todavía.
+Tras la autorización del modelo simulado por el docente, HU22 incorpora billetera, recargas y reservas. La versión `2026-10-31.1` explica el uso de saldos simulados y sus reservas, sin QR manual ni dinero real. La versión posterior `2026-10-31.2` incorpora las liquidaciones, incidencias y comisión del 5 % implementadas en Gestión de operaciones (HU23).
 
 La versión vigente se exige también antes de recargar, con retorno a Mi billetera después de aceptarla. Se conservan las aceptaciones anteriores y ninguna cuenta existente acepta automáticamente las nuevas condiciones.
 
