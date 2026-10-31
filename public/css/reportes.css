@@ -1,4 +1,10 @@
 .reports-page { max-width: 1440px; }
+.report-kpis.report-financial-kpis { grid-template-columns: repeat(auto-fit,minmax(min(100%,170px),1fr)); }
+.report-financial-kpis .report-kpi > strong { font-size:clamp(1.1rem,2vw,1.6rem);font-variant-numeric:tabular-nums;overflow-wrap:anywhere; }
+.report-reference { overflow-wrap:anywhere;min-width:0; }
+.report-movement-details { display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:24px;margin:28px 0;padding:24px 0;border-block:1px solid var(--line); }
+.report-movement-details dt { color:var(--muted);font-size:.9rem; }.report-movement-details dd { margin:8px 0;font-weight:600; }
+.report-movement-section { margin-top:28px;padding-bottom:24px;border-bottom:1px solid var(--line); }
 .reports-heading { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
 .reports-heading p { margin: 8px 0; color: var(--muted); }
 .reports-heading .eyebrow { color: var(--blue); }
@@ -59,3 +65,7 @@
 .report-empty { padding: 50px 18px; color: var(--muted); font-size: .88rem; text-align: center; }
 @media (max-width: 1150px) { .report-kpis { grid-template-columns: repeat(2,minmax(0,1fr)); }.report-charts { grid-template-columns: 1fr; }.users-charts .report-growth { grid-row: auto; } }
 @media (max-width: 800px) { .reports-layout { grid-template-columns: 1fr; }.report-filters form { display: block; }.reports-heading { align-items: flex-start; }.admin-badge { display: none; }.report-filters { padding: 20px; }.report-filters input,.report-filters select { margin-bottom: 8px; }.report-table-heading { flex-wrap: wrap; }.report-kpi { padding: 15px; }.report-kpi > strong { font-size: 1.7rem; } }
+
+.report-kpis.report-sales-kpis { grid-template-columns:repeat(3,minmax(0,1fr)); }
+@media(max-width:600px) { .report-kpis.report-sales-kpis { grid-template-columns:1fr; } }
+@media(min-width:1251px) and (max-width:1350px) { .nav-wrap { gap:16px; } }

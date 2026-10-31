@@ -25,6 +25,7 @@ Artisan::command('subastas:instalar-funciones', function () {
         DB::unprepared(file_get_contents(database_path('sql/Fondos.sql')));
         DB::unprepared(file_get_contents(database_path('sql/Operaciones.sql')));
         DB::unprepared(file_get_contents(database_path('sql/Reputacion.sql')));
+        DB::unprepared(file_get_contents(database_path('sql/ReportesEconomicos.sql')));
     });
     $this->info('Funciones.sql, BusquedaGeografica.sql y PublicacionSubastas.sql instalados. Las tablas y sus datos se conservaron.');
 })->purpose('Instala o actualiza las funciones y triggers de PostgreSQL');

@@ -15,6 +15,8 @@ class ReporteService
         $sql = match ($tipo) {
             'subastas' => 'select reporte_subastas(?,?::jsonb) as datos',
             'usuarios' => 'select reporte_usuarios(?,?::jsonb) as datos',
+            'ventas' => 'select reporte_ventas(?,?::jsonb) as datos',
+            'movimientos' => 'select reporte_movimientos(?,?::jsonb) as datos',
             default => throw new \InvalidArgumentException('Reporte desconocido.'),
         };
         $datos = json_decode($this->ejecutar($sql, [$actor, $this->json($filtros)], 'reportes')[0]->datos, true, 512, JSON_THROW_ON_ERROR);
@@ -28,5 +30,10 @@ class ReporteService
     public function ciudades(int $actor): array
     {
         return $this->ejecutar('select * from ciudades_reporte(?)', [$actor]);
+    }
+
+    public function movimiento(int $actor, int $id): array
+    {
+        return json_decode($this->ejecutar('select detalle_movimiento_fondos(?,?) as datos', [$actor, $id], 'reportes')[0]->datos, true, 512, JSON_THROW_ON_ERROR);
     }
 }

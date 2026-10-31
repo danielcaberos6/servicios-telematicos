@@ -55,7 +55,7 @@
         if (request()->routeIs('admin.subastas.show')) $items = array_map(fn ($item) => [$item[0], $item[1], false], $items);
     } elseif (request()->routeIs('reportes.*')) {
         $titulo = 'Reportes';
-        $items = [[route('reportes.subastas'), 'Subastas', request()->routeIs('reportes.subastas')], [route('reportes.usuarios'), 'Usuarios', request()->routeIs('reportes.usuarios')]];
+        $items = [[route('reportes.subastas'), 'Subastas', request()->routeIs('reportes.subastas')], [route('reportes.usuarios'), 'Usuarios', request()->routeIs('reportes.usuarios')], [route('reportes.ventas'), 'Ventas', request()->routeIs('reportes.ventas')], [route('reportes.movimientos'), 'Movimientos', request()->routeIs('reportes.movimientos', 'reportes.movimiento')]];
     }
 @endphp
 @if ($titulo)

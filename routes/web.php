@@ -54,6 +54,9 @@ Route::middleware(['auth', SoloAdministrador::class])->prefix('admin')->name('ad
 
 Route::middleware(['auth', SoloAdministrador::class])->prefix('reportes')->name('reportes.')->group(function () {
     Route::redirect('/', '/reportes/subastas')->name('index');
+    Route::get('/ventas', [ReporteController::class, 'ventas'])->name('ventas');
+    Route::get('/movimientos', [ReporteController::class, 'movimientos'])->name('movimientos');
+    Route::get('/movimientos/{movimiento}', [ReporteController::class, 'movimiento'])->whereNumber('movimiento')->name('movimiento');
     Route::get('/subastas', [ReporteController::class, 'subastas'])->name('subastas');
     Route::get('/usuarios', [ReporteController::class, 'usuarios'])->name('usuarios');
 });

@@ -117,7 +117,7 @@ Las pruebas fijan explícitamente la conexión a `subastaya_test` y comprueban s
 
 La lógica de negocio vive en PostgreSQL: el esquema inicial está en `database/sql/Script.sql` y las funciones generales en `database/sql/Funciones.sql`. Las ampliaciones de gestión se organizan en `GestionUsuarios.sql`, `RolesUsuarios.sql`, `GestionCategorias.sql`, `NombresUsuarios.sql`, `IdentidadUsuarios.sql`, `RevisionIdentidad.sql`, `BusquedaGeografica.sql`, `RevisionSubastas.sql`, `PublicacionSubastas.sql` y `RevisionSubastasAdmin.sql`, instaladas por sus migraciones. Para actualizar un entorno existente, ejecuta `docker compose exec laravel php artisan migrate`.
 
-Tras modificar funciones o triggers, crea una migración que instale el cambio. El comando `php artisan subastas:instalar-funciones` reinstala, en este orden, `Funciones.sql`, `BusquedaGeografica.sql` y `PublicacionSubastas.sql`. Los dos últimos solo contienen funciones; `PublicacionSubastas.sql` redefine el catálogo (revisión y filtro por radio), la validación de pujas, la finalización y el aviso de nuevas solicitudes, por lo que debe ejecutarse al final. Los archivos que contienen ampliaciones de esquema se ejecutan mediante migraciones, una sola vez.
+Tras modificar funciones o triggers, crea una migración que instale el cambio. El comando `php artisan subastas:instalar-funciones` reinstala las funciones generales y sus ampliaciones de búsqueda, publicación, participación, normativa, consultas, fondos, operaciones, reputación y reportes económicos. El orden vigente está en `routes/console.php`; `PublicacionSubastas.sql` se instala después de `Funciones.sql` para conservar la revisión, el filtro por radio y las reglas de puja y cierre. Los archivos que contienen ampliaciones de esquema se ejecutan mediante migraciones, una sola vez.
 
 ## Detener
 
@@ -127,3 +127,5 @@ docker compose down
 
 
 HU25 incorpora la **reputación de participantes**: valoración de la contraparte tras completar la entrega, publicación al valorar ambas partes o al cumplir 14 días, promedios como comprador/vendedor, moderación motivada y perfil público desde el nombre del vendedor o del autor de una reseña. La ciudad se muestra solo con consentimiento desde Mi perfil. Las reseñas previas se conservan como históricas. Consulta `docs/HU25-reputacion.md`; esta es la numeración vigente del Sprint Planning 3.
+
+HU24 añade **Ventas** y **Movimientos** al menú de Reportes. Ventas filtra por cierre de subasta y distingue reservas, abonos al vendedor, devoluciones y comisiones efectivas; las publicaciones anteriores sin fondos no cuentan como ventas respaldadas. Movimientos permite seguir las referencias y abrir el detalle de cada registro, con fechas de Bolivia y acceso exclusivo de administrador. Consulta `docs/HU24-reportes-administrativos.md`.

@@ -29,6 +29,18 @@ class ReporteRequest extends FormRequest
             'page' => ['sometimes', 'integer', 'min:1', 'max:100000'],
         ];
 
+        if ($this->routeIs('reportes.ventas')) {
+            return [...$common, 'estado' => ['nullable', Rule::in(['Pendiente', 'En revisión', 'Completada', 'Reembolsada'])]];
+        }
+        if ($this->routeIs('reportes.movimientos')) {
+            return [...$common,
+                'tipo_movimiento' => ['nullable', Rule::in(['Recarga', 'Reserva', 'Liberación', 'Devolución', 'Liquidación', 'Pago'])],
+                'usuario' => ['nullable', 'integer', 'exists:usuario,id_usuario'],
+                'subasta' => ['nullable', 'integer', 'exists:subasta,id_subasta'],
+                'operacion' => ['nullable', 'integer', 'exists:operacion_subasta,id_operacion'],
+            ];
+        }
+
         return $this->routeIs('reportes.subastas') ? [...$common,
             'categoria' => ['nullable', 'integer', 'exists:categoria,id_categoria'],
             'estado' => ['nullable', Rule::in(['Activa', 'Finalizada', 'Cancelada'])],
