@@ -26,7 +26,7 @@
                         @endunless
                     </h2>
                     <p>{{ $item->contenido }}</p>
-                    @if(in_array($item->titulo,['Entrega por coordinar','Propuesta de entrega','Respuesta de entrega','Incidencia de entrega','Entrega pendiente de revisión','Operación cancelada','Entrega completada'],true))<p><a href="{{ route(auth()->user()->esAdministrador() ? 'admin.operaciones.index' : 'operaciones.index') }}">{{ auth()->user()->esAdministrador() ? 'Revisar incidencias de entrega' : 'Ver mis operaciones' }}</a></p>@endif
+                    @if(in_array($item->titulo,['Entrega por coordinar','Propuesta de entrega','Respuesta de entrega','Incidencia de entrega','Entrega pendiente de revisión','Operación cancelada','Entrega completada'],true))<p><a href="{{ route('notificaciones.destino',$item->id_notificacion) }}">{{ auth()->user()->esAdministrador() ? 'Revisar incidencia de entrega' : 'Abrir operación' }}</a></p>@endif
                     @if ($item->id_subasta)<p><a href="{{ route('subastas.show', $item->id_subasta) }}">{{ in_array($item->titulo, ['Solicitud en revisión', 'Nueva solicitud de publicación'], true) ? 'Ver solicitud' : 'Ver subasta' }}</a></p>@endif
                     @if ($item->id_verificacion)<p><a href="{{ route('identidad.show', $item->id_verificacion) }}">Ver solicitud de identidad</a></p>@endif
                     <time

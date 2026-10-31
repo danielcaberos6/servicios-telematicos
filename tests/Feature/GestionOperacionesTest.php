@@ -67,6 +67,82 @@ class GestionOperacionesTest extends TestCase
         return $u;
     }
 
+    public function test_delivery_snapshot_is_private_and_changes_on_confirmation_without_mutating_funds(): void
+    {
+        [$id,$c,$v] = $this->operacion();
+        $url = '/operaciones/'.$id.'/estado';
+        $a = $this->actingAs($c)->getJson($url)->assertOk()->assertHeader('Cache-Control', 'no-store, private')->json();
+        $this->getJson($url)->assertJsonPath('firma', $a['firma']);
+        $this->accion($v, $id, 'confirmar')->assertSessionHasNoErrors();
+        $b = $this->actingAs($c)->getJson($url)->assertOk()->assertJsonPath('estado', 'Pendiente')->json();
+        $this->assertNotSame($a['firma'], $b['firma']);
+        $this->assertNotNull($b['vendedor_confirmo']);
+        $this->actingAs(User::factory()->create())->getJson($url)->assertNotFound();
+        $this->actingAs($this->admin())->getJson($url)->assertForbidden();
+        $this->assertDatabaseCount('comision_operacion', 0);
+    }
+
+    public function test_operations_filter_buys_and_sales_preserves_state_and_does_not_expose_other_accounts(): void
+    {
+        [$id,$c,$v] = $this->operacion();
+        $this->actingAs($c)->get('/mis-operaciones?rol=compras&estado=Pendiente')->assertOk()->assertViewHas('operaciones', fn ($p) => $p->total() === 1);
+        $this->get('/mis-operaciones?rol=ventas')->assertViewHas('operaciones', fn ($p) => $p->total() === 0);
+        $this->actingAs($v)->get('/mis-operaciones?rol=ventas')->assertViewHas('operaciones', fn ($p) => $p->total() === 1);
+        $this->get('/mis-operaciones?rol=otro')->assertSessionHasErrors('rol');
+    }
+
+    public function test_operation_notifications_open_the_exact_owned_operation_or_admin_incident(): void
+    {
+        [$id,$c,$v,$s] = $this->operacion();
+        $n = DB::table('notificacion')->where('id_usuario', $c->id_usuario)->where('titulo', 'Entrega por coordinar')->first();
+        $this->actingAs($c)->get('/notificaciones/'.$n->id_notificacion.'/destino')->assertRedirect('/operaciones/'.$id);
+        $this->actingAs($v)->get('/notificaciones/'.$n->id_notificacion.'/destino')->assertNotFound();
+        $admin = $this->admin();
+        $this->accion($c, $id, 'incidencia', ['motivo' => 'No se realizó el encuentro acordado.']);
+        $caso = DB::table('incidencia_operacion')->where('id_operacion', $id)->first();
+        $aviso = DB::table('notificacion')->where('id_usuario', $admin->id_usuario)->where('titulo', 'Incidencia de entrega')->first();
+        $this->actingAs($admin)->get('/notificaciones/'.$aviso->id_notificacion.'/destino')->assertRedirect('/admin/operaciones/incidencias/'.$caso->id_incidencia);
+    }
+
+    public function test_auction_detail_does_not_offer_coordination_before_the_scheduler_records_closing(): void
+    {
+        [$id,$c,$v,$s] = $this->operacion(true, true, false);
+        $this->actingAs($c)->get('/subastas/'.$s->id_subasta)->assertOk()->assertSee('Se está procesando el cierre')->assertDontSee('>Coordinar entrega</button>', false);
+        DB::select('select finalizar_subastas()');
+        $this->get('/subastas/'.$s->id_subasta)->assertOk()->assertSee('>Coordinar entrega</button>', false);
+    }
+
+    public function test_full_delivery_flow_coordinates_settles_rates_and_reconciles_the_report(): void
+    {
+        [$id,$c,$v] = $this->operacion();
+        $this->accion($c, $id, 'proponer', ['lugar' => 'Plaza Abaroa, ingreso principal', 'fecha' => now('America/La_Paz')->addDay()->format('Y-m-d\TH:i')])->assertSessionHasNoErrors();
+        $acuerdo = DB::table('acuerdo_operacion')->where('id_operacion', $id)->first();
+        $this->accion($v, $id, 'responder', ['acuerdo' => $acuerdo->id_acuerdo, 'aceptar' => 1])->assertSessionHasNoErrors();
+        $this->accion($c, $id, 'mensaje', ['referencia' => (string) Str::uuid(), 'texto' => 'De acuerdo, nos vemos en el lugar.'])->assertSessionHasNoErrors();
+        $this->accion($c, $id, 'confirmar');
+        $this->accion($v, $id, 'confirmar')->assertSessionHasNoErrors();
+        $this->actingAs($c)->getJson('/operaciones/'.$id.'/estado')->assertJsonPath('estado', 'Completada');
+        $this->post('/operaciones/'.$id.'/valoracion', ['estrellas' => 5, 'comentario' => 'Entrega puntual.'])->assertSessionHasNoErrors();
+        $this->actingAs($v)->post('/operaciones/'.$id.'/valoracion', ['estrellas' => 4])->assertSessionHasNoErrors();
+        $this->assertSame(2, DB::table('resenas_publicadas')->where('id_operacion', $id)->count());
+        $this->actingAs($this->admin())->getJson('/reportes/ventas?desde=1900-01-01&hasta=2100-12-31')
+            ->assertOk()->assertJsonPath('indicadores.total_liquidado', 500)->assertJsonPath('indicadores.neto_liquidado', 475)->assertJsonPath('indicadores.comisiones', 25);
+    }
+
+    public function test_full_incident_flow_refunds_and_excludes_ratings_and_commission(): void
+    {
+        [$id,$c,$v] = $this->operacion();
+        $admin = $this->admin();
+        $this->accion($c, $id, 'incidencia', ['motivo' => 'El artículo no coincide con las fotografías.'])->assertSessionHasNoErrors();
+        $caso = DB::table('incidencia_operacion')->where('id_operacion', $id)->value('id_incidencia');
+        $this->actingAs($admin)->post('/admin/operaciones/incidencias/'.$caso, ['accion' => 'asignar'])->assertSessionHasNoErrors();
+        $this->post('/admin/operaciones/incidencias/'.$caso, ['accion' => 'resolver', 'decision' => 'Devolver', 'motivo' => 'Se comprobó la diferencia y corresponde devolución.'])->assertSessionHasNoErrors();
+        $this->actingAs($c)->getJson('/operaciones/'.$id.'/estado')->assertJsonPath('estado', 'Reembolsada');
+        $this->post('/operaciones/'.$id.'/valoracion', ['estrellas' => 1])->assertSessionHasErrors('valoracion');
+        $this->actingAs($admin)->getJson('/reportes/ventas?desde=1900-01-01&hasta=2100-12-31')
+            ->assertJsonPath('indicadores.devuelto', 500)->assertJsonPath('indicadores.comisiones', 0)->assertJsonPath('indicadores.total_liquidado', 0);
+    }
+
     private function accion(User $u, int $id, string $accion, array $data = [])
     {
         return $this->actingAs($u)->post('/operaciones/'.$id.'/'.$accion, $data);

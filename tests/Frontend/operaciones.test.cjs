@@ -14,7 +14,7 @@ async function entorno(pagina='1') {
     const chat={dataset:{pagina,url:'/mensajes',leerUrl:'/leer',csrf:'test-csrf'},matches:()=>false,contains:()=>false,
         querySelector:s=>({'[data-mensajes]':list,'[data-chat-estado]':status,'[data-chat-anteriores]':older}[s])};
     const document={hidden:false,querySelector:()=>chat,addEventListener:(k,f)=>handlers[k]=f,
-        createElement(tag){return {tag,dataset:{},textContent:'',children:[],append(...nodes){this.children.push(...nodes);},set innerHTML(_){throw new Error('El texto no debe interpretarse como HTML.');}};}};
+        createElement(tag){return {tag,dataset:{},textContent:'',children:[],getBoundingClientRect(){return {top:10,bottom:this.bottom ?? 40};},append(...nodes){this.children.push(...nodes);},set innerHTML(_){throw new Error('El texto no debe interpretarse como HTML.');}};}};
     const fetch=async(url,options)=>{
         requests.push({url,options});
         if(url==='/leer')return {ok:true};
@@ -49,4 +49,17 @@ test('un error conserva los mensajes y el borrador; la pestaña oculta no consul
 test('la actualización no reemplaza el historial de una página anterior',async()=>{
     const e=await entorno('2');await e.tick();
     assert.equal(e.requests.filter(r=>r.url==='/mensajes').length,0);
+});
+
+test('no marca los mensajes nuevos que quedan debajo de la zona visible',async()=>{
+    const e=await entorno();const before=e.requests.filter(r=>r.url==='/leer').length;
+    e.list.getBoundingClientRect=()=>({top:10,bottom:30});
+    e.response={ok:true,json:async()=>({total:1,data:[{id_mensaje:13,autor:'Otra persona',texto:'Todavía no visible',fecha_creacion:'2026-10-31T15:01:00Z'}]})};
+    await e.tick();assert.equal(e.requests.filter(r=>r.url==='/leer').length,before);
+    e.list.getBoundingClientRect=()=>({top:10,bottom:100});
+    await e.tick();assert.equal(JSON.parse(e.requests.filter(r=>r.url==='/leer').at(-1).options.body).hasta,13);
+});
+
+test('los mensajes sin cambios conservan sus nodos para no interrumpir la lectura',async()=>{
+    const e=await entorno();const original=e.list.children[0];await e.tick();assert.equal(e.list.children[0],original);
 });

@@ -81,6 +81,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/mis-operaciones', [OperacionController::class, 'index'])->name('operaciones.index');
         Route::post('/operaciones/subasta/{subasta}', [OperacionController::class, 'abrir'])->whereNumber('subasta')->name('operaciones.abrir');
         Route::get('/operaciones/{operacion}', [OperacionController::class, 'show'])->whereNumber('operacion')->name('operaciones.show');
+        Route::get('/operaciones/{operacion}/estado', [OperacionController::class, 'estado'])->whereNumber('operacion')->name('operaciones.estado');
         Route::get('/operaciones/{operacion}/mensajes', [OperacionController::class, 'mensajes'])->whereNumber('operacion')->name('operaciones.mensajes');
         Route::post('/operaciones/{operacion}/{accion}', [OperacionController::class, 'accion'])->whereNumber('operacion')->whereIn('accion', ['confirmar', 'incidencia', 'proponer', 'responder', 'mensaje', 'leer'])->middleware('throttle:60,1')->name('operaciones.accion');
         Route::get('/mi-billetera', [FondosController::class, 'index'])->name('billetera.index');
@@ -106,6 +107,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/subastas/{subasta}/participar', [SubastaController::class, 'participar'])->whereNumber('subasta')->name('subastas.participar');
     });
     Route::get('/notificaciones', [NotificacionController::class, 'index'])->name('notificaciones.index');
+    Route::get('/notificaciones/{notificacion}/destino', [NotificacionController::class, 'destino'])->whereNumber('notificacion')->name('notificaciones.destino');
     Route::patch('/notificaciones/leer-todas', [NotificacionController::class, 'leerTodas'])->name('notificaciones.leerTodas');
     Route::patch('/notificaciones/{notificacion}', [NotificacionController::class, 'leer'])->name('notificaciones.leer');
     Route::delete('/notificaciones/{notificacion}', [NotificacionController::class, 'destroy'])->name('notificaciones.destroy');

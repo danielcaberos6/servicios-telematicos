@@ -14,10 +14,11 @@ class OperacionController extends Controller
 {
     public function index(Request $r, OperacionService $s)
     {
-        $datos = $r->validate(['estado' => ['nullable', Rule::in(['Pendiente', 'En revisión', 'Completada', 'Reembolsada'])], 'page' => ['sometimes', 'integer', 'min:1']]);
+        $datos = $r->validate(['estado' => ['nullable', Rule::in(['Pendiente', 'En revisión', 'Completada', 'Reembolsada'])], 'rol' => ['nullable', Rule::in(['compras', 'ventas'])], 'page' => ['sometimes', 'integer', 'min:1', 'max:100000']]);
         $actor = $r->user()->id_usuario;
         $operaciones = $s->consulta()->where(fn ($q) => $q->where('o.id_comprador', $actor)->orWhere('o.id_vendedor', $actor))
             ->when($datos['estado'] ?? null, fn ($q, $estado) => $q->where('o.estado', $estado))
+            ->when($datos['rol'] ?? null, fn ($q, $rol) => $q->where($rol === 'compras' ? 'o.id_comprador' : 'o.id_vendedor', $actor))
             ->selectRaw('(select count(*) from mensaje_operacion m where m.id_operacion=o.id_operacion and m.id_autor<>? and m.id_mensaje>case when o.id_comprador=? then o.leido_comprador else o.leido_vendedor end) as sin_leer', [$actor, $actor])
             ->orderByDesc('o.id_operacion')->paginate(15)->withQueryString();
 
@@ -49,7 +50,12 @@ class OperacionController extends Controller
         $eventos = DB::table('evento_operacion')->where('id_operacion', $operacion)->orderByDesc('id_evento')->paginate(15, ['*'], 'eventos')->withQueryString();
         $casos = DB::table('incidencia_operacion')->where('id_operacion', $operacion)->orderByDesc('id_incidencia')->get();
 
-        return response()->view('operaciones.show', ['op' => $op, 'mensajes' => $mensajes, 'acuerdos' => $acuerdos, 'eventos' => $eventos, 'casos' => $casos, 'referencia' => (string) Str::uuid(), 'valoracion' => app(ReputacionService::class)->valorarDisponible($r->user()->id_usuario, $operacion)])->header('Cache-Control', 'no-store, private');
+        return response()->view('operaciones.show', ['op' => $op, 'mensajes' => $mensajes, 'acuerdos' => $acuerdos, 'eventos' => $eventos, 'casos' => $casos, 'referencia' => (string) Str::uuid(), 'seguimiento' => $s->estado($r->user()->id_usuario, $operacion), 'valoracion' => app(ReputacionService::class)->valorarDisponible($r->user()->id_usuario, $operacion)])->header('Cache-Control', 'no-store, private');
+    }
+
+    public function estado(Request $r, int $operacion, OperacionService $s)
+    {
+        return response()->json($s->estado($r->user()->id_usuario, $operacion))->header('Cache-Control', 'no-store, private');
     }
 
     public function mensajes(Request $r, int $operacion, OperacionService $s)

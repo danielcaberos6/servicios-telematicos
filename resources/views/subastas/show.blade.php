@@ -207,7 +207,7 @@
                         <h3>{{ auth()->id() === $ganadora->id_usuario ? '¡Ganaste esta subasta!' : 'Contacto del ganador' }}
                         </h3>
                         <p>Coordina con {{ $contacto->nombre }}:</p>
-                        <form method="POST" action="{{ route('operaciones.abrir',$subasta->id_subasta) }}">@csrf<button class="button" type="submit">Coordinar entrega</button></form>
+                        @if($subasta->estado_subasta==='Finalizada')<form method="POST" action="{{ route('operaciones.abrir',$subasta->id_subasta) }}">@csrf<button class="button primary" type="submit">Coordinar entrega</button></form>@else<p class="muted">Se está procesando el cierre. La coordinación estará disponible cuando termine.</p>@endif
                         <p><a href="mailto:{{ $contacto->correo }}">{{ $contacto->correo }}</a></p>
                         @if ($contacto->telefono)
                             <p>{{ $contacto->telefono }}</p>

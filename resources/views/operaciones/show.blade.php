@@ -6,15 +6,16 @@
 @php($comprador=auth()->id()===$op->id_comprador)
 @php($abierta=!in_array($op->estado,['Completada','Reembolsada']))
 @php($fecha=fn($v)=>$v ? \Carbon\Carbon::parse($v)->timezone('America/La_Paz')->format('d/m/Y H:i') : 'Pendiente')
-<section class="container section ops-page">
+<section class="container section ops-page" data-operacion data-estado-url="{{ route('operaciones.estado',$op->id_operacion) }}" data-firma="{{ $seguimiento['firma'] }}">
     <a href="{{ route('operaciones.index') }}">Volver a mis operaciones</a>
-    <p class="eyebrow">OPERACIÓN #{{ $op->id_operacion }} · {{ $op->estado }}</p><h1>{{ $op->titulo }}</h1>
+    <p class="eyebrow">OPERACIÓN #{{ $op->id_operacion }} · <span data-operacion-estado>{{ $op->estado }}</span></p><h1>{{ $op->titulo }}</h1>
     <p>{{ $comprador ? 'Vendedor: '.$op->vendedor : 'Comprador: '.$op->comprador }} · <a href="{{ route('subastas.show',$op->id_subasta) }}">Ver subasta</a></p>
+    <p role="status" data-operacion-aviso hidden></p><button class="button secondary" type="button" data-operacion-actualizar hidden>Actualizar detalles</button>
     <nav class="ops-tabs" aria-label="Secciones de la operación"><a href="#entrega">Entrega</a><a href="#encuentro">Encuentro</a><a href="#conversacion">Conversación</a><a href="#incidencias">Incidencias</a><a href="#historial">Historial</a></nav>
     <section id="entrega" class="ops-block"><h2>Entrega del artículo</h2>
         <dl class="ops-summary"><div><dt>Puja ganadora</dt><dd>Bs {{ number_format($op->importe,2,',','.') }}</dd></div>@if($op->con_fondos)<div><dt>Comisión (5 %)</dt><dd>Bs {{ number_format($op->comision,2,',','.') }}</dd></div><div><dt>Neto del vendedor</dt><dd>Bs {{ number_format($op->neto,2,',','.') }}</dd></div>@endif</dl>
-        @if($op->con_fondos)<p>{{ $op->estado==='Completada' ? 'Pago registrado y fondos acreditados al vendedor.' : ($op->estado==='Reembolsada' ? 'Reserva devuelta al comprador, sin comisión.' : 'Los fondos siguen retenidos. Se paga cuando ambos confirman la entrega y no hay incidencias abiertas.') }}</p>@else<p>Esta subasta es anterior a la billetera. Permite coordinar la entrega, sin movimientos de fondos ni comisión.</p>@endif
-        <p>Recepción del comprador: <strong>{{ $fecha($op->fecha_confirmacion_comprador) }}</strong><br>Entrega del vendedor: <strong>{{ $fecha($op->fecha_confirmacion_vendedor) }}</strong></p>
+        @if($op->con_fondos)<p data-entrega-fondos>{{ $op->estado==='Completada' ? 'Pago registrado y fondos acreditados al vendedor.' : ($op->estado==='Reembolsada' ? 'Reserva devuelta al comprador, sin comisión.' : 'Los fondos siguen retenidos. Se paga cuando ambos confirman la entrega y no hay incidencias abiertas.') }}</p>@else<p>Esta subasta es anterior a la billetera. Permite coordinar la entrega, sin movimientos de fondos ni comisión.</p>@endif
+        <p>Recepción del comprador: <strong data-confirmacion="comprador_confirmo">{{ $fecha($op->fecha_confirmacion_comprador) }}</strong><br>Entrega del vendedor: <strong data-confirmacion="vendedor_confirmo">{{ $fecha($op->fecha_confirmacion_vendedor) }}</strong></p>
         @if($abierta && !($comprador ? $op->fecha_confirmacion_comprador : $op->fecha_confirmacion_vendedor))
             <form method="POST" action="{{ route('operaciones.accion',[$op->id_operacion,'confirmar']) }}" class="ops-form">@csrf
                 <label><input type="checkbox" required> {{ $comprador ? 'Ya recibí el artículo y revisé su estado.' : 'Ya entregué el artículo al comprador.' }}</label>

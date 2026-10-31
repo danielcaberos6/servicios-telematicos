@@ -35,6 +35,18 @@ class OperacionService
             ->select('o.*', 's.titulo', 'c.nombre as comprador', 'v.nombre as vendedor');
     }
 
+    public function estado(int $actor, int $id): array
+    {
+        $op = $this->ejecutarAccion('parte', [$actor, $id])[0];
+        $datos = ['estado' => $op->estado, 'con_fondos' => $op->con_fondos,
+            'comprador_confirmo' => $op->fecha_confirmacion_comprador, 'vendedor_confirmo' => $op->fecha_confirmacion_vendedor,
+            'evento' => DB::table('evento_operacion')->where('id_operacion', $id)->max('id_evento'),
+            'resenas_publicadas' => DB::table('resenas_publicadas')->where('id_operacion', $id)->exists()];
+        $datos['firma'] = hash('sha256', json_encode($datos, JSON_THROW_ON_ERROR));
+
+        return $datos;
+    }
+
     public function mensajes(int $id)
     {
         return DB::table('mensaje_operacion as m')->join('usuario as u', 'u.id_usuario', '=', 'm.id_autor')
