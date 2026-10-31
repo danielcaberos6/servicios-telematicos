@@ -3,6 +3,7 @@
 use App\Http\Controllers\AutenticacionController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ConsultaArticuloController;
+use App\Http\Controllers\FondosController;
 use App\Http\Controllers\GestionUsuarioController;
 use App\Http\Controllers\IdentidadController;
 use App\Http\Controllers\ImagenController;
@@ -26,6 +27,8 @@ Route::get('/normas-y-politicas', [NormativaController::class, 'show'])->name('n
 Route::get('/imagenes/{imagen}', [ImagenController::class, 'show'])->name('imagenes.show');
 
 Route::middleware(['auth', SoloAdministrador::class])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/fondos', [FondosController::class, 'control'])->name('fondos.index');
+    Route::get('/fondos/{usuario}', [FondosController::class, 'control'])->whereNumber('usuario')->name('fondos.show');
     Route::get('/consultas', [ConsultaArticuloController::class, 'index'])->name('consultas.index');
     Route::patch('/consultas/reportes/{reporte}', [ConsultaArticuloController::class, 'moderar'])->whereNumber('reporte')->name('consultas.moderar');
     Route::get('/subastas', [RevisionSubastaController::class, 'index'])->name('subastas.index');
@@ -61,6 +64,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
     Route::put('/perfil', [PerfilController::class, 'update'])->middleware('throttle:10,1')->name('perfil.update');
     Route::middleware(SoloUsuario::class)->group(function () {
+        Route::get('/mi-billetera', [FondosController::class, 'index'])->name('billetera.index');
+        Route::get('/mi-billetera/saldo', [FondosController::class, 'saldo'])->name('billetera.saldo');
+        Route::post('/mi-billetera/recargas', [FondosController::class, 'solicitar'])->middleware([NormasAceptadas::class, 'throttle:20,1'])->name('billetera.solicitar');
+        Route::get('/mi-billetera/recargas/{recarga}', [FondosController::class, 'recarga'])->whereUuid('recarga')->name('billetera.recarga');
+        Route::post('/mi-billetera/recargas/{recarga}', [FondosController::class, 'resolver'])->whereUuid('recarga')->middleware([NormasAceptadas::class, 'throttle:30,1'])->name('billetera.resolver');
         Route::post('/subastas/{subasta}/preguntas', [ConsultaArticuloController::class, 'preguntar'])->middleware('throttle:10,1')->whereNumber('subasta')->name('consultas.preguntar');
         Route::post('/consultas/{consulta}/respuesta', [ConsultaArticuloController::class, 'responder'])->middleware('throttle:20,1')->whereNumber('consulta')->name('consultas.responder');
         Route::post('/consultas/{consulta}/reportes', [ConsultaArticuloController::class, 'reportar'])->middleware('throttle:10,1')->whereNumber('consulta')->name('consultas.reportar');

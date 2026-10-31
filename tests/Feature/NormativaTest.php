@@ -4,11 +4,13 @@ namespace Tests\Feature;
 
 use App\Models\Categoria;
 use App\Models\User;
+use App\Services\FondosService;
 use App\Services\NormativaService;
 use App\Services\PujaService;
 use App\Services\SubastaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
@@ -91,6 +93,9 @@ class NormativaTest extends TestCase
         $this->actingAs($owner)->put('/subastas/'.$auction->id_subasta, $data)->assertRedirectContains('/normas-y-politicas');
         $this->post('/normas-y-politicas/aceptar', ['acepto' => 1, 'version' => $this->version(), 'volver' => '/subastas/'.$auction->id_subasta])->assertRedirect('/subastas/'.$auction->id_subasta);
         $this->actingAs($bidder)->post('/normas-y-politicas/aceptar', ['acepto' => 1, 'version' => $this->version()]);
+        $fondos = app(FondosService::class);
+        $recarga = $fondos->solicitar($bidder->id_usuario, (string) Str::uuid(), '100');
+        $fondos->resolver($bidder->id_usuario, $recarga->id_recarga, 'Aprobada');
         $this->post('/subastas/'.$auction->id_subasta.'/pujas', ['monto' => 100])->assertSessionHasNoErrors();
         $this->assertDatabaseCount('puja', 1);
     }

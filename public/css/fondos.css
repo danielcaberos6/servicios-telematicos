@@ -1,0 +1,35 @@
+.funds-page { max-width:1240px; }
+.funds-balances { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); border-block:1px solid var(--line); margin:28px 0 12px; padding:24px 0; gap:24px; }
+.funds-balances dt { color:var(--muted); font-size:.95rem; }
+.funds-balances dd { margin:12px 0; font-size:clamp(1.35rem,2.4vw,2rem); font-weight:800; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.funds-balances p { margin:0; font-size:.85rem; color:var(--muted); }
+.funds-available dd { color:var(--blue); }
+.funds-sync { min-height:24px; font-size:.85rem; }
+.funds-recharge { display:grid; grid-template-columns:1fr 1fr; gap:32px; padding:28px; background:var(--surface); border:1px solid var(--line); border-radius:8px; margin:28px 0 40px; }
+.funds-recharge h2 { margin-top:0; }
+.funds-recharge form,.funds-search { display:flex; flex-wrap:wrap; align-items:end; gap:16px; }
+.funds-recharge form>div,.funds-search>div { flex:1; min-width:180px; }
+.funds-recharge input { margin-bottom:6px; }
+.funds-recharge small { color:var(--muted); }
+.funds-history { margin:36px 0; }
+.funds-table-scroll { overflow-x:auto; border-block:1px solid var(--line); }
+.funds-table { width:100%; border-collapse:collapse; text-align:left; font-size:.9rem; }
+.funds-table th,.funds-table td { padding:16px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+.funds-table thead { color:var(--muted); background:var(--paper); }
+.funds-table td { font-variant-numeric:tabular-nums; }
+.funds-nowrap { white-space:nowrap; }
+.funds-reference { overflow-wrap:anywhere; font-size:.8rem; }
+.funds-empty { padding:28px 12px; color:var(--muted); }
+.funds-recharges { padding:0; list-style:none; }
+.funds-recharges li { display:flex; gap:20px; align-items:center; justify-content:space-between; border-top:1px solid var(--line); padding:18px 0; }
+.funds-recharges li>div { min-width:0; }
+.funds-recharges span,.funds-recharges small { display:block; color:var(--muted); margin-top:6px; }
+.funds-payment { max-width:760px; }
+.funds-payment .eyebrow { margin-top:36px; }
+.funds-payment-amount { font-size:2.5rem; font-weight:800; color:var(--blue); }
+.funds-payment dt { color:var(--muted); margin-top:18px; }
+.funds-payment dd { margin:6px 0; }
+.funds-payment-actions { display:flex; flex-wrap:wrap; gap:12px; margin:28px 0; }
+.funds-search { margin:28px 0; }
+.funds-search input { margin-bottom:0; }
+@media(max-width:720px) { .funds-balances { grid-template-columns:1fr; gap:20px; }.funds-balances>div { border-bottom:1px solid var(--line); padding-bottom:16px; }.funds-balances>div:last-child { border:0; padding:0; }.funds-balances dd { font-size:1.8rem; margin:6px 0; }.funds-recharge { grid-template-columns:1fr; padding:20px; gap:16px; }.funds-recharge form>div { width:100%; }.funds-recharges li { align-items:start; flex-direction:column; }.funds-payment-actions .button { width:100%; } }

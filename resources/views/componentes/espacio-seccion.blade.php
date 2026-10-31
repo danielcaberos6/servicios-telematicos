@@ -23,6 +23,12 @@
     } elseif (request()->routeIs('subastas.mias')) {
         $titulo = 'Mis subastas';
         $items = $filtrar('subastas.mias', 'apartado', ['' => 'Todas', 'revision' => 'En revisión', 'publicadas' => 'Publicadas', 'rechazadas' => 'Rechazadas', 'finalizadas' => 'Finalizadas']);
+    } elseif (request()->routeIs('billetera.index')) {
+        $titulo = 'Mi billetera';
+        $items = [['#recargar', 'Recargar', false], ['#movimientos', 'Movimientos', false], ['#recargas', 'Recargas', false]];
+    } elseif (request()->routeIs('admin.fondos.*')) {
+        $titulo = 'Control de fondos';
+        $items = [[route('admin.fondos.index'), 'Cuentas', request()->routeIs('admin.fondos.index')]];
     } elseif (request()->routeIs('notificaciones.index')) {
         $titulo = 'Notificaciones';
         $items = $filtrar('notificaciones.index', 'solo_no_leidas', ['' => 'Todas', '1' => 'No leídas']);

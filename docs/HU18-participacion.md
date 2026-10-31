@@ -11,7 +11,7 @@ Implementación según la HU18 del [Sprint Planning 3](https://docs.google.com/d
 | 9 a 13 | Lista privada agrupada por artículo con mayor oferta propia, oferta vigente, foto, cierre y resultado. Apartados Todas, Voy ganando, Me superaron, Ganadas, No ganadas y Canceladas. Paginación de 15; privacidad por cuenta y restricciones de rol. El resultado del cierre no confirma la entrega. |
 | 14 a 17 | Favoritos privados, idempotentes y sin puja; lista de 15 elementos; exclusión de publicaciones no disponibles; recordatorio interno único durante los últimos 30 minutos para favoritos guardados antes del umbral. |
 
-Por instrucción expresa de Juan, la integración de fondos, reservas y billetera HU16 queda pendiente. La conversación privada y el seguimiento de entrega del criterio 12 dependen de HU19 y todavía no existen; por ahora se ofrece el acceso al detalle. No se crean enlaces sin destino ni se simula una entrega completada.
+La integración de fondos quedó habilitada tras la autorización del modelo simulado y se implementa en HU22, según la numeración vigente. Las nuevas publicaciones requieren saldo y reservas; las anteriores no adquieren reservas retroactivas. La conversación privada y el seguimiento de entrega del criterio 12 dependen de Gestión de operaciones (HU23 en la numeración vigente) y todavía no existen; por ahora se ofrece el acceso al detalle. No se crean enlaces sin destino ni se simula una entrega completada.
 
 ## Rutas
 

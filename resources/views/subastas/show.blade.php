@@ -118,6 +118,10 @@
                         </div>
                     </div>
                     <p class="muted">{{ $subasta->modelo_puja === 1 ? 'Modelo anterior: conserva sus importes y reglas originales. No tiene fondos reservados.' : 'Incremento de puja: Bs '.$subasta->incremento_puja.'. Cada oferta confirma el siguiente monto exacto.' }}</p>
+                    @if($subasta->requiere_fondos)
+                        <p class="muted">Las ofertas requieren saldo disponible y reservan el importe mientras lideras la subasta.</p>
+                        @if(auth()->check() && !auth()->user()->esAdministrador())<a href="{{ route('billetera.index') }}">Consultar mi billetera</a>@endif
+                    @endif
                     @if ($subasta->publicada() && $subasta->usuario->activo)
                         <p><a class="consulta-acceso" href="#preguntas-articulo">Preguntas sobre el artículo ({{ $consultas->total() }})</a></p>
                     @endif

@@ -10,11 +10,11 @@
 - Al aceptar se vuelve a una ruta local permitida. La publicación o puja debe confirmarse después; nunca se repite automáticamente una petición anterior.
 - Los administradores pueden leer las normas, pero no aceptarlas como participantes. Las cuentas desactivadas tampoco pueden hacerlo.
 
-## Reglas económicas pendientes
+## Reglas de billetera
 
-Por decisión del responsable del proyecto, no se implementan billetera, recargas, reservas, liquidaciones ni comisión del 5 %. La página describe el alcance actual y no pide aceptar condiciones económicas todavía no aprobadas. Tampoco se presenta como disponible el formulario de incidencias o el seguimiento de entrega de HU19.
+Tras la autorización del modelo simulado por el docente, HU22 incorpora billetera, recargas y reservas. La versión `2026-10-31.1` explica el uso de saldos simulados y sus reservas, sin QR manual ni dinero real. Las liquidaciones, incidencias y comisión corresponden a Gestión de operaciones (HU23 en la numeración actual) y no se presentan como disponibles todavía.
 
-HU17 queda implementada en su alcance no económico. El criterio 3 y la parte económica del criterio 4 del Sprint Planning continúan pendientes, al igual que la aceptación antes de recargar cuando exista esa función.
+La versión vigente se exige también antes de recargar, con retorno a Mi billetera después de aceptarla. Se conservan las aceptaciones anteriores y ninguna cuenta existente acepta automáticamente las nuevas condiciones.
 
 ## Persistencia y protección
 

@@ -7,7 +7,7 @@
         <p class="eyebrow">PARTICIPAR CON CONFIANZA</p>
         <h1>Normas claras.<br>Subastas responsables.</h1>
         <p>Conoce las reglas para publicar, ofertar y cuidar tu información en SubastaYA. Puedes leerlas sin crear una cuenta.</p>
-        <p class="normas-version">Versión {{ $version }} · Publicada el 29 de octubre de 2026</p>
+        <p class="normas-version">Versión {{ $version }} · Publicada el 31 de octubre de 2026</p>
     </header>
     <div class="normas-layout">
         <nav class="normas-indice" aria-label="Contenido de las normas">
@@ -60,8 +60,9 @@
             </section>
             <section id="alcance" aria-labelledby="alcance-titulo">
                 <span class="normas-numero" aria-hidden="true">07</span><h2 id="alcance-titulo">Qué incluye el sistema actual</h2>
-                <p>SubastaYA es un proyecto universitario. Actualmente no administra una billetera, recargas, fondos reservados ni transferencias bancarias. No ofrece préstamos ni cobra automáticamente comisiones por las subastas.</p>
-                <p>Las condiciones de una futura gestión de fondos todavía están pendientes de definición. Aceptar estas normas no autoriza cargos ni activa servicios económicos. Si cambian las reglas, se publicará una nueva versión y se solicitará su aceptación antes de volver a publicar u ofertar.</p>
+                <p>La billetera utiliza saldos y recargas simulados en bolivianos para la demostración del proyecto. No se mueve dinero real, no se solicitan comprobantes ni datos bancarios y no se ofrecen préstamos, retiros o transferencias bancarias.</p>
+                <p>En las nuevas publicaciones se reserva el importe del líder; si otra persona lo supera, recupera su disponibilidad. Si el líder aumenta su oferta, solo se reserva la diferencia. Al cierre, la reserva del ganador permanece retenida hasta la gestión de entrega. Las publicaciones anteriores conservan sus importes y no adquieren reservas retroactivas.</p>
+                <p>La liquidación, las devoluciones por incidencias y la comisión se incorporarán mediante la gestión de operaciones. Actualmente no se cobra comisión. Aceptar estas normas no autoriza cargos reales; si cambian las reglas, se publicará una nueva versión.</p>
             </section>
             <section id="aceptacion" class="normas-aceptacion" aria-labelledby="aceptacion-titulo">
                 <h2 id="aceptacion-titulo">Lee, acepta y continúa</h2>

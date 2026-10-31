@@ -27,6 +27,6 @@ class NormativaService
     public function destino(?string $ruta): string
     {
         // Lista cerrada de rutas locales: nunca redirigir a una URL del formulario.
-        return $ruta && preg_match('~^/(?:subastas/crear|subastas/[1-9][0-9]*(?:/editar)?)$~D', $ruta) ? $ruta : '/';
+        return $ruta && preg_match('~^/(?:mi-billetera|subastas/crear|subastas/[1-9][0-9]*(?:/editar)?)$~D', $ruta) ? $ruta : '/';
     }
 }
