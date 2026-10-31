@@ -22,6 +22,16 @@
                     </dl>
                     @if ($subasta->resultado === 'ganadas')<p class="muted">Ganaste esta subasta. El resultado del cierre no confirma la entrega del artículo.</p>@endif
                     <a class="text-link" href="{{ route('subastas.show', $subasta) }}">Ver subasta</a>
+                    @if($subasta->resultado === 'ganadas')
+                        @if($subasta->id_operacion)
+                            <p class="muted">Entrega: {{ $subasta->estado_entrega }}.</p>
+                            <div class="participation-actions"><a class="button secondary" href="{{ route('operaciones.show',$subasta->id_operacion) }}#conversacion">Conversación</a><a class="button secondary" href="{{ route('operaciones.show',$subasta->id_operacion) }}#entrega">Seguimiento de entrega</a></div>
+                        @elseif($subasta->estado_subasta === 'Finalizada')
+                            <form method="POST" action="{{ route('operaciones.abrir',$subasta->id_subasta) }}">@csrf<button class="button secondary" type="submit">Coordinar entrega</button></form>
+                        @else
+                            <p class="muted">Se está procesando el cierre. La coordinación estará disponible cuando termine.</p>
+                        @endif
+                    @endif
                 </div>
             </li>
         @empty

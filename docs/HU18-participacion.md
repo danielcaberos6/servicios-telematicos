@@ -11,7 +11,7 @@ Implementación según la HU18 del [Sprint Planning 3](https://docs.google.com/d
 | 9 a 13 | Lista privada agrupada por artículo con mayor oferta propia, oferta vigente, foto, cierre y resultado. Apartados Todas, Voy ganando, Me superaron, Ganadas, No ganadas y Canceladas. Paginación de 15; privacidad por cuenta y restricciones de rol. El resultado del cierre no confirma la entrega. |
 | 14 a 17 | Favoritos privados, idempotentes y sin puja; lista de 15 elementos; exclusión de publicaciones no disponibles; recordatorio interno único durante los últimos 30 minutos para favoritos guardados antes del umbral. |
 
-La integración de fondos quedó habilitada tras la autorización del modelo simulado y se implementa en HU22, según la numeración vigente. Las nuevas publicaciones requieren saldo y reservas; las anteriores no adquieren reservas retroactivas. La conversación privada y el seguimiento de entrega del criterio 12 dependen de Gestión de operaciones (HU23 en la numeración vigente) y todavía no existen; por ahora se ofrece el acceso al detalle. No se crean enlaces sin destino ni se simula una entrega completada.
+La integración de fondos quedó habilitada tras la autorización del modelo simulado y se implementa en HU22, según la numeración vigente. Las nuevas publicaciones requieren saldo y reservas; las anteriores no adquieren reservas retroactivas. El criterio 12 queda integrado con HU23: cada fila ganada ofrece Conversación y Seguimiento de entrega, junto con el estado actual de esa entrega. Una subasta anterior ya finalizada permite crear su coordinación con un POST autorizado, sin inventar fondos. Si el cierre efectivo todavía espera al planificador, se explica la espera y se conserva el acceso al detalle, sin ofrecer un enlace de coordinación que devolvería 404. La consulta de la lista no crea operaciones ni modifica fondos.
 
 ## Rutas
 
@@ -33,3 +33,10 @@ El comando `subastas:recordar-favoritos` se ejecuta cada minuto junto con el fin
 Las pruebas de `IncrementosPujaTest`, `ConcurrenciaPujasTest` y `SeguimientoParticipacionesTest` cubren importes, vistas desactualizadas, concurrencia, conservación del modelo anterior, condiciones fijadas, agrupación, privacidad, estados, paginación, duplicados y recordatorios. Se ejecutan exclusivamente en `subastaya_test` con la protección de `Tests\TestCase`.
 
 Para probar el nuevo flujo manualmente, crea una publicación con monto inicial Bs 100 e incremento Bs 10, apruébala como administrador y entra con otra cuenta: la primera confirmación debe ser Bs 100 y la siguiente Bs 110. Dos pantallas que confirmen Bs 100 no deben registrar dos pujas. Las participaciones y los favoritos se consultan desde el menú de la cuenta normal.
+
+
+## Cierre de integración de HU17 y HU18
+
+Rama vigente de Juan: `HU-17-18/Normas-participacionSubastas/Juan`. Las dependencias de aceptación (HU17), fondos (HU22) y conversación/entrega (HU23) están implementadas; no quedan esas integraciones pendientes en HU18.
+
+Los criterios 1 a 17 se cubren mediante la base existente y el acceso por fila a las operaciones. Las pruebas adicionales verifican enlaces privados del ganador, ausencia de acceso para otros pujadores, coordinación de publicaciones anteriores sin fondos y transición desde el cierre efectivo hasta el cierre registrado por el planificador. La paginación y los filtros originales se conservan.

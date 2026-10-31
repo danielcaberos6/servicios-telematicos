@@ -30,6 +30,54 @@ class SeguimientoParticipacionesTest extends TestCase
         $s->pujas()->create(['id_usuario' => $u->id_usuario, 'monto' => $monto]);
     }
 
+    public function test_winner_can_open_private_conversation_and_delivery_from_the_participation_row(): void
+    {
+        $ganador = User::factory()->create();
+        $otro = User::factory()->create();
+        $s = $this->subasta();
+        $this->pujar($s, $otro, 100);
+        $this->pujar($s, $ganador, 120);
+        $s->forceFill(['estado_subasta' => 'Finalizada'])->save();
+        $op = DB::selectOne('select crear_operacion_cierre(?) as id', [$s->id_subasta])->id;
+        $this->actingAs($ganador)->get('/mis-participaciones?apartado=ganadas')->assertOk()
+            ->assertSee(route('operaciones.show', $op).'#conversacion', false)
+            ->assertSee(route('operaciones.show', $op).'#entrega', false)->assertSee('Entrega: Pendiente');
+        $this->get('/operaciones/'.$op)->assertOk()->assertSee('Conversación privada');
+        $this->actingAs($otro)->get('/mis-participaciones?apartado=no_ganadas')->assertOk()
+            ->assertDontSee(route('operaciones.show', $op).'#conversacion', false)->assertDontSee('Seguimiento de entrega');
+        $this->get('/operaciones/'.$op)->assertNotFound();
+        $this->assertDatabaseCount('movimiento_fondos', 0);
+    }
+
+    public function test_older_won_auction_can_create_its_coordination_without_inventing_funds(): void
+    {
+        $ganador = User::factory()->create();
+        $s = $this->subasta();
+        $this->pujar($s, $ganador, 100);
+        $s->forceFill(['estado_subasta' => 'Finalizada'])->save();
+        $this->actingAs($ganador)->get('/mis-participaciones?apartado=ganadas')->assertOk()->assertSee('Coordinar entrega');
+        $this->assertDatabaseCount('operacion_subasta', 0);
+        for ($i = 0; $i < 2; $i++) {
+            $this->post('/operaciones/subasta/'.$s->id_subasta)->assertRedirect();
+        }
+        $this->assertDatabaseCount('operacion_subasta', 1);
+        $this->assertDatabaseCount('reserva_fondos', 0);
+        $this->assertDatabaseCount('movimiento_fondos', 0);
+        $this->get('/mis-participaciones?apartado=ganadas')->assertSee('Conversación')->assertSee('Seguimiento de entrega');
+    }
+
+    public function test_effective_winner_waits_for_closing_without_a_broken_coordination_link(): void
+    {
+        $ganador = User::factory()->create();
+        $s = $this->subasta(['fecha_fin' => now()->addSeconds(2)]);
+        $this->pujar($s, $ganador, 100);
+        DB::statement('select pg_sleep(2.1)');
+        $this->actingAs($ganador)->get('/mis-participaciones?apartado=ganadas')->assertOk()->assertSee('Se está procesando el cierre')->assertDontSee('>Coordinar entrega</button>', false);
+        $this->assertDatabaseCount('operacion_subasta', 0);
+        DB::select('select finalizar_subastas()');
+        $this->get('/mis-participaciones?apartado=ganadas')->assertOk()->assertSee('Seguimiento de entrega')->assertDontSee('Se está procesando el cierre');
+    }
+
     public function test_list_groups_bids_and_filters_every_result_privately(): void
     {
         $yo = User::factory()->create();

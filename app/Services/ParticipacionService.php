@@ -17,6 +17,8 @@ class ParticipacionService
     {
         return Subasta::query()->select('subasta.*', 'participacion.oferta_propia', 'participacion.oferta_actual', 'participacion.resultado')
             ->fromRaw('listar_participaciones(?) as participacion join subasta on subasta.id_subasta=participacion.id_subasta', [$actor])
+            ->leftJoin('operacion_subasta as entrega', fn ($join) => $join->on('entrega.id_subasta', '=', 'subasta.id_subasta')->where('entrega.id_comprador', $actor))
+            ->addSelect('entrega.id_operacion', 'entrega.estado as estado_entrega')
             ->when($apartado, fn ($q) => $q->where('participacion.resultado', $apartado))
             ->with('imagenes')->orderByDesc('fecha_fin')->orderByDesc('subasta.id_subasta')->paginate(15)->withQueryString();
     }

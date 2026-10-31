@@ -1,4 +1,5 @@
 .participation-list { list-style:none; padding:0; margin:28px 0; }
+.participation-actions { display:flex;flex-wrap:wrap;gap:12px;margin-top:12px; }
 .participation-row { display:flex; align-items:flex-start; gap:24px; padding:24px 0; border-top:1px solid var(--line); }
 .participation-photo { width:112px; height:112px; object-fit:cover; border-radius:6px; flex-shrink:0; }
 .participation-info { min-width:0; flex:1; overflow-wrap:anywhere; }
