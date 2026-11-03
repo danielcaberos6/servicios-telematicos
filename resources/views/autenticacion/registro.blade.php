@@ -11,6 +11,7 @@
             <h2>Crea tu cuenta</h2>
             <p class="muted">El primer paso para encontrar algo especial.</p>
             <form method="post" action="{{ route('registro') }}">@csrf
+                <input type="hidden" name="normas_version" value="{{ app(\App\Services\NormativaService::class)->version() }}">
                 <label for="nombres">Nombres</label><input id="nombres" name="nombres" value="{{ old('nombres') }}" required maxlength="100" autocomplete="given-name">
                 <label for="apellidos">Apellidos</label><input id="apellidos" name="apellidos" value="{{ old('apellidos') }}" required maxlength="100" autocomplete="family-name">
                 <label for="correo">Correo electrónico</label><input id="correo" name="correo"
@@ -19,7 +20,9 @@
                     minlength="8" maxlength="72" autocomplete="new-password"><small>Usa al menos 8
                     caracteres.</small><label for="password_confirmation">Repetir contraseña</label><input
                     id="password_confirmation" name="password_confirmation" type="password" required minlength="8"
-                    maxlength="72" autocomplete="new-password"><button class="button primary full-width"
+                    maxlength="72" autocomplete="new-password">
+                <p id="registro-normas" class="auth-terms">Al hacer clic en «Crear mi cuenta», aceptas nuestros <a href="{{ route('normas.show') }}" target="_blank" rel="noopener" aria-label="Términos y condiciones (se abre en otra pestaña)">Términos y condiciones</a>.</p>
+                <button class="button primary full-width" aria-describedby="registro-normas"
                     type="submit">Crear mi cuenta</button></form>
             <p class="auth-switch">¿Ya tienes una cuenta? <a href="{{ route('iniciar-sesion') }}">Inicia sesión</a></p>
         </div>

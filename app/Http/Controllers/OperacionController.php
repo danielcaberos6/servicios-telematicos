@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Services\AdjuntoConversacionService;
 use App\Services\OperacionService;
 use App\Services\ReputacionService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -45,12 +48,13 @@ class OperacionController extends Controller
         $s->ejecutarAccion('parte', [$r->user()->id_usuario, $operacion]);
         $r->validate(['mensajes' => ['sometimes', 'integer', 'min:1'], 'acuerdos' => ['sometimes', 'integer', 'min:1'], 'eventos' => ['sometimes', 'integer', 'min:1']]);
         $op = $s->consulta()->where('o.id_operacion', $operacion)->first();
+        $interlocutor = User::with('imagen')->find($r->user()->id_usuario === $op->id_comprador ? $op->id_vendedor : $op->id_comprador);
         $mensajes = $s->mensajes($operacion);
-        $acuerdos = DB::table('acuerdo_operacion')->where('id_operacion', $operacion)->orderByDesc('id_acuerdo')->paginate(15, ['*'], 'acuerdos')->withQueryString();
-        $eventos = DB::table('evento_operacion')->where('id_operacion', $operacion)->orderByDesc('id_evento')->paginate(15, ['*'], 'eventos')->withQueryString();
+        $acuerdos = DB::table('acuerdo_operacion')->where('id_operacion', $operacion)->orderByDesc('id_acuerdo')->paginate(15, ['*'], 'acuerdos')->withQueryString()->fragment('encuentro');
+        $eventos = DB::table('evento_operacion')->where('id_operacion', $operacion)->orderByDesc('id_evento')->paginate(15, ['*'], 'eventos')->withQueryString()->fragment('historial');
         $casos = DB::table('incidencia_operacion')->where('id_operacion', $operacion)->orderByDesc('id_incidencia')->get();
 
-        return response()->view('operaciones.show', ['op' => $op, 'mensajes' => $mensajes, 'acuerdos' => $acuerdos, 'eventos' => $eventos, 'casos' => $casos, 'referencia' => (string) Str::uuid(), 'seguimiento' => $s->estado($r->user()->id_usuario, $operacion), 'valoracion' => app(ReputacionService::class)->valorarDisponible($r->user()->id_usuario, $operacion)])->header('Cache-Control', 'no-store, private');
+        return response()->view('operaciones.show', ['op' => $op, 'interlocutor' => $interlocutor, 'mensajes' => $mensajes, 'acuerdos' => $acuerdos, 'eventos' => $eventos, 'casos' => $casos, 'referencia' => (string) Str::uuid(), 'seguimiento' => $s->estado($r->user()->id_usuario, $operacion), 'valoracion' => app(ReputacionService::class)->valorarDisponible($r->user()->id_usuario, $operacion)])->header('Cache-Control', 'no-store, private');
     }
 
     public function estado(Request $r, int $operacion, OperacionService $s)
@@ -82,10 +86,11 @@ class OperacionController extends Controller
                 $params[] = Carbon::createFromFormat('Y-m-d\TH:i', $d['fecha'], 'America/La_Paz')->toIso8601String();
                 break;
             case 'mensaje':
-                $d = $r->validate(['referencia' => ['required', 'uuid'], 'texto' => ['required', 'string', 'max:2000']]);
-                $params[] = $d['referencia'];
-                $params[] = $d['texto'];
-                break;
+                $d = $r->validate(['referencia' => ['required', 'uuid'], 'texto' => ['nullable', 'required_without:archivo', 'string', 'max:2000'], 'archivo' => ['nullable', 'file', 'max:5120']]);
+                app(AdjuntoConversacionService::class)->enviar($r->user()->id_usuario, $operacion, $d['referencia'], $d['texto'] ?? '', $r->file('archivo'));
+
+                return $r->expectsJson() ? response()->json(['ok' => true])->header('Cache-Control', 'no-store, private')
+                    : redirect()->to(route('operaciones.show', $operacion).'#conversacion')->with('status', 'Mensaje enviado.');
             case 'leer':
                 $d = $r->validate(['hasta' => ['required', 'integer', 'min:0']]);
                 $params[] = $d['hasta'];
@@ -102,7 +107,13 @@ class OperacionController extends Controller
             return response()->json(['ok' => true])->header('Cache-Control', 'no-store, private');
         }
 
-        return back()->with('status', 'Cambio registrado.');
+        $apartado = match ($accion) {
+            'proponer', 'responder' => 'encuentro',
+            'incidencia' => 'incidencias',
+            default => 'entrega',
+        };
+
+        return redirect()->to(route('operaciones.show', $operacion).'#'.$apartado)->with('status', 'Cambio registrado.');
     }
 
     public function incidencias(Request $r)
@@ -140,8 +151,33 @@ class OperacionController extends Controller
     {
         $r->validate(['mensajes' => ['sometimes', 'integer', 'min:1']]);
         $id = $s->ejecutarAccion('chatAdmin', [$r->user()->id_usuario, $incidencia])[0]->id;
-        $mensajes = $s->mensajes($id);
+        $mensajes = $s->mensajes($id, $incidencia);
 
         return response()->view('operaciones.chat-caso', compact('mensajes', 'incidencia'))->header('Cache-Control', 'no-store, private');
+    }
+
+    public function archivo(Request $r, int $operacion, int $mensaje, OperacionService $s)
+    {
+        $s->ejecutarAccion('parte', [$r->user()->id_usuario, $operacion]);
+
+        return $this->mostrarArchivo($operacion, $mensaje);
+    }
+
+    public function archivoCaso(Request $r, int $incidencia, int $mensaje, OperacionService $s)
+    {
+        $id = $s->ejecutarAccion('chatAdmin', [$r->user()->id_usuario, $incidencia])[0]->id;
+
+        return $this->mostrarArchivo($id, $mensaje);
+    }
+
+    private function mostrarArchivo(int $operacion, int $mensaje)
+    {
+        $m = DB::table('mensaje_operacion')->where('id_operacion', $operacion)->where('id_mensaje', $mensaje)->whereNotNull('archivo_ruta')->first();
+        abort_unless($m && Storage::disk('conversaciones')->exists($m->archivo_ruta), 404);
+
+        return response()->file(Storage::disk('conversaciones')->path($m->archivo_ruta), [
+            'Content-Type' => $m->archivo_mime, 'Cache-Control' => 'no-store, private',
+            'X-Content-Type-Options' => 'nosniff', 'Content-Security-Policy' => "default-src 'none'; sandbox",
+        ])->setPrivate();
     }
 }

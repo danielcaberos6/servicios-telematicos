@@ -51,8 +51,8 @@ begin
     end if;
     if articulo.id_usuario = new.id_usuario then raise exception 'No puedes pujar en tu propia subasta.' using errcode = '42501'; end if;
     select max(monto) into mayor from puja where id_subasta = new.id_subasta;
+    if new.monto <> trunc(new.monto) then raise exception 'La oferta debe ser un monto entero, sin centavos.'; end if;
     if articulo.modelo_puja=2 then
-        if new.monto <> trunc(new.monto) then raise exception 'La oferta debe ser un monto entero, sin centavos.'; end if;
         minimo := coalesce(mayor+articulo.incremento_puja,articulo.monto_inicial);
         if new.monto <> minimo then
             raise exception 'La siguiente oferta permitida es Bs %. Actualiza el detalle y vuelve a confirmar.', minimo;
@@ -60,8 +60,11 @@ begin
     elsif new.monto < articulo.monto_inicial or (mayor is not null and new.monto <= mayor) then
         raise exception 'La oferta debe superar la puja actual y alcanzar el monto inicial.';
     end if;
-    if articulo.requiere_fondos then
+    if articulo.requiere_fondos or coalesce((to_jsonb(articulo)->>'activar_fondos_al_pujar')::boolean,false) then
         perform reservar_fondos_puja(new.id_subasta,new.id_usuario,new.monto,new.id_puja);
+        if not articulo.requiere_fondos then
+            update subasta set requiere_fondos=true,activar_fondos_al_pujar=false where id_subasta=new.id_subasta;
+        end if;
     end if;
     return new;
 end;

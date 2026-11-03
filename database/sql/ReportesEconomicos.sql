@@ -11,7 +11,7 @@ begin
     fin:=((p_filtros->>'hasta')::date+1)::timestamp at time zone 'America/La_Paz';
     with ordenes as materialized (
         select o.id_operacion,o.id_subasta,s.titulo,c.nombre as comprador,v.nombre as vendedor,
-            o.importe,o.comision as comision_prevista,o.neto as neto_previsto,o.estado,s.fecha_fin,
+            o.importe,o.comision as comision_prevista,(o.importe-o.comision) as neto_previsto,o.estado,s.fecha_fin,
             coalesce((select r.monto from reserva_fondos r where r.id_subasta=o.id_subasta and r.id_usuario=o.id_comprador and r.estado='Retenida'),0) as retenido,
             coalesce((select sum(m.importe) from movimiento_fondos m where m.tipo='Pago' and m.referencia='operacion:'||o.id_operacion and m.id_usuario=o.id_comprador and m.id_subasta=o.id_subasta),0) as total_liquidado,
             coalesce((select sum(m.importe) from movimiento_fondos m where m.tipo='Liquidación' and m.referencia='operacion:'||o.id_operacion and m.id_usuario=o.id_vendedor and m.id_subasta=o.id_subasta),0) as neto_liquidado,
@@ -75,7 +75,7 @@ begin
         'tipo',m.tipo,'importe',m.importe,'disponible',m.disponible,'reservado',m.reservado,'referencia',m.referencia,
         'fecha_movimiento',m.fecha_movimiento,'estado','Registrado','id_subasta',m.id_subasta,'titulo',s.titulo,
         'id_recarga',r.id_recarga,'estado_recarga',r.estado,'fecha_recarga',r.fecha_creacion,'fecha_resolucion_recarga',r.fecha_resolucion,
-        'id_operacion',o.id_operacion,'estado_operacion',o.estado,'comision_prevista',o.comision,'neto_previsto',o.neto,
+        'id_operacion',o.id_operacion,'estado_operacion',o.estado,'comision_prevista',o.comision,'neto_previsto',case when o.con_fondos then o.importe-o.comision else 0 end,
         'fecha_resolucion_operacion',o.fecha_resolucion,'estado_reserva_actual',rf.estado,'monto_reserva_actual',rf.monto,
         'id_puja_actual',rf.id_puja)
     into resultado

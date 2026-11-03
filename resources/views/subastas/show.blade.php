@@ -32,35 +32,12 @@
                     <p class="preserve-lines">{{ $subasta->descripcion }}</p>
                 </div>
                 @if ($canViewRanking)
-                    <section class="panel description-panel" id="historial-ofertas" aria-labelledby="historial-ofertas-title">
-                        <h2 id="historial-ofertas-title">Historial de ofertas</h2>
-                        <p class="muted">Todas las ofertas, de mayor a menor monto. Solo el vendedor y quienes ofertaron pueden consultarlas.</p>
-                        @if ($historialOfertas->isNotEmpty())
-                            <div class="ranking-scroll" role="region" aria-label="Ofertas registradas" tabindex="0">
-                                <table class="ranking-table">
-                                    <thead><tr><th scope="col">Monto ofertado</th><th scope="col">Fecha y hora (Bolivia)</th><th scope="col">Participación</th></tr></thead>
-                                    <tbody>
-                                        @foreach ($historialOfertas as $oferta)
-                                            <tr>
-                                                <th scope="row">Bs {{ number_format($oferta->monto, 2, ',', '.') }}</th>
-                                                <td><time datetime="{{ $oferta->fecha_puja->toIso8601String() }}">{{ $oferta->fecha_puja->timezone('America/La_Paz')->format('d/m/Y H:i:s') }}</time></td>
-                                                <td>{{ $oferta->id_usuario === auth()->id() ? 'Tu oferta' : 'Otro participante' }}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                            <x-paginacion :elementos="$historialOfertas" />
-                        @else
-                            <p>Todavía no hay ofertas. Aquí aparecerán los montos y las fechas cuando alguien participe.</p>
-                        @endif
-                    </section>
-                    <section class="panel description-panel" aria-labelledby="ranking-title">
+                    <section data-live-region="ranking" class="panel description-panel" aria-labelledby="ranking-title">
                         <h2 id="ranking-title">Ranking de participantes</h2>
                         <p class="muted">La mejor oferta de cada usuario. {{ count($ranking) }} participantes.</p>
                         @if ($ranking)
-                            <div class="ranking-scroll"><table class="ranking-table">
-                                <thead><tr><th scope="col">Puesto</th><th scope="col">Usuario</th><th scope="col">Mejor oferta</th><th scope="col">Pujas</th></tr></thead>
+                            <div class="ranking-scroll" role="region" aria-label="Ranking de participantes" tabindex="0"><table class="ranking-table">
+                                <thead><tr><th scope="col">Puesto</th><th scope="col">Usuario</th><th scope="col">Mejor oferta</th><th scope="col">Pujas</th><th scope="col">Fecha y hora de la mejor oferta (Bolivia)</th></tr></thead>
                                 <tbody>@foreach ($ranking as $participant)
                                     <tr @class(['ranking-leader' => $participant->posicion === 1])>
                                         <td>#{{ $participant->posicion }}</td>
@@ -68,7 +45,7 @@
                                             @if ($participant->id_usuario === auth()->id())<small>(Tú)</small>@endif
                                             @if ($participant->posicion === 1)<span class="tag green">{{ $subasta->estado === 'Finalizada' ? 'Ganador' : 'Líder' }}</span>@endif
                                         </th>
-                                        <td>Bs {{ number_format($participant->mejor_oferta, 2, ',', '.') }}</td><td>{{ $participant->ofertas }}</td>
+                                        <td>Bs {{ number_format($participant->mejor_oferta, 2, ',', '.') }}</td><td>{{ $participant->ofertas }}</td><td><time datetime="{{ \Carbon\Carbon::parse($participant->fecha)->toIso8601String() }}">{{ \Carbon\Carbon::parse($participant->fecha)->timezone('America/La_Paz')->format('d/m/Y H:i:s') }}</time></td>
                                     </tr>
                                 @endforeach</tbody>
                             </table></div>
@@ -79,7 +56,7 @@
                 @endif
             </div>
             <div class="detail-info">
-                <div class="detail-badges"><span class="tag">{{ $subasta->categoria?->nombre_categoria }}</span>@if ($subasta->publicada())<span
+                <div data-live-region="estado-subasta" class="detail-badges"><span class="tag">{{ $subasta->categoria?->nombre_categoria }}</span>@if ($subasta->publicada())<span
                         class="tag {{ $subasta->estado === 'Activa' ? 'green' : '' }}">{{ $subasta->estado }}</span>@endif</div>
                 @unless ($subasta->publicada())
                     {{-- Solo llegan aquí el propietario y el Administrador. --}}
@@ -102,7 +79,8 @@
                 <x-historial-subasta :subasta="$subasta" />
                 <p class="muted">{{ $subasta->estado_articulo }} · {{ $subasta->publicada() ? 'Publicada' : 'Enviada' }} el
                     {{ $subasta->fecha_inicio->format('d/m/Y H:i') }}</p>
-                <div class="panel bid-panel">
+                <p class="muted" data-live-status role="status">Las ofertas se actualizan automáticamente.</p>
+                <div data-live-region="oferta" class="panel bid-panel">
                     <small>{{ $subasta->pujas_count ? 'Oferta actual' : 'Monto inicial' }}</small><strong
                         class="detail-price">Bs
                         {{ number_format($subasta->pujas_max_monto ?? $subasta->monto_inicial, 2, ',', '.') }}</strong>
@@ -117,8 +95,8 @@
                             @if ($subasta->estado === 'Finalizada')<small>{{ $ganadora ? 'La oferta ganadora está confirmada.' : 'La subasta terminó sin ofertas.' }}</small>@endif
                         </div>
                     </div>
-                    <p class="muted">{{ $subasta->modelo_puja === 1 ? 'Modelo anterior: conserva sus importes y reglas originales. No tiene fondos reservados.' : 'Incremento de puja: Bs '.$subasta->incremento_puja.'. Cada oferta confirma el siguiente monto exacto.' }}</p>
-                    @if($subasta->requiere_fondos)
+                    <p class="muted">{{ $subasta->modelo_puja === 1 ? ($subasta->activar_fondos_al_pujar ? 'La próxima oferta reservará su importe completo. Las ofertas anteriores no tienen reservas.' : 'Esta subasta no tiene fondos reservados. Las nuevas ofertas deben ser montos enteros, sin centavos.') : 'Incremento de puja: Bs '.$subasta->incremento_puja.'. Cada oferta confirma el siguiente monto exacto.' }}</p>
+                    @if($subasta->requiere_fondos || $subasta->activar_fondos_al_pujar)
                         <p class="muted">Las ofertas requieren saldo disponible y reservan el importe mientras lideras la subasta.</p>
                         @if(auth()->check() && !auth()->user()->esAdministrador())<a href="{{ route('billetera.index') }}">Consultar mi billetera</a>@endif
                     @endif
@@ -157,9 +135,9 @@
                                         <small>El servidor verifica el monto al confirmar. Si otra persona oferta antes, actualiza el detalle.</small>
                                     @else
                                     @csrf<label for="monto">Tu oferta (Bs)</label>
-                                    <div class="bid-input"><input id="monto" name="monto" type="number" step="0.01"
-                                            min="{{ $subasta->pujas_count ? number_format((float) $subasta->pujas_max_monto + 0.01, 2, '.', '') : $subasta->monto_inicial }}"
-                                            max="9999999999.99" value="{{ old('monto') }}"
+                                    <div class="bid-input"><input id="monto" name="monto" type="number" step="1"
+                                            min="{{ $subasta->pujas_count ? floor((float) $subasta->pujas_max_monto) + 1 : ceil((float) $subasta->monto_inicial) }}"
+                                            max="9999999999" value="{{ old('monto') }}"
                                             required><button class="button primary" type="submit">Hacer oferta</button></div>
                                     @endif
                                 </form>
@@ -197,6 +175,7 @@
                         class="avatar small">{{ mb_strtoupper(mb_substr($subasta->usuario->nombre, 0, 1)) }}</span>
                     <div><small>Publicado por</small><strong><a href="{{ route('participantes.show',$subasta->id_usuario) }}">{{ $subasta->usuario->nombre }}</a></strong><x-distintivo-identidad :usuario="$subasta->usuario" /></div>
                 </div>
+                <div data-live-region="coordinacion">
                 @if (
                     $subasta->estado === 'Finalizada' &&
                         $ganadora &&
@@ -214,6 +193,7 @@
                         @endif
                     </div>
                 @endif
+                </div>
             </div>
         </div>
     </div>

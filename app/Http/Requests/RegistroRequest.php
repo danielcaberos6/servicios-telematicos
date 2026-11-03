@@ -22,6 +22,12 @@ class RegistroRequest extends FormRequest
             'apellidos' => ['required', 'string', 'max:100'],
             'correo' => ['required', 'email', 'max:254', 'unique:usuario,correo'],
             'password' => ['required', 'string', 'min:8', 'max:72', 'confirmed'],
+            'normas_version' => ['required', 'string', 'max:50'],
         ];
+    }
+
+    public function messages(): array
+    {
+        return ['normas_version.required' => 'Recarga el formulario para consultar las normas vigentes antes de crear tu cuenta.'];
     }
 }

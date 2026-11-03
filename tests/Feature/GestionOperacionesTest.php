@@ -10,6 +10,7 @@ use App\Services\SubastaService;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -159,7 +160,9 @@ class GestionOperacionesTest extends TestCase
         $this->accion($c, $id, 'confirmar')->assertSessionHasNoErrors();
         $this->accion($c, $id, 'confirmar')->assertSessionHasNoErrors();
         $this->accion($v, $id, 'confirmar')->assertSessionHasNoErrors();
-        $this->assertDatabaseHas('operacion_subasta', ['id_operacion' => $id, 'estado' => 'Completada', 'comision' => 25, 'neto' => 475]);
+        $this->assertDatabaseHas('operacion_subasta', ['id_operacion' => $id, 'estado' => 'Completada', 'comision' => 25, 'importe' => 500]);
+        $this->assertEquals(475, app(OperacionService::class)->consulta()->where('o.id_operacion', $id)->first()->neto);
+        $this->assertFalse(Schema::hasColumn('operacion_subasta', 'neto'));
         $this->assertDatabaseHas('reserva_fondos', ['id_subasta' => $subasta->id_subasta, 'estado' => 'Consumida']);
         $f = app(FondosService::class);
         $this->assertEquals(500, $f->saldo($c->id_usuario)->disponible);
@@ -305,7 +308,7 @@ class GestionOperacionesTest extends TestCase
     {
         [$id,$c] = $this->operacion();
         $this->accion($c, $id, 'mensaje', ['referencia' => (string) Str::uuid(), 'texto' => 'Historial permanente.']);
-        foreach (['update mensaje_operacion set texto=\'Cambio\'', 'delete from evento_operacion', 'update operacion_subasta set comision=0,neto=importe'] as $sql) {
+        foreach (['update mensaje_operacion set texto=\'Cambio\'', 'delete from evento_operacion', 'update operacion_subasta set comision=0'] as $sql) {
             try {
                 DB::transaction(fn () => DB::statement($sql));
                 $this->fail('Debe conservar la evidencia.');

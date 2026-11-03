@@ -120,7 +120,7 @@ class IncrementosPujaTest extends TestCase
         $this->assertSame(10, $subasta->fresh()->incremento_puja);
     }
 
-    public function test_legacy_auctions_keep_decimal_bids_and_their_original_rules(): void
+    public function test_legacy_auctions_require_new_integer_bids_without_changing_their_initial_amount(): void
     {
         $subasta = User::factory()->conFondos()->create()->subastas()->forceCreate([
             ...$this->datos(), 'modelo_puja' => 1, 'monto_inicial' => '100.50',
@@ -128,11 +128,12 @@ class IncrementosPujaTest extends TestCase
         ])->refresh();
         $postor = User::factory()->conFondos()->create();
         $this->artisan('subastas:instalar-funciones')->assertSuccessful();
-        $this->actingAs($postor)->get('/subastas/'.$subasta->id_subasta)->assertSee('Modelo anterior');
+        $this->actingAs($postor)->get('/subastas/'.$subasta->id_subasta)->assertSee('Las nuevas ofertas deben ser montos enteros');
         foreach (['100.50', '100.51'] as $monto) {
-            $this->post('/subastas/'.$subasta->id_subasta.'/pujas', compact('monto'))->assertSessionHasNoErrors();
+            $this->post('/subastas/'.$subasta->id_subasta.'/pujas', compact('monto'))->assertSessionHasErrors('monto');
         }
-        $this->assertSame(['100.50', '100.51'], $subasta->pujas()->orderBy('id_puja')->pluck('monto')->all());
+        $this->post('/subastas/'.$subasta->id_subasta.'/pujas', ['monto' => '101'])->assertSessionHasNoErrors();
+        $this->assertSame(['101.00'], $subasta->pujas()->orderBy('id_puja')->pluck('monto')->all());
         $this->assertSame('100.50', $subasta->fresh()->monto_inicial);
         $this->assertSame(1, $subasta->fresh()->modelo_puja);
     }

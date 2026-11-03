@@ -12,7 +12,7 @@ Los saldos se derivan de un libro de movimientos inmutable. No existe campo edit
 
 ## Integración de pujas
 
-Las publicaciones creadas desde esta actualización mediante `crear_subasta` tienen `requiere_fondos=true`. Las anteriores conservan false, incluidos los ejemplos históricos, sus cantidades y reglas; no se les crean reservas retroactivas. El campo no puede modificarse después de crear la publicación.
+Las publicaciones creadas desde esta actualización mediante `crear_subasta` tienen `requiere_fondos=true`. Las anteriores no adquieren reservas retroactivas. Desde la migración del 02/11/2026, las que siguen abiertas reservan el importe completo de su próxima puja y activan la gestión de fondos dentro de esa misma transacción. Si falta saldo, se conserva la oferta anterior y no se activa la transición. Las subastas antiguas ya cerradas conservan su coordinación sin fondos.
 
 La validación bloquea primero la subasta, comprueba normas, identidad de cuenta, vigencia e incremento y después bloquea las billeteras afectadas en orden ascendente de usuario:
 
@@ -44,3 +44,7 @@ docker compose exec -T laravel php artisan test --compact
 ```
 
 Las pruebas de navegador de `tests/Frontend/fondos.test.cjs` verifican actualización periódica, recuperación al volver a la pestaña y conservación del último saldo ante errores, sin peticiones que modifiquen datos.
+
+El saldo disponible de la cabecera se muestra solo a usuarios normales y se actualiza cada 2 segundos. Los movimientos y solicitudes de la billetera se actualizan cada 5 segundos sin alterar el formulario de recarga. Las cancelaciones se conservan en solicitudes y no generan movimientos de dinero.
+
+Mi billetera usa apartados exclusivos para Recargar, Movimientos y Recargas. El resumen de saldos permanece visible, el formulario conserva el monto al cambiar de apartado y los enlaces de paginación regresan al historial seleccionado.

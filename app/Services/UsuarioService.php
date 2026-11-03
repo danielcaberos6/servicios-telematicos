@@ -13,12 +13,17 @@ class UsuarioService
 
     public function registrar(array $data): User
     {
-        $row = $this->ejecutar('select * from crear_usuario(?::jsonb)', [$this->json([
-            'nombre' => $data['nombre'], 'correo' => $data['correo'], 'contrasena' => Hash::make($data['password']),
-            'nombres' => $data['nombres'], 'apellidos' => $data['apellidos'],
-        ])], 'correo')[0];
+        return DB::transaction(function () use ($data) {
+            $row = $this->ejecutar('select * from crear_usuario(?::jsonb)', [$this->json([
+                'nombre' => $data['nombre'], 'correo' => $data['correo'], 'contrasena' => Hash::make($data['password']),
+                'nombres' => $data['nombres'], 'apellidos' => $data['apellidos'],
+            ])], 'correo')[0];
 
-        return (new User)->newFromBuilder((array) $row);
+            $usuario = (new User)->newFromBuilder((array) $row);
+            app(NormativaService::class)->aceptar($usuario->id_usuario, $data['normas_version']);
+
+            return $usuario;
+        });
     }
 
     public function actualizar(int $actor, array $data): User

@@ -6,6 +6,14 @@ return [
 
     'disks' => [
 
+        'conversaciones' => [
+            'driver' => 'local',
+            'root' => storage_path('app/conversaciones'),
+            'visibility' => 'private',
+            'serve' => false,
+            'throw' => true,
+        ],
+
         'identidad' => [
             'driver' => 'local',
             'root' => storage_path('app/identidad'),

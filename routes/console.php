@@ -9,7 +9,16 @@ Artisan::command('subastas:cargar-demo', function () {
         return;
     }
 
-    return $this->call('db:seed', ['--class' => ReportesDemoSeeder::class, '--force' => true]);
+    $salida = $this->call('db:seed', ['--class' => ReportesDemoSeeder::class, '--force' => true]);
+    if ($salida !== 0) {
+        return $salida;
+    }
+    $this->call('db:seed', ['--class' => NormasDemoSeeder::class, '--force' => true]);
+    DB::table('subasta')->where('requiere_fondos', false)->where('activar_fondos_al_pujar', false)
+        ->where('estado_subasta', 'Activa')->where('fecha_fin', '>', now())
+        ->update(['activar_fondos_al_pujar' => true]);
+
+    return $salida;
 })->purpose('Carga cuentas, subastas con fotos, pujas y valoraciones de demostración en local');
 
 Artisan::command('subastas:instalar-funciones', function () {
@@ -54,6 +63,7 @@ Artisan::command('subastas:crear-bd-pruebas', function () {
     $this->info("Base {$nombre} creada.");
 })->purpose('Crea la base de datos que usa la suite de pruebas');
 
+use Database\Seeders\NormasDemoSeeder;
 use Database\Seeders\ReportesDemoSeeder;
 use Illuminate\Foundation\Inspiring;
 

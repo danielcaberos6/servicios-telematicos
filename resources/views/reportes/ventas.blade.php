@@ -3,11 +3,17 @@
 @section('reporte-descripcion','Operaciones de demostración respaldadas por fondos. Periodo según el cierre de la subasta; estados e importes consultados ahora.')
 @section('indicadores')
 <div class="report-kpis report-financial-kpis report-sales-kpis">
-    <article class="report-kpi"><h2>Operaciones del periodo</h2><strong>{{ $datos['indicadores']['ordenes'] }}</strong><small>Según los filtros.</small></article>
-    @foreach([['Fondos retenidos','retenido'],['Abonado al vendedor','neto_liquidado'],['Comisiones registradas','comisiones'],['Total liquidado','total_liquidado'],['Devuelto al comprador','devuelto']] as [$label,$clave])
-    <article class="report-kpi"><h2>{{ $label }}</h2><strong>Bs {{ number_format($datos['indicadores'][$clave],2,',','.') }}</strong><small>{{ $clave==='total_liquidado' ? 'Neto del vendedor más comisión.' : 'Importes efectivamente registrados.' }}</small></article>@endforeach
+    <article class="report-kpi"><h2>Operaciones del periodo</h2><strong>{{ $datos['indicadores']['ordenes'] }}</strong><small>Cantidad de operaciones incluidas con las fechas y los filtros seleccionados.</small></article>
+    @foreach([
+        ['Fondos retenidos','retenido','Dinero del comprador reservado mientras la entrega o una incidencia sigue pendiente.'],
+        ['Abonado al vendedor','neto_liquidado','Dinero acreditado a los vendedores, después de descontar la comisión.'],
+        ['Comisiones registradas','comisiones','Ingresos de la plataforma: el 5 % cobrado en operaciones completadas.'],
+        ['Total liquidado','total_liquidado','Total de pagos ya distribuidos: abonos a vendedores más comisiones de la plataforma.'],
+        ['Devuelto al comprador','devuelto','Dinero devuelto a los compradores por operaciones reembolsadas, sin cobrar comisión.'],
+    ] as [$label,$clave,$descripcion])
+    <article class="report-kpi"><h2>{{ $label }}</h2><strong>Bs {{ number_format($datos['indicadores'][$clave],2,',','.') }}</strong><small>{{ $descripcion }}</small></article>@endforeach
 </div>
-<p class="muted">Las órdenes pendientes o en revisión conservan la reserva; no generan comisión cobrada. Las devoluciones no cobran comisión. Las subastas anteriores a la billetera no se incluyen como ventas respaldadas.</p>
+<p class="muted">Las órdenes pendientes o en revisión conservan la reserva; no generan comisión cobrada. Las devoluciones no cobran comisión.</p>
 @endsection
 @section('tabla')
 <div class="report-table-heading"><h2 id="detalle-titulo">Ventas del periodo</h2><span>{{ $datos['total'] }} resultados</span></div>

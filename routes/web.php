@@ -36,6 +36,7 @@ Route::middleware(['auth', SoloAdministrador::class])->prefix('admin')->name('ad
     Route::get('/operaciones/incidencias/{incidencia}', [OperacionController::class, 'caso'])->whereNumber('incidencia')->name('operaciones.caso');
     Route::post('/operaciones/incidencias/{incidencia}', [OperacionController::class, 'gestionarCaso'])->whereNumber('incidencia')->middleware('throttle:30,1')->name('operaciones.gestionar');
     Route::get('/operaciones/incidencias/{incidencia}/conversacion', [OperacionController::class, 'chatCaso'])->whereNumber('incidencia')->name('operaciones.chat');
+    Route::get('/operaciones/incidencias/{incidencia}/mensajes/{mensaje}/archivo', [OperacionController::class, 'archivoCaso'])->whereNumber(['incidencia', 'mensaje'])->name('operaciones.archivo');
     Route::get('/fondos', [FondosController::class, 'control'])->name('fondos.index');
     Route::get('/fondos/{usuario}', [FondosController::class, 'control'])->whereNumber('usuario')->name('fondos.show');
     Route::get('/consultas', [ConsultaArticuloController::class, 'index'])->name('consultas.index');
@@ -83,6 +84,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/operaciones/{operacion}', [OperacionController::class, 'show'])->whereNumber('operacion')->name('operaciones.show');
         Route::get('/operaciones/{operacion}/estado', [OperacionController::class, 'estado'])->whereNumber('operacion')->name('operaciones.estado');
         Route::get('/operaciones/{operacion}/mensajes', [OperacionController::class, 'mensajes'])->whereNumber('operacion')->name('operaciones.mensajes');
+        Route::get('/operaciones/{operacion}/mensajes/{mensaje}/archivo', [OperacionController::class, 'archivo'])->whereNumber(['operacion', 'mensaje'])->name('operaciones.archivo');
         Route::post('/operaciones/{operacion}/{accion}', [OperacionController::class, 'accion'])->whereNumber('operacion')->whereIn('accion', ['confirmar', 'incidencia', 'proponer', 'responder', 'mensaje', 'leer'])->middleware('throttle:60,1')->name('operaciones.accion');
         Route::get('/mi-billetera', [FondosController::class, 'index'])->name('billetera.index');
         Route::get('/mi-billetera/saldo', [FondosController::class, 'saldo'])->name('billetera.saldo');

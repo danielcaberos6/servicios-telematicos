@@ -11,6 +11,15 @@ class ParticipacionService
 
     public const APARTADOS = ['' => 'Todas', 'ganando' => 'Voy ganando', 'superadas' => 'Me superaron', 'ganadas' => 'Ganadas', 'no_ganadas' => 'No ganadas', 'canceladas' => 'Canceladas'];
 
+    public const DESCRIPCIONES = [
+        '' => 'Todas las subastas en las que ofertaste. Cada artículo aparece una sola vez, aunque hayas realizado varias ofertas.',
+        'ganando' => 'Subastas abiertas en las que tu oferta es la más alta. Otra persona todavía puede superarte antes del cierre.',
+        'superadas' => 'Subastas abiertas en las que otra persona superó tu oferta. Puedes volver a ofertar mientras sigan abiertas.',
+        'ganadas' => 'Subastas finalizadas en las que tu oferta fue la ganadora. Desde aquí puedes coordinar la entrega.',
+        'no_ganadas' => 'Subastas finalizadas en las que participaste, pero ganó otra persona.',
+        'canceladas' => 'Subastas en las que ofertaste y que fueron canceladas. Ya no admiten nuevas ofertas.',
+    ];
+
     public const RESULTADOS = ['ganando' => 'Vas ganando', 'superadas' => 'Te superaron', 'ganadas' => 'Ganada', 'no_ganadas' => 'No ganada', 'canceladas' => 'Cancelada'];
 
     public function listar(int $actor, ?string $apartado = null)

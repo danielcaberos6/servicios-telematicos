@@ -15,8 +15,8 @@ Ejemplo: una puja ganadora de Bs 500 produce Bs 475 para el vendedor y Bs 25 de 
 ## Conversación y privacidad
 
 - Una conversación por operación, exclusivamente entre vendedor y ganador. No hay conversaciones para subastas activas, canceladas o sin ofertas.
-- Texto de 1 a 2.000 caracteres, sin archivos. El servidor valida autor y pertenencia; las vistas escapan el texto y el actualizador usa `textContent`.
-- Historial de 15 mensajes por página, fechas de Bolivia e indicador de mensajes sin leer en Mis operaciones. La página más reciente consulta novedades cada tres segundos cuando está visible; un error conserva mensajes y borrador. La lectura se registra mediante POST con CSRF.
+- Texto de hasta 2.000 caracteres, fotos JPG/PNG/WebP o audios MP3/M4A/OGG/WAV/WebM de hasta 5 MB por archivo. Los adjuntos se guardan en el disco privado `conversaciones`; las rutas autenticadas verifican pertenencia antes de servirlos. La biblioteca getID3 comprueba que los contenedores de audio no incluyan video. Las vistas escapan el texto y el actualizador usa `textContent`.
+- Historial de 15 mensajes por página, fechas de Bolivia e indicador de mensajes sin leer en Mis operaciones. La página más reciente consulta novedades cada tres segundos cuando está visible; un error conserva mensajes y borrador. La lectura interna se registra mediante POST con CSRF para actualizar el contador de mensajes nuevos. No hay confirmaciones de lectura ni doble check visibles.
 - UUID único por envío para no duplicar mensajes al reintentar. No hay endpoints para editar o borrar mensajes.
 - El administrador solo consulta la conversación de una incidencia activa asignada a su cuenta. Cada acceso, incluyendo paginación, registra cuenta, fecha y motivo. No puede escribir mensajes ni acceder a una bandeja general de chats. Al resolver, pierde ese acceso.
 
@@ -35,3 +35,13 @@ Comando automático cada minuto: `php artisan subastas:revisar-entregas`. El com
 Las funciones PostgreSQL bloquean la operación antes de confirmar, reportar, acordar o resolver. La liquidación bloquea las billeteras por ID ordenado y ejecuta reserva, pago y comisión dentro de la misma transacción. Los movimientos y el historial no admiten modificaciones ni eliminación; los participantes e importes de la operación quedan fijados.
 
 Las pruebas de `GestionOperacionesTest` cubren comisión, conservación del saldo, idempotencia, devolución, autorización administrativa, plazo de 72 horas, propuestas, privacidad, XSS, historial y compatibilidad. `ConcurrenciaOperacionesTest` utiliza conexiones independientes contra `subastaya_test` para comprobar confirmaciones simultáneas y una incidencia que compite con la confirmación final. Ninguna prueba usa la base de desarrollo.
+
+## Actualización del chat (02/11/2026)
+
+La conversación presenta burbujas por autor, avatar del interlocutor, fecha/hora de Bolivia, ampliación de fotos con zoom y reproductores de audio. El formulario envía sin recargar la página, conserva texto, adjunto y UUID ante errores y descarta copias de archivos en reintentos idempotentes. Los reproductores existentes se mantienen al recibir mensajes nuevos.
+
+La grabación usa el micrófono solo al pulsar Grabar y aceptar el permiso del navegador. Puede detenerse, escucharse y descartarse antes del envío. Se detiene al cumplir dos minutos o al ocultar la pestaña, y libera los recursos al salir. Si no hay soporte o permiso, sigue disponible adjuntar un archivo de audio. La grabación requiere localhost o HTTPS, según la API del navegador.
+
+La migración `2026_11_02_000003` amplía los mensajes sin perder el historial y mantiene su inmutabilidad. Los archivos no se publican mediante el enlace de almacenamiento público. El acceso del administrador a cada adjunto requiere una incidencia activa asignada y deja un registro de consulta. Las respuestas de archivo usan `no-store, private`, MIME verificado y soporte de rangos para reproducción.
+
+La operación usa la barra lateral compartida con apartados exclusivos: Entrega (incluye valoración), Encuentro, Conversación, Incidencias e Historial. Cambiar de apartado conserva borradores; la paginación y los formularios mantienen el apartado correspondiente. El chat muestra avisos de conexión solo ante errores, sin el mensaje rutinario «Mensajes actualizados».

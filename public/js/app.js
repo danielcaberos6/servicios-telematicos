@@ -44,10 +44,9 @@ document.querySelector(".menu-toggle")?.addEventListener("click", function () {
         .classList.toggle("is-open", !expanded);
 });
 
-document.querySelectorAll("form[data-confirm]").forEach((form) => {
-    form.addEventListener("submit", (event) => {
-        if (!window.confirm(form.dataset.confirm)) event.preventDefault();
-    });
+document.addEventListener("submit", (event) => {
+    const form = event.target.closest("form[data-confirm]");
+    if (form && !window.confirm(form.dataset.confirm)) event.preventDefault();
 });
 
 // Formularios GET del catálogo: omiten los campos vacíos para que la URL
@@ -214,17 +213,25 @@ document.querySelectorAll("[data-cierre-subasta]").forEach((input) => {
     const error = document.getElementById("deadline-error");
     let touched = false;
     const update = (showError = touched) => {
-        // El mínimo avanza también si se deja el formulario abierto.
+        // No reasignar min mientras se editan los segmentos del control nativo:
+        // Chromium puede descartar una fecha todavía incompleta al hacerlo.
         const now = serverNow + performance.now() - openedAt;
-        input.min = formatBoliviaDateTime(new Date((Math.floor(now / 60000) + 1) * 60000));
-        const message = input.value && input.value < input.min
+        const minimum = formatBoliviaDateTime(new Date((Math.floor(now / 60000) + 1) * 60000));
+        if (document.activeElement !== input && input.min !== minimum) input.min = minimum;
+        const message = input.value && input.value < minimum
             ? "La fecha y hora de cierre deben ser posteriores al momento actual (hora de Bolivia)." : "";
         input.setCustomValidity(message);
         input.setAttribute("aria-invalid", String(Boolean(message)));
         if (showError) error.textContent = message;
     };
-    input.addEventListener("input", () => { touched = true; update(true); });
-    input.addEventListener("focus", () => update());
+    input.addEventListener("input", () => {
+        touched = true;
+        input.setCustomValidity("");
+        input.setAttribute("aria-invalid", "false");
+        error.textContent = "";
+    });
+    input.addEventListener("blur", () => update(true));
+    input.addEventListener("change", () => update(true));
     input.addEventListener("invalid", () => { touched = true; update(true); });
     input.form.addEventListener("submit", (event) => {
         update(true);
@@ -233,8 +240,8 @@ document.querySelectorAll("[data-cierre-subasta]").forEach((input) => {
             input.reportValidity();
         }
     });
-    window.addEventListener("pageshow", () => update());
-    window.setInterval(() => update(), 1000);
+    window.addEventListener("pageshow", () => { if (document.activeElement !== input) update(); });
+    window.setInterval(() => { if (document.activeElement !== input) update(); }, 1000);
     update();
 });
 

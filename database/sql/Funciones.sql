@@ -97,7 +97,7 @@ create or replace function registrar_puja(p_actor bigint, p_id bigint, p_monto n
 declare resultado puja;
 begin
     perform exigir_normas(p_actor);
-    if exists(select 1 from subasta where id_subasta=p_id and modelo_puja=2) and p_monto <> trunc(p_monto) then
+    if p_monto <> trunc(p_monto) then
         raise exception 'La oferta debe ser un monto entero, sin centavos.';
     end if;
     if p_monto <> round(p_monto,2) then raise exception 'La oferta admite hasta dos decimales.'; end if;
@@ -171,7 +171,11 @@ $$;
 create or replace function proteger_subasta() returns trigger language plpgsql as $$
 begin
     if TG_OP = 'UPDATE' then
-        if new.requiere_fondos is distinct from old.requiere_fondos then raise exception 'La condición de fondos no puede modificarse.'; end if;
+        if new.requiere_fondos is distinct from old.requiere_fondos and not (
+            not old.requiere_fondos and new.requiere_fondos and old.estado_subasta='Activa'
+            and coalesce((to_jsonb(old)->>'activar_fondos_al_pujar')::boolean,false)
+            and exists(select 1 from reserva_fondos r where r.id_subasta=old.id_subasta and r.estado='Activa')
+        ) then raise exception 'La condición de fondos no puede modificarse.'; end if;
         if old.requiere_fondos and old.estado_subasta in ('Finalizada','Cancelada') and new.estado_subasta<>old.estado_subasta then
             raise exception 'La subasta ya terminó. Los fondos se resuelven mediante la gestión de entrega.';
         end if;

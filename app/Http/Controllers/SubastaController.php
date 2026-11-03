@@ -8,7 +8,6 @@ use App\Models\Subasta;
 use App\Services\CatalogoService;
 use App\Services\ConsultaArticuloService;
 use App\Services\ImagenService;
-use App\Services\PujaService;
 use App\Services\SubastaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -80,14 +79,11 @@ class SubastaController extends Controller
         $canViewRanking = $request->user() && ($request->user()->id_usuario === $subasta->id_usuario || $subasta->pujas()->where('id_usuario', $request->user()->id_usuario)->exists());
         $ranking = $canViewRanking ? $this->subastaService->ranking($subasta->id_subasta, $request->user()->id_usuario) : [];
 
-        $historialOfertas = $canViewRanking
-            ? app(PujaService::class)->historial($subasta, $request->user()) : null;
-
         $esFavorito = $request->user() && DB::table('favorito_subasta')->where('id_usuario', $request->user()->id_usuario)->where('id_subasta', $subasta->id_subasta)->exists();
 
         $consultas = app(ConsultaArticuloService::class)->publicas($subasta);
 
-        return view('subastas.show', compact('subasta', 'ganadora', 'ranking', 'canViewRanking', 'historialOfertas', 'esFavorito', 'consultas'));
+        return view('subastas.show', compact('subasta', 'ganadora', 'ranking', 'canViewRanking', 'esFavorito', 'consultas'));
     }
 
     public function misSubastas(Request $request)

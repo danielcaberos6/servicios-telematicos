@@ -20,11 +20,16 @@
         $titulo = 'Tu publicación';
         $local = true;
         $items = [['#articulo', 'Artículo', true], ['#fotografias', 'Fotografías', false], ['#condiciones', 'Condiciones', false], ['#encuentro', 'Ubicación', false]];
+    } elseif (request()->routeIs('operaciones.show')) {
+        $titulo = 'Mi operación';
+        $local = true;
+        $items = [['#entrega', 'Entrega', true], ['#encuentro', 'Encuentro', false], ['#conversacion', 'Conversación', false], ['#incidencias', 'Incidencias', false], ['#historial', 'Historial', false]];
     } elseif (request()->routeIs('subastas.mias')) {
         $titulo = 'Mis subastas';
         $items = $filtrar('subastas.mias', 'apartado', ['' => 'Todas', 'revision' => 'En revisión', 'publicadas' => 'Publicadas', 'rechazadas' => 'Rechazadas', 'finalizadas' => 'Finalizadas']);
     } elseif (request()->routeIs('billetera.index')) {
         $titulo = 'Mi billetera';
+        $local = true;
         $items = [['#recargar', 'Recargar', false], ['#movimientos', 'Movimientos', false], ['#recargas', 'Recargas', false]];
     } elseif (request()->routeIs('admin.fondos.*')) {
         $titulo = 'Control de fondos';

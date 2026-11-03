@@ -5,7 +5,9 @@
 <section class="container section">
     <p class="eyebrow">ARTÍCULOS GUARDADOS</p><h1 class="page-title">Mis favoritos</h1>
     <p class="muted">Guardar un artículo no registra una oferta. Te avisaremos cerca del cierre si lo guardaste antes de los últimos 30 minutos.</p>
-    <p>{{ $subastas->total() }} {{ $subastas->total() === 1 ? 'favorito disponible' : 'favoritos disponibles' }}</p>
+    <p data-live-region="total">{{ $subastas->total() }} {{ $subastas->total() === 1 ? 'favorito disponible' : 'favoritos disponibles' }}</p>
+    <p class="muted" data-live-status role="status">Se actualiza automáticamente.</p>
+    <div data-live-region="favoritos">
     <ul class="participation-list">
         @forelse ($subastas as $subasta)
             <li class="participation-row">
@@ -21,5 +23,6 @@
         @endforelse
     </ul>
     <x-paginacion :elementos="$subastas" />
+    </div>
 </section>
 @endsection

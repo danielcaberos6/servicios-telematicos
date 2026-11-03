@@ -26,10 +26,10 @@ begin
             raise exception 'La reserva del ganador no coincide con el cierre.';
         end if;
     end if;
-    insert into operacion_subasta(id_subasta,id_comprador,id_vendedor,importe,comision,neto,con_fondos,fecha_creacion)
+    insert into operacion_subasta(id_subasta,id_comprador,id_vendedor,importe,comision,con_fondos,fecha_creacion)
     values(p_subasta,ganador.id_usuario,s.id_usuario,ganador.monto,
         case when s.requiere_fondos then round(ganador.monto*0.05,2) else 0 end,
-        case when s.requiere_fondos then ganador.monto-round(ganador.monto*0.05,2) else 0 end,s.requiere_fondos,case when s.requiere_fondos then s.fecha_fin else clock_timestamp() end)
+        s.requiere_fondos,case when s.requiere_fondos then s.fecha_fin else clock_timestamp() end)
     returning id_operacion into resultado;
     insert into evento_operacion(id_operacion,accion,detalle) values(resultado,'Creación',case when s.requiere_fondos then 'Orden creada con fondos retenidos y comisión del 5 %.' else 'Coordinación de publicación anterior, sin reservas ni cobro de comisión.' end);
     -- El finalizador ya comunica el ganador; estos avisos identifican la operación privada.
@@ -67,7 +67,7 @@ begin
         else
             insert into movimiento_fondos(id_usuario,tipo,importe,disponible,reservado,referencia,id_subasta) values
                 (op.id_comprador,'Pago',op.importe,0,-op.importe,'operacion:'||p_id,op.id_subasta),
-                (op.id_vendedor,'Liquidación',op.neto,op.neto,0,'operacion:'||p_id,op.id_subasta);
+                (op.id_vendedor,'Liquidación',op.importe-op.comision,op.importe-op.comision,0,'operacion:'||p_id,op.id_subasta);
             insert into comision_operacion(id_operacion,importe) values(p_id,op.comision);
         end if;
         update reserva_fondos set estado=case when p_devolver then 'Liberada' else 'Consumida' end,fecha_actualizacion=clock_timestamp() where id_subasta=op.id_subasta;
@@ -186,19 +186,38 @@ begin
 end;
 $$;
 
-create or replace function enviar_mensaje_operacion(p_actor bigint,p_id bigint,p_referencia uuid,p_texto text) returns bigint language plpgsql as $$
-declare op operacion_subasta; anterior mensaje_operacion; resultado bigint;
+-- Una única firma, compatible con las llamadas anteriores de cuatro parámetros.
+drop function if exists enviar_mensaje_operacion(bigint,bigint,uuid,text);
+create or replace function enviar_mensaje_operacion(p_actor bigint,p_id bigint,p_referencia uuid,p_texto text,p_archivo jsonb default null) returns bigint language plpgsql as $$
+declare op operacion_subasta; anterior mensaje_operacion; resultado bigint; tipo_archivo text; cuerpo text;
 begin
     perform exigir_parte_operacion(p_actor,p_id);
-    if p_referencia is null or p_texto is null or length(trim(p_texto)) not between 1 and 2000 then raise exception 'Escribe un mensaje de 1 a 2.000 caracteres.'; end if;
+    cuerpo := trim(coalesce(p_texto,''));
+    tipo_archivo := coalesce(p_archivo->>'tipo','Texto');
+    if p_referencia is null or length(cuerpo)>2000 or (tipo_archivo='Texto' and length(cuerpo)=0) then
+        raise exception 'Escribe un mensaje de 1 a 2.000 caracteres o adjunta una foto o un audio.';
+    end if;
+    if tipo_archivo not in ('Texto','Foto','Audio') then raise exception 'Solo puedes enviar texto, fotos o audios.'; end if;
+    if tipo_archivo<>'Texto' and (
+        coalesce(p_archivo->>'ruta','') !~ '^operaciones/[0-9]+/[a-f0-9-]+\.[a-z0-9]+$'
+        or coalesce((p_archivo->>'bytes')::bigint,0) not between 1 and 5242880
+        or coalesce(p_archivo->>'sha256','') !~ '^[a-f0-9]{64}$'
+        or (tipo_archivo='Foto' and p_archivo->>'mime' not in ('image/jpeg','image/png','image/webp'))
+        or (tipo_archivo='Audio' and p_archivo->>'mime' not in ('audio/mpeg','audio/mp4','audio/ogg','audio/wav','audio/webm'))
+    ) then raise exception 'El archivo adjunto no es válido.'; end if;
     select * into op from operacion_subasta where id_operacion=p_id for update;
     select * into anterior from mensaje_operacion where referencia=p_referencia;
     if found then
-        if anterior.id_autor<>p_actor or anterior.id_operacion<>p_id or anterior.texto<>trim(p_texto) then raise exception 'La referencia ya se utilizó para otro mensaje.'; end if;
+        if anterior.id_autor<>p_actor or anterior.id_operacion<>p_id or anterior.texto<>cuerpo
+           or anterior.tipo<>tipo_archivo or anterior.archivo_sha256 is distinct from p_archivo->>'sha256' then
+            raise exception 'La referencia ya se utilizó para otro mensaje.';
+        end if;
         return anterior.id_mensaje;
     end if;
     if op.estado='Reembolsada' then raise exception 'Esta conversación está cerrada; puedes consultar su historial.'; end if;
-    insert into mensaje_operacion(referencia,id_operacion,id_autor,texto) values(p_referencia,p_id,p_actor,trim(p_texto)) returning id_mensaje into resultado;
+    insert into mensaje_operacion(referencia,id_operacion,id_autor,texto,tipo,archivo_ruta,archivo_mime,archivo_bytes,archivo_sha256)
+    values(p_referencia,p_id,p_actor,cuerpo,tipo_archivo,p_archivo->>'ruta',p_archivo->>'mime',(p_archivo->>'bytes')::bigint,p_archivo->>'sha256')
+    returning id_mensaje into resultado;
     return resultado;
 end;
 $$;
@@ -261,8 +280,8 @@ create trigger comision_permanente before update or delete on comision_operacion
 create or replace function proteger_importes_operacion() returns trigger language plpgsql as $$
 begin
     if TG_OP='DELETE' then raise exception 'La operación y su historial deben conservarse.'; end if;
-    if (new.id_subasta,new.id_comprador,new.id_vendedor,new.importe,new.comision,new.neto,new.con_fondos,new.fecha_creacion)
-       is distinct from (old.id_subasta,old.id_comprador,old.id_vendedor,old.importe,old.comision,old.neto,old.con_fondos,old.fecha_creacion) then
+    if (new.id_subasta,new.id_comprador,new.id_vendedor,new.importe,new.comision,new.con_fondos,new.fecha_creacion)
+       is distinct from (old.id_subasta,old.id_comprador,old.id_vendedor,old.importe,old.comision,old.con_fondos,old.fecha_creacion) then
         raise exception 'Los participantes y los importes de una operación son permanentes.';
     end if;
     return new;

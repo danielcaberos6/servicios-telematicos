@@ -24,6 +24,9 @@ class DatosDemoArranqueTest extends TestCase
         $this->assertDatabaseCount('resenas', 45);
         $this->assertSame(0, Subasta::doesntHave('imagenes')->count());
         $this->assertSame(47, Subasta::where('estado_revision', 'Aceptada')->count());
+        $this->assertGreaterThan(0, Subasta::where('activar_fondos_al_pujar', true)->count());
+        $this->assertSame(0, Subasta::where('requiere_fondos', false)->where('estado_subasta', 'Activa')
+            ->where('fecha_fin', '>', now())->where('activar_fondos_al_pujar', false)->count());
 
         $admin = User::where('correo', 'admin@subastaya.test')->sole();
         $admin->forceFill(['contrasena' => 'ClaveCambiada2026!', 'activo' => false])->save();

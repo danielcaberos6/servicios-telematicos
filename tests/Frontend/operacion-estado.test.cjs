@@ -17,9 +17,9 @@ async function entorno(draft=false) {
         if(s==='[data-entrega-fondos]')return funds;
         return dates[s]??=( {textContent:''} );
     },querySelectorAll:s=>s==='form'?[{method:'post',elements:[field]}]:[]};
-    const document={hidden:false,querySelector:s=>s==='[data-chat]'?chat:root,addEventListener(){}};
+    const document={hidden:false,querySelector:s=>s==='[data-chat]'?chat:root,addEventListener(){},dispatchEvent(){}};
     const fetch=async()=>{count++;if(response instanceof Error)throw response;return {ok:true,json:async()=>response};};
-    vm.runInNewContext(source,{document,window:{innerHeight:844,location:{reload(){reloads++;}}},fetch,Intl,Date,Number,Math,Array,AbortSignal,setInterval:(f)=>ticks.push(f)});
+    vm.runInNewContext(source,{document,window:{innerHeight:844,location:{reload(){reloads++;}}},fetch,Intl,Date,Number,Math,Array,AbortSignal,CustomEvent:class {},setInterval:(f)=>ticks.push(f)});
     await new Promise(setImmediate);
     return {document,notice,reload,badge,funds,field,tick:ticks[1],get requests(){return count;},get reloads(){return reloads;},set response(v){response=v;}};
 }

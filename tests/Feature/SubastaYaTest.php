@@ -6,6 +6,7 @@ use App\Models\Categoria;
 use App\Models\Notificacion;
 use App\Models\Subasta;
 use App\Models\User;
+use App\Services\NormativaService;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -58,7 +59,7 @@ class SubastaYaTest extends TestCase
 
     public function test_registration_login_and_logout_use_original_usuario_table(): void
     {
-        $this->post('/registro', ['nombres' => 'Ana', 'apellidos' => 'Prueba', 'correo' => 'ANA@example.test', 'password' => 'ClaveSegura123', 'password_confirmation' => 'ClaveSegura123'])->assertRedirect('/');
+        $this->post('/registro', ['normas_version' => app(NormativaService::class)->version(), 'nombres' => 'Ana', 'apellidos' => 'Prueba', 'correo' => 'ANA@example.test', 'password' => 'ClaveSegura123', 'password_confirmation' => 'ClaveSegura123'])->assertRedirect('/');
         $user = User::where('correo', 'ana@example.test')->firstOrFail();
         $this->assertAuthenticatedAs($user);
         $this->assertTrue(Hash::check('ClaveSegura123', $user->contrasena));

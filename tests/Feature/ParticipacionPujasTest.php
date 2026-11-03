@@ -43,7 +43,8 @@ class ParticipacionPujasTest extends TestCase
         $this->assertNotNull($historial->first()->fecha_puja);
         foreach ([$vendedor, $uno, $dos] as $usuario) {
             $this->actingAs($usuario)->get('/subastas/'.$subasta->id_subasta)->assertOk()
-                ->assertSee('Historial de ofertas')->assertSeeInOrder(['Bs 120,00', 'Bs 110,00', 'Bs 100,00'])
+                ->assertSee('Ranking de participantes')->assertDontSee('Historial de ofertas')
+                ->assertSee('Fecha y hora de la mejor oferta (Bolivia)')->assertViewHas('ranking', fn ($r) => count($r) === 2 && $r[0]->ofertas === 2)
                 ->assertDontSee($uno->correo)->assertDontSee($dos->correo);
         }
     }
@@ -53,14 +54,13 @@ class ParticipacionPujasTest extends TestCase
         $vendedor = User::factory()->conFondos()->create();
         $subasta = $this->subasta($vendedor);
         $url = '/subastas/'.$subasta->id_subasta;
-        $this->actingAs($vendedor)->get($url)->assertSee('Todavía no hay ofertas.');
+        $this->actingAs($vendedor)->get($url)->assertSee('Todavía no hay participantes.');
         $postor = User::factory()->conFondos()->create();
         for ($monto = 100; $monto <= 250; $monto += 10) {
             app(PujaService::class)->registrar($postor->id_usuario, $subasta->id_subasta, (string) $monto);
         }
-        $this->get($url)->assertViewHas('historialOfertas', fn ($p) => $p->total() === 16 && $p->count() === 15)
-            ->assertSee('ofertas=2', false);
-        $this->get($url.'?ofertas=2')->assertViewHas('historialOfertas', fn ($p) => $p->count() === 1 && $p->first()->monto === '100.00');
+        $this->get($url)->assertViewHas('ranking', fn ($r) => count($r) === 1 && $r[0]->ofertas === 16)
+            ->assertDontSee('ofertas=2', false);
     }
 
     public function test_terceros_y_visitantes_no_reciben_el_historial_ni_consultandolo_directamente(): void
@@ -71,7 +71,7 @@ class ParticipacionPujasTest extends TestCase
         $url = '/subastas/'.$subasta->id_subasta.'?ofertas=1';
         $this->get($url)->assertDontSee('Historial de ofertas')->assertDontSee($postor->correo)->assertDontSee($postor->telefono);
         $ajeno = User::factory()->conFondos()->create();
-        $this->actingAs($ajeno)->get($url)->assertDontSee('Historial de ofertas')->assertViewHas('historialOfertas', null);
+        $this->actingAs($ajeno)->get($url)->assertDontSee('Historial de ofertas')->assertViewHas('ranking', []);
         foreach ([null, $ajeno] as $usuario) {
             try {
                 app(PujaService::class)->historial($subasta, $usuario);

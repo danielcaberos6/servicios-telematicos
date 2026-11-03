@@ -52,6 +52,10 @@ class FondosController extends Controller
         $datos = $request->validate(['resultado' => ['required', Rule::in(['Aprobada', 'Rechazada', 'Cancelada'])]]);
         $resultado = $fondos->resolver($request->user()->id_usuario, $recarga, $datos['resultado']);
 
+        if ($resultado->estado === 'Cancelada') {
+            return redirect()->route('billetera.index')->with('status', 'Recarga cancelada. Tu saldo no cambió.');
+        }
+
         return redirect()->route('billetera.recarga', $recarga)->with('status', 'Recarga '.$resultado->estado.'.');
     }
 

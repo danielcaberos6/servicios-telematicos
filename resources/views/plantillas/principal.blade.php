@@ -17,6 +17,10 @@
     <link rel="stylesheet" href="{{ asset('css/cuenta.css') }}">
     <script src="{{ asset('js/app.js') }}" defer></script>
     <script src="{{ asset('js/apartados.js') }}" defer></script>
+    <script src="{{ asset('js/actualizacion.js') }}" defer></script>
+    @auth
+        @unless(auth()->user()->esAdministrador())<script src="{{ asset('js/fondos.js') }}" defer></script>@endunless
+    @endauth
     @stack('scripts')
     <script src="{{ asset('js/cuenta.js') }}" defer></script>
 </head>
@@ -66,6 +70,16 @@
                 @endif
             </nav>
             <div class="account-nav">
+                @auth
+                    @unless($esAdministrador)
+                        @php
+                            $saldoCabecera = app(\App\Services\FondosService::class)->saldo(auth()->id());
+                        @endphp
+                        <a class="account-balance" href="{{ route('billetera.index') }}" data-saldo-cabecera data-saldo-url="{{ route('billetera.saldo') }}" title="Saldo disponible para nuevas ofertas, sin el importe reservado">
+                            <small>Disponible</small><strong>Bs <span data-disponible-cabecera>{{ number_format($saldoCabecera->disponible,2,',','.') }}</span></strong>
+                        </a>
+                    @endunless
+                @endauth
                 <button class="theme-toggle" type="button" data-tema-selector aria-label="Modo oscuro" aria-pressed="false" hidden>
                     <svg class="icon theme-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20.9 13a9 9 0 0 1-9.9-9.9A9 9 0 1 0 20.9 13Z" /></svg>
                     <svg class="icon theme-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" /></svg>

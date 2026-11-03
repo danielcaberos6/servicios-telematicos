@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Services\Concerns\EjecutaFuncionesSql;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class OperacionService
@@ -32,7 +33,8 @@ class OperacionService
     {
         return DB::table('operacion_subasta as o')->join('subasta as s', 's.id_subasta', '=', 'o.id_subasta')
             ->join('usuario as c', 'c.id_usuario', '=', 'o.id_comprador')->join('usuario as v', 'v.id_usuario', '=', 'o.id_vendedor')
-            ->select('o.*', 's.titulo', 'c.nombre as comprador', 'v.nombre as vendedor');
+            ->select('o.*', 's.titulo', 'c.nombre as comprador', 'v.nombre as vendedor')
+            ->selectRaw('case when o.con_fondos then o.importe-o.comision else 0 end as neto');
     }
 
     public function estado(int $actor, int $id): array
@@ -47,10 +49,18 @@ class OperacionService
         return $datos;
     }
 
-    public function mensajes(int $id)
+    public function mensajes(int $id, ?int $incidencia = null)
     {
-        return DB::table('mensaje_operacion as m')->join('usuario as u', 'u.id_usuario', '=', 'm.id_autor')
-            ->where('m.id_operacion', $id)->select('m.*', 'u.nombre as autor')->orderByDesc('id_mensaje')
-            ->paginate(15, ['*'], 'mensajes')->withQueryString();
+        $pagina = DB::table('mensaje_operacion as m')->join('usuario as u', 'u.id_usuario', '=', 'm.id_autor')
+            ->where('m.id_operacion', $id)->select('m.id_mensaje', 'm.id_operacion', 'm.id_autor', 'm.texto', 'm.tipo', 'm.archivo_mime', 'm.fecha_creacion', 'u.nombre as autor')->orderByDesc('id_mensaje')
+            ->paginate(15, ['*'], 'mensajes')->withQueryString()->fragment('conversacion');
+        foreach ($pagina as $mensaje) {
+            $mensaje->fecha_creacion = Carbon::parse($mensaje->fecha_creacion)->toIso8601String();
+            $mensaje->archivo_url = $mensaje->tipo === 'Texto' ? null : ($incidencia
+                ? route('admin.operaciones.archivo', [$incidencia, $mensaje->id_mensaje])
+                : route('operaciones.archivo', [$id, $mensaje->id_mensaje]));
+        }
+
+        return $pagina;
     }
 }

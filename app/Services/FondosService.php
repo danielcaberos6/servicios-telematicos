@@ -29,7 +29,7 @@ class FondosService
         $this->saldo($actor, $titular);
 
         return DB::table('movimiento_fondos')->where('id_usuario', $titular ?? $actor)
-            ->orderByDesc('fecha_movimiento')->orderByDesc('id_movimiento')->paginate(15, ['*'], 'movimientos')->withQueryString();
+            ->orderByDesc('fecha_movimiento')->orderByDesc('id_movimiento')->paginate(15, ['*'], 'movimientos')->withQueryString()->fragment('movimientos');
     }
 
     public function recargas(int $actor, ?int $titular = null)
@@ -37,6 +37,6 @@ class FondosService
         $this->saldo($actor, $titular);
 
         return DB::table('recarga')->where('id_usuario', $titular ?? $actor)
-            ->orderByDesc('fecha_creacion')->orderBy('id_recarga')->paginate(15, ['*'], 'recargas')->withQueryString();
+            ->orderByDesc('fecha_creacion')->orderBy('id_recarga')->paginate(15, ['*'], 'recargas')->withQueryString()->fragment('recargas');
     }
 }

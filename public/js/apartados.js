@@ -54,6 +54,7 @@ document.querySelectorAll('[data-espacio-seccion]').forEach((espacio) => {
             else enlace.removeAttribute('aria-current');
         });
         cambiarEstado(false);
+        document.dispatchEvent(new CustomEvent('apartado-cambiado', { detail: { id } }));
         // Los mapas necesitan recalcular su tamaño al revelar su apartado.
         window.dispatchEvent(new Event('resize'));
         if (enfocar) {

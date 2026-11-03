@@ -18,7 +18,8 @@ class IdiomaEspanolTest extends TestCase
         Storage::fake('public');
         $this->seed(DemoSeeder::class);
         $this->assertSame('es', app()->getLocale());
-        $auction = Subasta::where('estado_revision', 'Aceptada')->firstOrFail();
+        $auction = Subasta::where('estado_revision', 'Aceptada')->where('fecha_fin', '>', now()->addDays(2))
+            ->orderBy('id_subasta')->firstOrFail();
 
         foreach (['/', '/buscar', '/subastas/'.$auction->id_subasta] as $url) {
             $response = $this->get($url)->assertOk()->assertDontSee('from now')->assertDontSee(' ago');

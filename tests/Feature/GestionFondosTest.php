@@ -74,6 +74,23 @@ class GestionFondosTest extends TestCase
         $this->assertDatabaseCount('movimiento_fondos', 0);
     }
 
+    public function test_cancelling_returns_to_wallet_without_posting_money_movements(): void
+    {
+        $u = User::factory()->create();
+        $r = app(FondosService::class)->solicitar($u->id_usuario, (string) Str::uuid(), '100');
+        $url = '/mi-billetera/recargas/'.$r->id_recarga;
+
+        $this->actingAs($u)->get($url)->assertOk()->assertSee('Confirmar pago')
+            ->assertSee('Cancelar recarga')->assertDontSee('Rechazar pago');
+        $this->post($url, ['resultado' => 'Cancelada'])->assertRedirect('/mi-billetera');
+        $this->get('/mi-billetera')->assertOk()
+            ->assertViewHas('movimientos', fn ($p) => $p->total() === 0)
+            ->assertViewHas('recargas', fn ($p) => $p->total() === 1 && $p->first()->estado === 'Cancelada');
+        $this->post($url, ['resultado' => 'Aprobada'])->assertRedirect('/mi-billetera');
+        $this->assertDatabaseCount('movimiento_fondos', 0);
+        $this->assertEquals(0, app(FondosService::class)->saldo($u->id_usuario)->total);
+    }
+
     public function test_bids_reserve_release_and_only_take_the_leaders_difference(): void
     {
         $uno = User::factory()->create();
@@ -94,6 +111,31 @@ class GestionFondosTest extends TestCase
         $this->assertEquals(500, $saldo->total);
         $this->assertDatabaseHas('movimiento_fondos', ['id_usuario' => $dos->id_usuario, 'tipo' => 'Reserva', 'importe' => 10]);
         $this->assertDatabaseHas('reserva_fondos', ['id_subasta' => $s->id_subasta, 'id_usuario' => $dos->id_usuario, 'monto' => 120]);
+    }
+
+    public function test_reservation_must_match_the_bid_owner_auction_and_amount(): void
+    {
+        $u = User::factory()->conFondos(500)->create();
+        $otro = User::factory()->create();
+        $s = $this->subasta();
+        $otra = $this->subasta();
+        $this->actingAs($u)->post('/subastas/'.$s->id_subasta.'/pujas', ['monto' => 100])->assertSessionHasNoErrors();
+        DB::statement('set constraints reserva_coincide_con_puja immediate');
+        DB::statement('set constraints reserva_coincide_con_puja deferred');
+
+        foreach (['monto' => 101, 'id_usuario' => $otro->id_usuario, 'id_subasta' => $otra->id_subasta] as $campo => $valor) {
+            try {
+                DB::transaction(function () use ($s, $campo, $valor) {
+                    DB::table('reserva_fondos')->where('id_subasta', $s->id_subasta)->update([$campo => $valor]);
+                    DB::statement('set constraints reserva_coincide_con_puja immediate');
+                });
+                $this->fail('La reserva debe coincidir con todos los datos de la puja.');
+            } catch (QueryException $e) {
+                $this->assertSame('23503', $e->errorInfo[0]);
+            }
+        }
+        $this->assertDatabaseHas('reserva_fondos', ['id_subasta' => $s->id_subasta, 'id_usuario' => $u->id_usuario, 'monto' => 100]);
+        $this->assertEquals(100, app(FondosService::class)->saldo($u->id_usuario)->reservado);
     }
 
     public function test_insufficient_funds_and_tampered_bids_leave_everything_unchanged(): void
@@ -207,7 +249,7 @@ class GestionFondosTest extends TestCase
         $this->post('/mi-billetera/recargas', ['referencia' => $r->id_recarga, 'monto' => 200])->assertSessionHasErrors('monto');
         $otro = User::factory()->create();
         $this->actingAs($otro)->post('/mi-billetera/recargas', ['referencia' => $r->id_recarga, 'monto' => 100])->assertSessionHasErrors('monto');
-        $this->assertDatabaseCount('recarga',1);
-        $this->assertDatabaseCount('movimiento_fondos',0);
+        $this->assertDatabaseCount('recarga', 1);
+        $this->assertDatabaseCount('movimiento_fondos', 0);
     }
 }

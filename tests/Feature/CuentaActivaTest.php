@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Categoria;
 use App\Models\User;
+use App\Services\NormativaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -57,6 +58,7 @@ class CuentaActivaTest extends TestCase
     public function test_public_registration_cannot_set_account_state_or_admin_role(): void
     {
         $this->post('/registro', [
+            'normas_version' => app(NormativaService::class)->version(),
             'nombres' => 'Cuenta', 'apellidos' => 'de prueba', 'correo' => 'cuenta@example.test',
             'password' => 'ClaveSegura123', 'password_confirmation' => 'ClaveSegura123',
             'activo' => false, 'rol' => 'Administrador',

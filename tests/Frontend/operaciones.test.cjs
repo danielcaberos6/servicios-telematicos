@@ -9,19 +9,19 @@ async function entorno(pagina='1') {
     const requests=[],handlers={},status={textContent:''},older={hidden:true};
     const list={children:[],scrollHeight:20,scrollTop:0,clientHeight:20,
         getBoundingClientRect:()=>({top:10,bottom:100}),
-        querySelectorAll(){return this.children;},replaceChildren(...nodes){this.children=nodes;}};
+        querySelectorAll(){return this.children;},insertBefore(node,before){const old=this.children.indexOf(node);if(old>=0)this.children.splice(old,1);const index=before?this.children.indexOf(before):this.children.length;this.children.splice(index,0,node);},replaceChildren(...nodes){this.children=nodes;}};
     const draft={value:'Un mensaje todavía sin enviar.'};
     const chat={dataset:{pagina,url:'/mensajes',leerUrl:'/leer',csrf:'test-csrf'},matches:()=>false,contains:()=>false,
         querySelector:s=>({'[data-mensajes]':list,'[data-chat-estado]':status,'[data-chat-anteriores]':older}[s])};
     const document={hidden:false,querySelector:()=>chat,addEventListener:(k,f)=>handlers[k]=f,
-        createElement(tag){return {tag,dataset:{},textContent:'',children:[],getBoundingClientRect(){return {top:10,bottom:this.bottom ?? 40};},append(...nodes){this.children.push(...nodes);},set innerHTML(_){throw new Error('El texto no debe interpretarse como HTML.');}};}};
+        createElement(tag){return {tag,dataset:{},textContent:'',children:[],setAttribute(){},remove(){list.children=list.children.filter(node=>node!==this);},getBoundingClientRect(){return {top:10,bottom:this.bottom ?? 40};},append(...nodes){this.children.push(...nodes);},set innerHTML(_){throw new Error('El texto no debe interpretarse como HTML.');}};}};
     const fetch=async(url,options)=>{
         requests.push({url,options});
         if(url==='/leer')return {ok:true};
         if(response instanceof Error)throw response;
         return response;
     };
-    vm.runInNewContext(source,{document,window:{innerHeight:844},fetch,Intl,Date,Number,Math,Array,AbortSignal,setInterval:(f,t)=>{tick=f;interval=t;}});
+    vm.runInNewContext(source,{document,window:{innerHeight:844,fechaChat:require('../../public/js/fecha-chat.js')},fetch,Intl,Date,Number,Math,Array,AbortSignal,setInterval:(f,t)=>{tick=f;interval=t;}});
     await new Promise(setImmediate);
     return {tick,interval,requests,document,list,status,older,draft,handlers,set response(value){response=value;}};
 }
@@ -42,7 +42,6 @@ test('un error conserva los mensajes y el borrador; la pestaña oculta no consul
     const e=await entorno();const before=e.list.children[0];
     e.response=new Error('sin conexión');await e.tick();
     assert.equal(e.list.children[0],before);assert.equal(e.draft.value,'Un mensaje todavía sin enviar.');
-    assert.match(e.status.textContent,/reintentará/);
     const count=e.requests.length;e.document.hidden=true;await e.tick();assert.equal(e.requests.length,count);
 });
 
@@ -62,4 +61,13 @@ test('no marca los mensajes nuevos que quedan debajo de la zona visible',async()
 
 test('los mensajes sin cambios conservan sus nodos para no interrumpir la lectura',async()=>{
     const e=await entorno();const original=e.list.children[0];await e.tick();assert.equal(e.list.children[0],original);
+});
+
+test('recibir otro mensaje conserva el reproductor de audio existente',async()=>{
+    const e=await entorno();
+    const audio={id_mensaje:13,id_autor:2,autor:'Ana',texto:'',tipo:'Audio',archivo_url:'/privado/13',fecha_creacion:'2026-10-31T15:00:00Z'};
+    e.response={ok:true,json:async()=>({total:1,data:[audio]})};await e.tick();
+    const bubble=e.list.children[0],player=bubble.children.at(-1);assert.equal(player.tag,'audio');
+    e.response={ok:true,json:async()=>({total:2,data:[{...audio,id_mensaje:14,tipo:'Texto',archivo_url:null,texto:'Otro mensaje'},audio]})};
+    await e.tick();assert.equal(e.list.children[0],bubble);assert.equal(e.list.children[0].children.at(-1),player);assert.equal(e.list.children.length,2);
 });

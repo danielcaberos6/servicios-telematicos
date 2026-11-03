@@ -9,9 +9,7 @@ class PujaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'monto' => $this->route('subasta')->modelo_puja === 2
-                ? ['required', 'numeric', 'multiple_of:1', 'min:1', 'max:9999999999']
-                : ['required', 'numeric', 'decimal:0,2', 'min:0.01', 'max:9999999999.99'],
+            'monto' => ['required', 'numeric', 'multiple_of:1', 'min:1', 'max:9999999999'],
         ];
     }
 

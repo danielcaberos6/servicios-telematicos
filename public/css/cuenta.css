@@ -1,4 +1,17 @@
 .account-menu { position: relative; flex-shrink: 0; }
+.account-balance { display: flex; flex-direction: column; justify-content: center; min-height: 44px; padding: 4px 8px; border-radius: 6px; color: #fff; white-space: nowrap; line-height: 1.4; }
+.account-balance small { color: #c8dded; font-size: 11px; }
+.account-balance strong { font-size: 14px; font-variant-numeric: tabular-nums; }
+.account-balance:hover { background: #19415e; text-decoration: none; }
+@media (max-width: 500px) { .account-balance { padding: 4px; } .account-balance strong { font-size: 12px; } }
+@media (min-width: 701px) and (max-width: 1380px) {
+    .nav-wrap { flex-wrap: wrap; padding: 12px 0; gap: 0; }
+    .account-nav { margin-left: auto; }
+    .navigation { order: 3; width: 100%; justify-content: center; height: 52px; margin: 12px 0 -12px; }
+}
+@media (max-width: 700px) {
+    .account-nav > .theme-toggle { display: none; }
+}
 .account-menu > summary { cursor: pointer; list-style: none; padding: 4px; min-width: 44px; justify-content: center; border: 1px solid transparent; border-radius: 7px; }
 .account-menu > summary::-webkit-details-marker { display: none; }
 .account-menu[open] > summary, .account-menu > summary:hover { background: #19415e; border-color: #789ab4; text-decoration: none; }

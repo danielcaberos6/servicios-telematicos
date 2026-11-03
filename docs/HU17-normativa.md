@@ -4,8 +4,8 @@
 
 - Página pública `/normas-y-politicas`, con índice por secciones y enlace permanente en el pie de página.
 - Reglas de cuenta, publicaciones veraces, artículos prohibidos, pujas, entrega, desacuerdos y tratamiento de datos.
-- Aceptación explícita con casilla inicialmente desmarcada; usuario autenticado, versión y fecha del servidor.
-- Una aceptación por usuario y versión, sin sobrescribir su fecha al reenviar. No se aceptan normas en nombre de las cuentas existentes.
+- En el registro, el aviso junto a «Crear mi cuenta» enlaza las normas y explica que pulsar el botón implica aceptarlas. La creación de la cuenta y la aceptación de la versión mostrada se guardan en una transacción, con fecha del servidor. Para cuentas existentes sin aceptación vigente, se conserva el flujo de aceptación con casilla inicialmente desmarcada.
+- Una aceptación por usuario y versión, sin sobrescribir su fecha al reenviar. No se aceptan normas en nombre de cuentas reales existentes.
 - Protección para crear o editar publicaciones y registrar pujas. El catálogo, favoritos e historial siguen accesibles según los permisos anteriores.
 - Al aceptar se vuelve a una ruta local permitida. La publicación o puja debe confirmarse después; nunca se repite automáticamente una petición anterior.
 - Los administradores pueden leer las normas, pero no aceptarlas como participantes. Las cuentas desactivadas tampoco pueden hacerlo.
@@ -42,3 +42,7 @@ Rama vigente de Juan: `HU-17-18/Normas-participacionSubastas/Juan`. HU17 cubre s
 La lectura sigue siendo pública. Publicar, ofertar y recargar exigen aceptación explícita vigente tanto en HTTP como en PostgreSQL; se conservan usuario, versión y fecha. Las condiciones explican reservas, saldo de demostración, ausencia de préstamos/dinero real, comisión del 5 % exclusivamente al completar la venta y devolución sin comisión. Los conflictos retienen fondos hasta una decisión motivada, sin confiscaciones automáticas. Estas condiciones ya no están pendientes de la consulta al ingeniero.
 
 `NormativaTest` y `GestionFondosTest` verifican la lectura, aceptación y bloqueo de acciones sin normas vigentes, incluidos el retorno a Mi billetera y el rechazo de recargas sin aceptación. Los resultados históricos de la sección anterior corresponden a aquella entrega, no al recuento actual de la suite.
+
+El campo oculto `normas_version` vincula el formulario de registro con la versión mostrada. Si falta o está desactualizada, la cuenta no se crea; un fallo al aceptar revierte también la cuenta, billetera y roles. Las cuentas registradas con la versión vigente no repiten la aceptación al publicar, pujar o recargar. `RegistroNormasTest` verifica el aviso, la aceptación al registrarse, el acceso posterior y la reversión de un registro con versión anterior.
+
+Los datos de demostración se preparan con `NormasDemoSeeder`: solo en local/testing y para la lista cerrada de correos ficticios de los seeders. Esto permite recargar, publicar y ofertar con esas cuentas sin una aceptación adicional. El arranque `subastas:cargar-demo` ejecuta esta preparación sin duplicar registros ni alterar fechas existentes; no se aplica a cuentas reales, administradores o producción.
