@@ -59,7 +59,10 @@
                 const incoming=messages.map(message=>Number(message.id_mensaje)).join(',');
                 if (current!==incoming) {
                     // Mantener los reproductores existentes conectados evita cortar un audio.
-                    for(const [id,node] of existing) if(!messages.some(m=>Number(m.id_mensaje)===id)) node.remove();
+                    for(const [id,node] of existing) if(!messages.some(m=>Number(m.id_mensaje)===id)) {
+                        const playing=Array.from(node.querySelectorAll?.('audio') || []).some(audio=>!audio.paused && !audio.ended);
+                        if(!playing)node.remove();
+                    }
                     nodes.forEach((node,index)=>{if(list.children[index]!==node) list.insertBefore(node,list.children[index] || null);});
                 }
                 if (atEnd || (!scrolledInitially && isVisible())) list.scrollTop=list.scrollHeight;
