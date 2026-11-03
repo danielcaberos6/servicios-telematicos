@@ -32,6 +32,9 @@ Los visitantes ven Inicio, Subastas (el catálogo con búsqueda y filtros) y **C
 
 ## Datos de demostración
 
+Para ver pujas en vivo de cuatro usuarios, utiliza los tres scripts de cámara,
+bicicleta y guitarra descritos en [Simulaciones de pujas](docs/simulaciones-pujas.md).
+
 Todas las subastas de demostración incluyen al menos una foto, también las pendientes, rechazadas e históricas. Volver a ejecutar sus seeders completa las fotos faltantes sin reemplazar imágenes existentes ni cambiar los estados de las subastas. Las nuevas fotografías son ilustrativas; sus autores, fuentes y licencias están en [Créditos de fotos de ejemplo](public/imagenes/ejemplos/CREDITOS.md).
 
 ```sh
