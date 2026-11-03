@@ -12,7 +12,11 @@
     <p class="muted" data-live-status role="status">Se actualiza automáticamente.</p>
     <div data-live-region="operaciones">
     <ul class="ops-list">@forelse($operaciones as $op)
-        <li><div><span class="tag">{{ $op->estado }}</span><h2><a href="{{ route('operaciones.show',$op->id_operacion) }}">{{ $op->titulo }}</a></h2><p>{{ auth()->id()===$op->id_comprador ? 'Compraste a '.$op->vendedor : 'Vendiste a '.$op->comprador }} · Bs {{ number_format($op->importe,2,',','.') }}</p>@if($op->sin_leer)<strong>{{ $op->sin_leer }} mensaje(s) sin leer</strong>@endif</div><a class="button secondary" href="{{ route('operaciones.show',$op->id_operacion) }}">Ver operación</a></li>
+        <li><div><span class="tag">{{ $op->estado }}</span><h2><a href="{{ route('operaciones.show',$op->id_operacion) }}">{{ $op->titulo }}</a></h2><p>{{ auth()->id()===$op->id_comprador ? 'Compraste a '.$op->vendedor : 'Vendiste a '.$op->comprador }} · Bs {{ number_format($op->importe,2,',','.') }}</p>@if($op->sin_leer)<strong>{{ $op->sin_leer }} mensaje(s) sin leer</strong>@endif
+            @if($op->puede_valorar)
+                <p><strong>Valoración pendiente</strong><br><span class="muted">Puedes valorar hasta el {{ \Carbon\Carbon::parse($op->plazo_valoracion)->timezone('America/La_Paz')->format('d/m/Y H:i') }} (Bolivia).</span></p>
+                <a class="button primary" href="{{ route('operaciones.show',$op->id_operacion) }}#entrega">Valorar experiencia</a>
+            @endif</div><a class="button secondary" href="{{ route('operaciones.show',$op->id_operacion) }}">Ver operación</a></li>
     @empty<li><p>Aún no tienes operaciones. Aparecerán al finalizar una subasta con ganador.</p><a href="{{ route('participaciones.index') }}">Ver mis participaciones</a></li>@endforelse</ul>
     <x-paginacion :elementos="$operaciones" />
     </div>

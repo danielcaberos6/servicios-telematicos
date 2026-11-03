@@ -41,3 +41,10 @@ test('descartar y cerrar la página liberan el micrófono sin enviar mensajes',a
     assert.equal(e.stopped,1);assert.equal(e.nodes['[name=archivo]'].files.length,0);assert.equal(e.request,undefined);
     await e.nodes['[data-chat-grabar]'].events.click();e.windowEvents.pagehide();assert.equal(e.stopped,2);
 });
+
+test('conserva el borrador escrito durante un envio pendiente',async()=>{
+ const e=entorno();e.nodes['[name=texto]'].value='Enviado';
+ e.response={ok:true,json:async()=>{e.nodes['[name=texto]'].value='Nuevo borrador';return {ok:true};}};
+ await e.handlers.submit({preventDefault(){}});
+ assert.equal(e.nodes['[name=texto]'].value,'Nuevo borrador');
+});

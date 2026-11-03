@@ -23,6 +23,10 @@ class OperacionController extends Controller
             ->when($datos['estado'] ?? null, fn ($q, $estado) => $q->where('o.estado', $estado))
             ->when($datos['rol'] ?? null, fn ($q, $rol) => $q->where($rol === 'compras' ? 'o.id_comprador' : 'o.id_vendedor', $actor))
             ->selectRaw('(select count(*) from mensaje_operacion m where m.id_operacion=o.id_operacion and m.id_autor<>? and m.id_mensaje>case when o.id_comprador=? then o.leido_comprador else o.leido_vendedor end) as sin_leer', [$actor, $actor])
+            ->selectRaw("(o.fecha_resolucion at time zone 'America/La_Paz' + interval '14 days') at time zone 'America/La_Paz' as plazo_valoracion")
+            ->selectRaw("o.estado='Completada' and o.fecha_resolucion is not null
+                and clock_timestamp() < (o.fecha_resolucion at time zone 'America/La_Paz' + interval '14 days') at time zone 'America/La_Paz'
+                and not exists(select 1 from resenas r where r.id_operacion=o.id_operacion and r.id_usuario_resenador=?) as puede_valorar", [$actor])
             ->orderByDesc('o.id_operacion')->paginate(15)->withQueryString();
 
         return response()->view('operaciones.index', compact('operaciones'))->header('Cache-Control', 'no-store, private');

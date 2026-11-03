@@ -322,6 +322,30 @@ class GestionOperacionesTest extends TestCase
     {
         [$id,$c,$v,$s] = $this->operacion(true, true, false);
         $this->assertEquals(1, DB::selectOne('select finalizar_subastas() as total')->total);
+        $orden = app(OperacionService::class)->consulta()->where('o.id_subasta', $s->id_subasta)->first();
+        $this->assertNotNull($orden);
+        $this->assertEquals($c->id_usuario, $orden->id_comprador);
+        $this->assertEquals($v->id_usuario, $orden->id_vendedor);
+        $this->assertSame($s->titulo, $orden->titulo);
+        $this->assertEquals(500, $orden->importe);
+        $this->assertEquals(25, $orden->comision);
+        $this->assertEquals(475, $orden->neto);
+        $this->assertSame('Pendiente', $orden->estado);
+        $this->assertDatabaseHas('reserva_fondos', [
+            'id_subasta' => $s->id_subasta, 'id_usuario' => $c->id_usuario,
+            'estado' => 'Retenida', 'monto' => 500,
+        ]);
+        foreach ([$c, $v] as $parte) {
+            $this->assertSame(1, DB::table('notificacion')
+                ->where('id_subasta', $s->id_subasta)->where('id_usuario', $parte->id_usuario)
+                ->where('titulo', 'Entrega por coordinar')->count());
+        }
+        // Reintentar la creacion tampoco debe duplicar la orden, su evento ni sus avisos.
+        $avisos = DB::table('notificacion')->count();
+        $this->assertEquals($orden->id_operacion, DB::selectOne('select crear_operacion_cierre(?) as id', [$s->id_subasta])->id);
+        $this->assertSame($avisos, DB::table('notificacion')->count());
+        $this->assertSame(1, DB::table('evento_operacion')->where('id_operacion', $orden->id_operacion)->count());
+        $this->assertDatabaseCount('movimiento_fondos', 2); // Recarga y reserva; aun no hay pago.
         $this->assertEquals(0, DB::selectOne('select finalizar_subastas() as total')->total);
         $this->assertDatabaseCount('operacion_subasta', 1);
         $sinPujas = app(SubastaService::class)->crear($v->id_usuario, [

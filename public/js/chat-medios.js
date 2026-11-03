@@ -63,12 +63,15 @@ document.querySelectorAll('[data-chat-interfaz]').forEach(chat => {
     form.addEventListener('submit',async event=>{
         event.preventDefault();if(busy || closed || form.dataset.grabando==='true')return;
         if(!text.value.trim() && !file.files.length){feedback.textContent='Escribe un mensaje o adjunta una foto o un audio.';text.focus();return;}
+        const sentText=text.value,sentFile=file.files[0];
         busy=true;send.disabled=true;record.disabled=true;feedback.textContent='Enviando…';
         try {
             const response=await fetch(form.action,{method:'POST',body:new FormData(form),headers:{Accept:'application/json'},credentials:'same-origin',redirect:'error',signal:AbortSignal.timeout(30000)});
             const data=await response.json();
             if(!response.ok)throw new Error(data.errors?Object.values(data.errors).flat().join(' '):'No se pudo enviar. Conservamos tu mensaje para reintentar.');
-            text.value='';file.value='';clearPreview();form.querySelector('[name=referencia]').value=crypto.randomUUID();feedback.textContent='Mensaje enviado.';
+            if(text.value===sentText)text.value='';
+            if(file.files[0]===sentFile){file.value='';clearPreview();}
+            form.querySelector('[name=referencia]').value=crypto.randomUUID();feedback.textContent='Mensaje enviado.';
             if(Number(chat.dataset.pagina)!==1)window.location.assign(form.action.replace(/\/mensaje$/,'')+'#conversacion');
             else document.dispatchEvent(new CustomEvent('chat-enviado'));
         } catch(error){feedback.textContent=error.message && error.name==='Error'?error.message:'No se pudo enviar. Conservamos tu mensaje para reintentar.';}

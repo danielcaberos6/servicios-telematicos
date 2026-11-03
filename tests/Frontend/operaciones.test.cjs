@@ -71,3 +71,14 @@ test('recibir otro mensaje conserva el reproductor de audio existente',async()=>
     e.response={ok:true,json:async()=>({total:2,data:[{...audio,id_mensaje:14,tipo:'Texto',archivo_url:null,texto:'Otro mensaje'},audio]})};
     await e.tick();assert.equal(e.list.children[0],bubble);assert.equal(e.list.children[0].children.at(-1),player);assert.equal(e.list.children.length,2);
 });
+
+test('conserva audio activo fuera de la pagina y lo retira al terminar',async()=>{
+ const e=await entorno();
+ const audio={id_mensaje:13,id_autor:2,autor:'Ana',texto:'',tipo:'Audio',archivo_url:'/privado/13',fecha_creacion:'2026-10-31T15:00:00Z'};
+ e.response={ok:true,json:async()=>({total:1,data:[audio]})};await e.tick();
+ const bubble=e.list.children[0],player=bubble.children.at(-1);player.paused=false;player.ended=false;
+ bubble.querySelectorAll=()=>[player];
+ e.response={ok:true,json:async()=>({total:16,data:Array.from({length:15},(_,i)=>({...audio,id_mensaje:28-i,tipo:'Texto',archivo_url:null,texto:'Nuevo'}))})};
+ await e.tick();assert.ok(e.list.children.includes(bubble));
+ player.ended=true;await e.tick();assert.ok(!e.list.children.includes(bubble));
+});
