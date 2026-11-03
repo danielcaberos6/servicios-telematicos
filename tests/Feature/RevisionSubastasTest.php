@@ -157,7 +157,10 @@ class RevisionSubastasTest extends TestCase
             ->where('titulo', 'Solicitud corregida para revisión')->count());
         $this->assertSame(1, $seller->notificaciones()->where('id_subasta', $auction->id_subasta)
             ->where('titulo', 'Solicitud reenviada a revisión')->count());
-        $this->actingAs($seller)->get("/subastas/{$auction->id_subasta}")->assertOk()->assertSee($decision->motivo);
+        $this->actingAs($seller)->get("/subastas/{$auction->id_subasta}")->assertOk()
+            ->assertSee('Historial de revisiones')->assertSee('Rechazada')
+            ->assertSee($decision->fecha_decision->timezone('America/La_Paz')->format('d/m/Y H:i:s'))
+            ->assertDontSee($decision->motivo)->assertDontSee('(ID '.$decision->id_revisor.')');
         $this->actingAs($admin)->get('/admin/subastas')->assertSee($payload['titulo']);
         $this->get('/buscar')->assertDontSee($payload['titulo']);
         $this->actingAs(User::factory()->create())->get("/subastas/{$auction->id_subasta}")->assertNotFound();
