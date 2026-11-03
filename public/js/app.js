@@ -15,7 +15,9 @@ document.querySelectorAll("[data-aviso-exito]").forEach((aviso) => {
     const pausar = () => window.clearTimeout(temporizador);
     const programar = () => {
         pausar();
-        if (!aviso.matches(":hover") && !aviso.contains(document.activeElement)) {
+        // El cursor puede quedar encima después de una redirección.
+        // Solo pausar cuando se está usando el cierre mediante el teclado.
+        if (!aviso.contains(document.activeElement)) {
             temporizador = window.setTimeout(() => aviso.remove(), 6000);
         }
     };
@@ -24,8 +26,6 @@ document.querySelectorAll("[data-aviso-exito]").forEach((aviso) => {
         pausar();
         aviso.remove();
     });
-    aviso.addEventListener("mouseenter", pausar);
-    aviso.addEventListener("mouseleave", programar);
     aviso.addEventListener("focusin", pausar);
     aviso.addEventListener("focusout", (event) => {
         if (!aviso.contains(event.relatedTarget)) {
