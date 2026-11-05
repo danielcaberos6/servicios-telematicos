@@ -12,11 +12,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Laravel Cloud reemplaza estos discos con throw=false. Sin esto, una escritura
-        // fallida devolvería false y se registraría en la base una ruta inválida.
-        foreach (['public', 'identidad', 'conversaciones'] as $disco) {
-            $this->app['config']->set("filesystems.disks.{$disco}.throw", true);
-        }
+        //
     }
 
     /**

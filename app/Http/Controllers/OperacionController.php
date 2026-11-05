@@ -177,16 +177,11 @@ class OperacionController extends Controller
     private function mostrarArchivo(int $operacion, int $mensaje)
     {
         $m = DB::table('mensaje_operacion')->where('id_operacion', $operacion)->where('id_mensaje', $mensaje)->whereNotNull('archivo_ruta')->first();
-        $disco = Storage::disk('conversaciones');
-        abort_unless($m && $disco->exists($m->archivo_ruta), 404);
-        // Copia temporal: el reproductor de audio pide rangos de bytes y un bucket no
-        // ofrece ruta local. Los adjuntos no superan los 5 MB.
-        $copia = tempnam(sys_get_temp_dir(), 'adjunto');
-        file_put_contents($copia, $disco->readStream($m->archivo_ruta));
+        abort_unless($m && Storage::disk('conversaciones')->exists($m->archivo_ruta), 404);
 
-        return response()->file($copia, [
+        return response()->file(Storage::disk('conversaciones')->path($m->archivo_ruta), [
             'Content-Type' => $m->archivo_mime, 'Cache-Control' => 'no-store, private',
             'X-Content-Type-Options' => 'nosniff', 'Content-Security-Policy' => "default-src 'none'; sandbox",
-        ])->deleteFileAfterSend()->setPrivate();
+        ])->setPrivate();
     }
 }
