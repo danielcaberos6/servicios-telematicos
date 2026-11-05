@@ -15,9 +15,9 @@ class ImagenController extends Controller
         abort_if($subasta && ! $subasta->visiblePara($request->user()), 404);
         abort_unless(Storage::disk('public')->exists($imagen->ruta), 404);
 
-        $response = response()->file(Storage::disk('public')->path($imagen->ruta), ['X-Content-Type-Options' => 'nosniff']);
-        // BinaryFileResponse se marca public por defecto: las fotos de solicitudes sin
+        // El disco puede ser un bucket, sin ruta local. Las fotos de solicitudes sin
         // publicar se declaran privadas y sin almacenamiento en cachés compartidas.
+        $response = Storage::disk('public')->response($imagen->ruta, null, ['X-Content-Type-Options' => 'nosniff']);
         if (! $subasta || $subasta->publicada()) {
             return $response->setPublic()->setMaxAge(86400);
         }
