@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
@@ -38,6 +39,34 @@ Artisan::command('subastas:instalar-funciones', function () {
     });
     $this->info('Funciones.sql, BusquedaGeografica.sql y PublicacionSubastas.sql instalados. Las tablas y sus datos se conservaron.');
 })->purpose('Instala o actualiza las funciones y triggers de PostgreSQL');
+
+Artisan::command('subastas:primer-admin {correo : Correo de una cuenta ya registrada}', function (string $correo) {
+    $error = DB::transaction(function () use ($correo) {
+        // Comparte el bloqueo de las decisiones administrativas (gestionar_cuenta).
+        DB::select('select pg_advisory_xact_lock(8009, 1)');
+        $rol = DB::table('rol')->where('nombre_rol', 'Administrador')->value('id_rol');
+        $hayAdministrador = DB::table('usuario as u')->join('usuario_rol as ur', 'ur.id_usuario', '=', 'u.id_usuario')
+            ->where('u.activo', true)->where('ur.id_rol', $rol)->exists();
+        if ($hayAdministrador) {
+            return 'Ya hay un administrador activo: los siguientes se asignan desde /admin/usuarios.';
+        }
+        $usuario = User::whereRaw('lower(correo) = ?', [mb_strtolower(trim($correo))])->where('activo', true)->first();
+        if (! $usuario) {
+            return 'No hay una cuenta activa con ese correo. Regístrala primero en /registro.';
+        }
+        DB::table('usuario_rol')->insert(['id_usuario' => $usuario->id_usuario, 'id_rol' => $rol]);
+        DB::table('decision_usuario')->insert(['id_actor' => $usuario->id_usuario, 'id_usuario' => $usuario->id_usuario,
+            'operacion' => 'administrador', 'valor_anterior' => false, 'valor_nuevo' => true]);
+
+        return null;
+    });
+    if ($error) {
+        $this->error($error);
+
+        return 1;
+    }
+    $this->info('La cuenta ahora es administradora.');
+})->purpose('Nombra al primer administrador de una instalación sin cuentas de demostración');
 
 Artisan::command('subastas:finalizar', function () {
     $result = DB::selectOne('select finalizar_subastas() as total');
