@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\Categoria;
 use App\Models\Subasta;
 use App\Models\User;
+use App\Services\FondosService;
+use App\Services\PujaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -75,6 +77,57 @@ class RevisionAdministrativaSubastasTest extends TestCase
         // Administrador activo accede correctamente
         $this->actingAs($admin)->get('/admin/subastas')->assertOk()->assertSee('Revisión de subastas');
         $this->actingAs($admin)->get("/admin/subastas/{$auction->id_subasta}")->assertOk()->assertSee('Mochila de montaña 50L');
+    }
+
+    public function test_administrator_can_withdraw_an_auction_and_release_the_reservation_once(): void
+    {
+        $admin = $this->admin();
+        $buyer = User::factory()->conFondos(500)->create();
+        $auction = $this->auction('Aceptada', ['requiere_fondos' => true]);
+        $id = $auction->id_subasta;
+        $url = '/admin/subastas/'.$id;
+        $data = ['motivo_retiro' => 'El artículo incumple las normas del catálogo.'];
+        app(PujaService::class)->registrar($buyer->id_usuario, $id, '250');
+
+        $this->actingAs($auction->usuario)->deleteJson($url, $data)->assertForbidden();
+        $this->actingAs($admin)->get($url)->assertOk()->assertSee('Eliminar del catálogo');
+        $this->deleteJson($url)->assertUnprocessable();
+        $this->delete($url, $data)->assertRedirect($url);
+        $this->deleteJson($url, $data)->assertUnprocessable();
+
+        $this->assertDatabaseHas('subasta', ['id_subasta' => $id, 'estado_subasta' => 'Cancelada']);
+        $this->assertDatabaseHas('decision_subasta', [
+            'id_subasta' => $id, 'estado' => 'Cancelada', 'id_revisor' => $admin->id_usuario, 'motivo' => $data['motivo_retiro'],
+        ]);
+        $this->assertEquals(500, app(FondosService::class)->saldo($buyer->id_usuario)->disponible);
+        $this->assertEquals(0, app(FondosService::class)->saldo($buyer->id_usuario)->reservado);
+        $this->assertSame(1, DB::table('movimiento_fondos')->where('id_subasta', $id)->where('tipo', 'Liberación')->count());
+        $this->assertSame(2, DB::table('notificacion')->where('id_subasta', $id)->where('titulo', 'Subasta retirada')->count());
+        $this->assertSame(1, $auction->pujas()->count());
+        $this->get($url)->assertSee('Subasta retirada')->assertDontSee('Eliminar del catálogo');
+        $this->get('/admin/subastas?estado=Cancelada')->assertSee($auction->titulo);
+        $this->actingAs($buyer)->get('/buscar')->assertDontSee($auction->titulo);
+        $this->postJson('/subastas/'.$id.'/pujas', ['monto' => 300])->assertUnprocessable();
+    }
+
+    public function test_withdrawal_blocks_later_approval_and_preserves_finished_auctions(): void
+    {
+        $pending = $this->auction();
+        $legacy = $this->auction('Aceptada');
+        $ended = $this->auction('Aceptada', ['estado_subasta' => 'Finalizada']);
+        $bidder = $this->seller();
+        app(PujaService::class)->registrar($bidder->id_usuario, $legacy->id_subasta, '250');
+        $this->actingAs($this->admin());
+        $data = ['motivo_retiro' => 'Publicación retirada por moderación.'];
+        $url = '/admin/subastas/'.$pending->id_subasta;
+
+        $this->delete($url, $data)->assertRedirect($url);
+        $this->patchJson($url, ['decision' => 'Aceptada'])->assertUnprocessable();
+        $this->delete('/admin/subastas/'.$legacy->id_subasta, $data)->assertSessionHasNoErrors();
+        $this->assertSame('Cancelada', $legacy->refresh()->estado_subasta);
+        $this->assertSame(1, $legacy->pujas()->count());
+        $this->deleteJson('/admin/subastas/'.$ended->id_subasta, $data)->assertUnprocessable();
+        $this->assertSame('Finalizada', $ended->refresh()->estado_subasta);
     }
 
     public function test_administrator_can_list_and_filter_auctions_by_state_and_search(): void

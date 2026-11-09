@@ -44,6 +44,7 @@ Route::middleware(['auth', SoloAdministrador::class])->prefix('admin')->name('ad
     Route::get('/subastas', [RevisionSubastaController::class, 'index'])->name('subastas.index');
     Route::get('/subastas/{subasta}', [RevisionSubastaController::class, 'show'])->name('subastas.show');
     Route::patch('/subastas/{subasta}', [RevisionSubastaController::class, 'resolver'])->name('subastas.resolver');
+    Route::delete('/subastas/{subasta}', [RevisionSubastaController::class, 'retirar'])->name('subastas.retirar');
     Route::get('/identidad', [IdentidadController::class, 'index'])->name('identidad.index');
     Route::patch('/identidad/{verificacion}', [IdentidadController::class, 'resolver'])->name('identidad.resolver');
     Route::resource('categorias', CategoriaController::class)->except('show', 'destroy');

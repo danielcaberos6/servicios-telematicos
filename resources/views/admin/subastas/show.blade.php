@@ -89,7 +89,14 @@
                 @endif
             </div>
 
-            @if ($subasta->estado_revision === 'En revisión')
+            @if ($subasta->estado_subasta === 'Cancelada')
+                <section class="panel">
+                    <h2>Subasta retirada</h2>
+                    @if ($retiro = $subasta->decisiones->firstWhere('estado', 'Cancelada'))
+                        <p>{{ $retiro->motivo }}</p>
+                    @endif
+                </section>
+            @elseif ($subasta->estado_revision === 'En revisión' && $subasta->estado_subasta === 'Activa')
                 <section class="panel" aria-labelledby="decision-titulo" style="border: 2px solid var(--border, #e2e8f0);">
                     <h2 id="decision-titulo">Decisión de revisión</h2>
                     <p class="muted">Verifica que las imágenes y la descripción correspondan a un artículo lícito. Al aceptar, la subasta se publicará en el catálogo y su plazo completo comenzará en ese momento, aunque el cierre de referencia ya haya pasado.</p>
@@ -121,7 +128,7 @@
             @else
                 <section class="panel" style="background: var(--paper);">
                     <h3>Estado resuelto</h3>
-                    <p class="muted">Esta solicitud ya fue resuelta como <strong>{{ $subasta->estado_revision }}</strong> y no admite nuevas modificaciones.</p>
+                    <p class="muted">La decisión de revisión fue <strong>{{ $subasta->estado_revision }}</strong>.</p>
                     @if ($subasta->id_revisor && $subasta->fecha_decision)
                         <p><strong>Administrador responsable:</strong> {{ $subasta->revisor->nombre }} (ID {{ $subasta->id_revisor }})</p>
                         <p><strong>Fecha de decisión:</strong>
@@ -130,6 +137,27 @@
                     @else
                         <p class="muted">Decisión anterior sin registro de responsable ni fecha.</p>
                     @endif
+                </section>
+            @endif
+
+            @if ($subasta->editable())
+                <section class="panel" aria-labelledby="retiro-titulo">
+                    <h2 id="retiro-titulo">Eliminar del catálogo</h2>
+                    <p id="retiro-ayuda" class="muted">La subasta quedará cancelada. Se conservarán sus pujas y se devolverá el saldo de cualquier reserva activa. El vendedor y los pujadores recibirán el motivo.</p>
+                    <form method="post" action="{{ route('admin.subastas.retirar', $subasta) }}"
+                        data-confirm="¿Eliminar esta subasta del catálogo y notificar a sus participantes?">
+                        @csrf
+                        @method('DELETE')
+                        <label for="motivo-retiro">Motivo del retiro</label>
+                        <textarea id="motivo-retiro" name="motivo_retiro" required minlength="5" maxlength="1000" rows="3"
+                            aria-describedby="retiro-ayuda{{ $errors->has('motivo_retiro') ? ' retiro-error' : '' }}"
+                            @if ($errors->has('motivo_retiro')) aria-invalid="true" @endif
+                            style="width:100%; margin-bottom:0.75rem;">{{ old('motivo_retiro') }}</textarea>
+                        @error('motivo_retiro')<p id="retiro-error">{{ $message }}</p>@enderror
+                        <button class="button secondary" type="submit" style="color:var(--danger); border-color:var(--danger);">
+                            Eliminar del catálogo
+                        </button>
+                    </form>
                 </section>
             @endif
         </div>

@@ -56,7 +56,7 @@
         if (request()->routeIs('identidad.show')) $items = array_map(fn ($item) => [$item[0], $item[1], false], $items);
     } elseif (request()->routeIs('admin.subastas.*')) {
         $titulo = 'Revisión de subastas';
-        $items = $filtrar('admin.subastas.index', 'estado', ['En revisión' => 'Pendientes', 'Aceptada' => 'Aceptadas', 'Rechazada' => 'Rechazadas', 'todos' => 'Todas'], 'En revisión');
+        $items = $filtrar('admin.subastas.index', 'estado', ['En revisión' => 'Pendientes', 'Aceptada' => 'Aceptadas', 'Rechazada' => 'Rechazadas', 'Cancelada' => 'Canceladas', 'todos' => 'Todas'], 'En revisión');
         if (request()->routeIs('admin.subastas.show')) $items = array_map(fn ($item) => [$item[0], $item[1], false], $items);
     } elseif (request()->routeIs('reportes.*')) {
         $titulo = 'Reportes';

@@ -112,6 +112,9 @@ begin
     if p_actor is null or resultado.id_usuario<>p_actor then
         raise exception 'Esta subasta pertenece a otro usuario.' using errcode='42501';
     end if;
+    if resultado.estado_subasta='Cancelada' then
+        raise exception 'La subasta cancelada se conserva en el historial.';
+    end if;
     if exists(select 1 from puja where id_subasta=p_id) then
         raise exception 'Una subasta con pujas no puede modificarse ni eliminarse.';
     end if;

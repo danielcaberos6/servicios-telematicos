@@ -190,7 +190,8 @@ begin
         if TG_OP = 'DELETE' then raise exception 'Una subasta con pujas no puede eliminarse.'; end if;
         if row(new.titulo,new.descripcion,new.ubicacion,new.estado_articulo,new.monto_inicial,new.incremento_puja,new.fecha_inicio,new.fecha_fin,new.id_usuario,new.id_categoria,new.latitud,new.longitud)
            is distinct from row(old.titulo,old.descripcion,old.ubicacion,old.estado_articulo,old.monto_inicial,old.incremento_puja,old.fecha_inicio,old.fecha_fin,old.id_usuario,old.id_categoria,old.latitud,old.longitud)
-           or (new.estado_subasta = 'Cancelada' and not old.requiere_fondos) then
+           or (new.estado_subasta = 'Cancelada' and not old.requiere_fondos
+               and not exists(select 1 from decision_subasta where id_subasta=old.id_subasta and estado='Cancelada')) then
             raise exception 'Una subasta con pujas no puede modificarse.';
         end if;
     end if;

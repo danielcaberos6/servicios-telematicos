@@ -21,7 +21,11 @@ class RevisionSubastaService
         return Subasta::query()
             ->with(['usuario', 'categoria', 'imagenes'])
             ->when($estado !== 'todos', function ($query) use ($estado) {
-                $query->where('estado_revision', $estado);
+                if ($estado === 'Cancelada') {
+                    $query->where('estado_subasta', 'Cancelada');
+                } else {
+                    $query->where('estado_revision', $estado)->where('estado_subasta', '<>', 'Cancelada');
+                }
             })
             ->when($busqueda !== '', function ($query) use ($busqueda) {
                 $query->where(function ($q) use ($busqueda) {
@@ -41,5 +45,10 @@ class RevisionSubastaService
     public function resolver(int $actor, int $idSubasta, string $decision, ?string $motivo = null): void
     {
         $this->ejecutar('select resolver_revision_subasta(?,?,?,?)', [$actor, $idSubasta, $decision, $motivo], 'decision');
+    }
+
+    public function retirar(int $actor, int $idSubasta, string $motivo): void
+    {
+        $this->ejecutar('select retirar_subasta_admin(?,?,?)', [$actor, $idSubasta, $motivo], 'motivo_retiro');
     }
 }
