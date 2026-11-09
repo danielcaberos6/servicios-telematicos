@@ -47,7 +47,7 @@ begin
     end if;
 
     -- 6. Comprobar que esté pendiente de revisión
-    if articulo.estado_revision <> 'En revisión' then
+    if articulo.estado_revision <> 'En revisión' or articulo.estado_subasta <> 'Activa' then
         raise exception 'Esta subasta ya fue resuelta previamente.';
     end if;
 
@@ -84,5 +84,34 @@ begin
             'Tu subasta «' || articulo.titulo || '» fue rechazada. Motivo: ' || v_motivo
         );
     end if;
+end;
+$$;
+
+create or replace function retirar_subasta_admin(p_actor bigint, p_id bigint, p_motivo text)
+returns void language plpgsql as $$
+declare articulo subasta%rowtype; motivo_retiro text := btrim(coalesce(p_motivo, ''));
+begin
+    perform exigir_administrador(p_actor);
+    if length(motivo_retiro) not between 5 and 1000 then
+        raise exception 'Escribe un motivo de 5 a 1000 caracteres.';
+    end if;
+    select * into articulo from subasta where id_subasta=p_id for update;
+    if not found then raise exception 'Subasta no encontrada.' using errcode='P0002'; end if;
+    if articulo.estado_subasta <> 'Activa'
+        or (articulo.estado_revision='Aceptada' and articulo.fecha_fin<=clock_timestamp()) then
+        raise exception 'Solo se pueden retirar subastas que todavía no han terminado.';
+    end if;
+
+    insert into decision_subasta(id_subasta,estado,motivo,id_revisor,fecha_decision)
+    values(p_id,'Cancelada',motivo_retiro,p_actor,clock_timestamp());
+    -- El trigger de fondos libera la reserva en esta misma transacción.
+    update subasta set estado_subasta='Cancelada' where id_subasta=p_id;
+    insert into notificacion(id_usuario,id_subasta,titulo,contenido)
+    select destinatario,p_id,'Subasta retirada','Administración retiró «' || articulo.titulo || '». Motivo: ' || motivo_retiro
+    from (
+        select articulo.id_usuario as destinatario
+        union
+        select id_usuario from puja where id_subasta=p_id
+    ) participantes;
 end;
 $$;

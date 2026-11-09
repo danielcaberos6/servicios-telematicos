@@ -17,7 +17,7 @@ class RevisionSubastaController extends Controller
     public function index(Request $request)
     {
         $filtros = $request->validate([
-            'estado' => ['nullable', Rule::in(['En revisión', 'Aceptada', 'Rechazada', 'todos'])],
+            'estado' => ['nullable', Rule::in(['En revisión', 'Aceptada', 'Rechazada', 'Cancelada', 'todos'])],
             'q' => ['nullable', 'string', 'max:120'],
             'page' => ['sometimes', 'integer', 'min:1', 'max:100000'],
         ]);
@@ -37,6 +37,15 @@ class RevisionSubastaController extends Controller
         return response()
             ->view('admin.subastas.show', compact('subasta'))
             ->header('Cache-Control', 'private, no-store');
+    }
+
+    public function retirar(Request $request, Subasta $subasta)
+    {
+        $datos = $request->validate(['motivo_retiro' => ['required', 'string', 'min:5', 'max:1000']], [], ['motivo_retiro' => 'motivo del retiro']);
+        $this->revisionService->retirar($request->user()->id_usuario, $subasta->id_subasta, $datos['motivo_retiro']);
+
+        return redirect()->route('admin.subastas.show', $subasta)
+            ->with('status', 'Subasta retirada del catálogo.');
     }
 
     public function resolver(DecisionRevisionSubastaRequest $request, Subasta $subasta)
