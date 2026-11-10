@@ -284,6 +284,18 @@ class RevisionAdministrativaSubastasTest extends TestCase
         }
     }
 
+    public function test_review_displays_short_auction_period_in_minutes_and_seconds(): void
+    {
+        $inicio = now()->startOfSecond();
+        $auction = $this->auction('En revisión', [
+            'fecha_inicio' => $inicio,
+            'fecha_fin' => $inicio->copy()->addSeconds(71),
+        ]);
+
+        $this->actingAs($this->admin())->get('/admin/subastas/'.$auction->id_subasta)
+            ->assertOk()->assertSee('1 minuto y 11 segundos');
+    }
+
     public function test_rejection_preserves_reference_dates(): void
     {
         $admin = $this->admin();

@@ -59,7 +59,9 @@
                 <p><strong>Categoría:</strong> {{ $subasta->categoria?->nombre_categoria ?? 'Sin categoría' }}</p>
                 <p><strong>Condición del artículo:</strong> {{ $subasta->estado_articulo }}</p>
                 <p><strong>Monto inicial:</strong> <span style="font-size:1.25rem; font-weight:700; color:var(--blue);">Bs {{ number_format($subasta->monto_inicial, 2, ',', '.') }}</span></p>
-                <p><strong>Periodo de subasta:</strong> {{ $subasta->fecha_inicio->diffInDays($subasta->fecha_fin) }} días</p>
+                <p><strong>Periodo de subasta:</strong>
+                    {{ $subasta->fecha_inicio->diffAsCarbonInterval($subasta->fecha_fin, true)->locale('es')->forHumans(['parts' => 3, 'join' => true]) }}
+                </p>
                 <p><strong>Incremento de puja:</strong> Bs {{ $subasta->incremento_puja }}</p>
             </div>
 
