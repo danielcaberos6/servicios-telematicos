@@ -20,22 +20,22 @@
     ];
 @endphp
 @section('content')
-    {{-- Primer bloque: categorías y acciones principales. --}}
+    <section class="ini-hero" aria-labelledby="inicio-titulo">
+        <img class="ini-hero-image" src="{{ asset('imagenes/ejemplos/inicio-subasta.png') }}" alt="" aria-hidden="true" fetchpriority="high" width="2172" height="724">
+        <div class="ini-hero-copy">
+            <h1 id="inicio-titulo">Tu próxima oportunidad <span>empieza aquí.</span></h1>
+            <p>Descubre artículos únicos, haz tu mejor oferta y dale una nueva vida a lo que alguien más ya no necesita.</p>
+        </div>
+    </section>
+
+    {{-- Categorías con desplazamiento horizontal. --}}
     <section class="ini-browse" aria-labelledby="categorias-titulo">
         <div class="container">
             <div class="section-heading ini-browse-heading">
                 <div>
                     <p class="eyebrow">ENCUENTRA LO QUE TE MUEVE</p>
-                    <h1 id="categorias-titulo">Explora por categoría</h1>
+                    <h2 id="categorias-titulo">Explora por categoría</h2>
                     <p class="muted">Un buen hallazgo empieza por lo que te gusta.</p>
-                </div>
-                {{-- Explorar y publicar permanecen junto al encabezado. --}}
-                <div class="button-row ini-actions">
-                    <a class="button secondary" href="{{ route('subastas.index') }}"><x-icono nombre="search" />Explorar subastas</a>
-                    {{-- La creación de subastas conserva el requisito de sesión. --}}
-                    @auth
-                        <a class="button primary" href="{{ route('subastas.create') }}"><x-icono nombre="plus" />Crear subasta</a>
-                    @endauth
                 </div>
             </div>
             {{-- La barra reutiliza los controles del carrusel existente. --}}
@@ -55,7 +55,7 @@
         </div>
     </section>
 
-    {{-- Segundo bloque: subastas destacadas. --}}
+    {{-- Subastas destacadas. --}}
     <section class="container ini-section ini-featured" aria-labelledby="destacadas-titulo">
         <div class="section-heading">
             <div>
