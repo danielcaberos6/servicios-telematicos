@@ -38,6 +38,7 @@
     border-radius: 6px;
     background: var(--control-border);
 }
+/* Tarjetas de categorías con dimensiones uniformes. */
 .ini-category {
     display: flex;
     flex-direction: column;
