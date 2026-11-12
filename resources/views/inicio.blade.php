@@ -29,6 +29,7 @@
                     <h1 id="categorias-titulo">Explora por categoría</h1>
                     <p class="muted">Un buen hallazgo empieza por lo que te gusta.</p>
                 </div>
+                {{-- Explorar y publicar permanecen junto al encabezado. --}}
                 <div class="button-row ini-actions">
                     <a class="button secondary" href="{{ route('subastas.index') }}"><x-icono nombre="search" />Explorar subastas</a>
                     @auth
