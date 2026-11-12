@@ -32,6 +32,7 @@
                 {{-- Explorar y publicar permanecen junto al encabezado. --}}
                 <div class="button-row ini-actions">
                     <a class="button secondary" href="{{ route('subastas.index') }}"><x-icono nombre="search" />Explorar subastas</a>
+                    {{-- La creación de subastas conserva el requisito de sesión. --}}
                     @auth
                         <a class="button primary" href="{{ route('subastas.create') }}"><x-icono nombre="plus" />Crear subasta</a>
                     @endauth
