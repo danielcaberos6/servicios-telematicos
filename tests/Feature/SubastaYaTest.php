@@ -54,7 +54,9 @@ class SubastaYaTest extends TestCase
         }
         $this->post('/subastas', $this->payload())->assertRedirect('/iniciar-sesion');
         $this->assertDatabaseCount('subasta', 0);
-        $this->actingAs(User::factory()->create())->get('/')->assertSee('Crear subasta');
+        $this->actingAs(User::factory()->create())->get('/')->assertOk()
+            ->assertSee('Mis subastas')->assertDontSee('Crear subasta');
+        $this->get('/subastas/crear')->assertOk();
     }
 
     public function test_registration_login_and_logout_use_original_usuario_table(): void
