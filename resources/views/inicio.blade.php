@@ -55,6 +55,7 @@
         </div>
     </section>
 
+    {{-- Segundo bloque: subastas destacadas. --}}
     <section class="container ini-section ini-featured" aria-labelledby="destacadas-titulo">
         <div class="section-heading">
             <div>
