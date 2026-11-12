@@ -20,6 +20,7 @@
     ];
 @endphp
 @section('content')
+    {{-- Primer bloque: categorías y acciones principales. --}}
     <section class="ini-browse" aria-labelledby="categorias-titulo">
         <div class="container">
             <div class="section-heading ini-browse-heading">
