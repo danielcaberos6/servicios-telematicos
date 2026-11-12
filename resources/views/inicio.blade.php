@@ -1,7 +1,7 @@
 @extends('plantillas.principal')
 {{-- Estilos propios de la página de inicio. --}}
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/inicio.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/inicio.css') }}?v={{ substr(hash_file('sha256', public_path('css/inicio.css')), 0, 16) }}">
 @endpush
 {{-- Cada categoría utiliza un icono, sin fotografías decorativas. --}}
 @php
