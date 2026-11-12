@@ -75,6 +75,7 @@
                 <button type="button" class="ini-nav ini-nav-next" data-carrusel-siguiente aria-label="Ver más subastas"><x-icono nombre="chevron-right" /></button>
             </div>
         @else
+            {{-- Mensaje visible cuando no hay publicaciones activas. --}}
             <div class="empty-state"><x-icono nombre="gavel" />
                 <h3>Las próximas oportunidades empiezan contigo</h3>
                 <p>Todavía no hay subastas activas. Vuelve pronto para descubrir novedades.</p>
