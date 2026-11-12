@@ -42,6 +42,7 @@
             <div class="ini-carousel ini-category-carousel" data-carrusel>
                 <button type="button" class="ini-nav ini-nav-prev" data-carrusel-anterior disabled aria-label="Ver categorías anteriores" aria-controls="categorias-pista"><x-icono nombre="chevron-left" /></button>
                 <div class="ini-categories" id="categorias-pista" data-carrusel-pista tabindex="0" role="region" aria-label="Categorías de subastas">
+                    {{-- Los enlaces mantienen el filtro por categoría del catálogo. --}}
                     @foreach ($categorias as $categoria)
                         <a class="ini-category" href="{{ route('subastas.index', ['categoria' => $categoria->id_categoria]) }}">
                             <span class="ini-category-icon"><x-icono :nombre="$iconosCategorias[$categoria->nombre_categoria] ?? 'box'" /></span>
