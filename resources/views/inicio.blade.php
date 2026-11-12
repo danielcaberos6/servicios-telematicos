@@ -1,4 +1,5 @@
 @extends('plantillas.principal')
+{{-- Estilos propios de la página de inicio. --}}
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/inicio.css') }}">
 @endpush
