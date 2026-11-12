@@ -91,6 +91,7 @@
     padding-bottom: 48px;
 }
 
+/* Controles compartidos por ambas barras del inicio. */
 .ini-carousel {
     position: relative;
 }
