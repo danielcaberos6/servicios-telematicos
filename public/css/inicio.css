@@ -13,6 +13,7 @@
     margin-bottom: 8px;
     font-size: clamp(26px, 3vw, 34px);
 }
+/* Separación entre las acciones principales. */
 .ini-actions {
     flex-shrink: 0;
     gap: 10px;
