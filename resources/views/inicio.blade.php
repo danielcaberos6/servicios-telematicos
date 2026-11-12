@@ -38,6 +38,7 @@
                     @endauth
                 </div>
             </div>
+            {{-- La barra reutiliza los controles del carrusel existente. --}}
             <div class="ini-carousel ini-category-carousel" data-carrusel>
                 <button type="button" class="ini-nav ini-nav-prev" data-carrusel-anterior disabled aria-label="Ver categorías anteriores" aria-controls="categorias-pista"><x-icono nombre="chevron-left" /></button>
                 <div class="ini-categories" id="categorias-pista" data-carrusel-pista tabindex="0" role="region" aria-label="Categorías de subastas">
