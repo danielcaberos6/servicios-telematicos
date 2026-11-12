@@ -60,6 +60,7 @@
     background: var(--info-surface);
     text-decoration: none;
 }
+/* Contenedor común para todos los iconos. */
 .ini-category-icon {
     display: grid;
     place-items: center;
