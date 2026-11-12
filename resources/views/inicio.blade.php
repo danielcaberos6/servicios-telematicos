@@ -3,6 +3,7 @@
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/inicio.css') }}">
 @endpush
+{{-- Cada categoría utiliza un icono, sin fotografías decorativas. --}}
 @php
     $iconosCategorias = [
         'Antigüedades y coleccionables' => 'trophy',
