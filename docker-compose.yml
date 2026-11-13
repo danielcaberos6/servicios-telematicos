@@ -3,6 +3,8 @@ name: subastaya
 x-app: &app
     init: true
     restart: unless-stopped
+    # Para publicar en Docker Hub: IMAGEN=usuario/subastaya TAG=1.0
+    image: ${IMAGEN:-subastaya}:${TAG:-latest}
     build:
         context: .
         dockerfile: dockerfile
@@ -15,6 +17,8 @@ x-app: &app
         - .:/app
         - vendor:/app/vendor
     environment:
+        COMPOSER_INSTALL: "true"
+        CREATE_TEST_DB: "true"
         APP_URL: http://localhost:${APP_PORT:-8000}
         DB_CONNECTION: pgsql
         DB_HOST: postgres

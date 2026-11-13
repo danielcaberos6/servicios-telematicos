@@ -1,13 +1,37 @@
 .git
 .gitignore
+.gitattributes
+.editorconfig
 .env
+.env.bak
+.env.backup
+.env.production
+auth.json
 vendor
 node_modules
-storage/logs
+.runtime
+.vscode
+.idea
+.claude
+pgdata
+
+# Archivos de Docker que no forman parte de la aplicación
+docker-compose.yml
+docker-compose.hub.yml
+
+# Datos generados en desarrollo: fotos subidas, cachés, logs y sesiones
+storage/app/public/*
+storage/app/private/*
 storage/framework/cache
 storage/framework/sessions
+storage/framework/testing
 storage/framework/views
-docker-compose.yml
-pgdata
-.runtime
-.env.bak
+storage/logs
+bootstrap/cache/*.php
+
+# Pruebas y documentación: no se ejecutan dentro de la imagen
+tests
+docs
+phpunit.xml
+.phpunit.result.cache
+.phpunit.cache
