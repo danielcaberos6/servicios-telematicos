@@ -30,8 +30,13 @@ RUN composer install --no-dev --no-interaction --prefer-dist --no-progress --no-
 
 COPY --chown=${UID}:${GID} . .
 
+# Las carpetas de archivos subidos existen en la imagen con el usuario sin
+# privilegios como dueño: así los volúmenes con nombre de Compose heredan ese
+# dueño en lugar de crearse como root.
 RUN mkdir -p storage/app/public \
     storage/app/private \
+    storage/app/identidad \
+    storage/app/conversaciones \
     storage/framework/views \
     storage/framework/cache/data \
     storage/framework/sessions \

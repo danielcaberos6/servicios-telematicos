@@ -9,6 +9,30 @@ spec:
         requests:
             storage: 2Gi
 ---
+# Carnets de identidad (datos personales, fuera del almacenamiento público).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: identidad
+spec:
+    accessModes: ["ReadWriteOnce"]
+    storageClassName: local-path
+    resources:
+        requests:
+            storage: 1Gi
+---
+# Fotos, audios y videos adjuntos en las conversaciones de las operaciones.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: conversaciones
+spec:
+    accessModes: ["ReadWriteOnce"]
+    storageClassName: local-path
+    resources:
+        requests:
+            storage: 2Gi
+---
 # Una sola réplica: el arranque aplica migraciones y el volumen de fotos es
 # ReadWriteOnce. Recreate evita dos pods a la vez durante una actualización.
 apiVersion: apps/v1
@@ -84,10 +108,20 @@ spec:
                   volumeMounts:
                       - name: fotos
                         mountPath: /app/storage/app/public
+                      - name: identidad
+                        mountPath: /app/storage/app/identidad
+                      - name: conversaciones
+                        mountPath: /app/storage/app/conversaciones
             volumes:
                 - name: fotos
                   persistentVolumeClaim:
                       claimName: fotos
+                - name: identidad
+                  persistentVolumeClaim:
+                      claimName: identidad
+                - name: conversaciones
+                  persistentVolumeClaim:
+                      claimName: conversaciones
 ---
 apiVersion: v1
 kind: Service

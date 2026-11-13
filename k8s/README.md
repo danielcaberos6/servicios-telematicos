@@ -5,12 +5,12 @@ Manifiestos para desplegar la imagen `danielcaberos/subastaya` en un clúster ku
 | Recurso | Qué hace |
 |---|---|
 | `postgres` (StatefulSet + Service) | PostgreSQL 16 con 5 Gi en `local-path` |
-| `subastaya` (Deployment) | La aplicación. Migra y carga los datos al arrancar y monta 2 Gi de fotos |
+| `subastaya` (Deployment) | La aplicación. Migra y carga los datos al arrancar. Monta tres volúmenes: fotos (2 Gi), carnets de identidad (1 Gi) y adjuntos del chat (2 Gi) |
 | `subastaya` (Service NodePort) | Acceso desde la red en el puerto **30080** de cualquier nodo |
 | `scheduler` (Deployment) | Cierre de subastas, recordatorios y revisión de entregas cada minuto |
 | `subastaya-config` / `subastaya-secret` | Configuración (`config.env`) y secretos (`secret.env`) |
 
-La aplicación y el scheduler tienen **una sola réplica**. El arranque aplica migraciones, el volumen de fotos es `ReadWriteOnce` y dos schedulers repetirían las tareas.
+La aplicación y el scheduler tienen **una sola réplica**. El arranque aplica migraciones, los volúmenes de archivos son `ReadWriteOnce` y dos schedulers repetirían las tareas.
 
 ## 1. Instalar el StorageClass (una vez por clúster)
 
@@ -60,7 +60,7 @@ kubectl -n subastaya exec -it deploy/subastaya -c app -- php artisan about
 
 **Nueva versión:** publica la imagen con otra etiqueta (por ejemplo `1.1`, ver el README principal), cambia `newTag` en `kustomization.yaml` y ejecuta `kubectl apply -k k8s/`. Al cambiar `config.env` o `secret.env`, el mismo `apply` reinicia los pods.
 
-**Borrar:** `kubectl delete -k k8s/` elimina también los PVC y, con ellos, **la base y las fotos**. Para detener sin perder datos:
+**Borrar:** `kubectl delete -k k8s/` elimina también los PVC y, con ellos, **la base, las fotos, los carnets y los adjuntos**. Para detener sin perder datos:
 
 ```sh
 kubectl -n subastaya scale deploy/subastaya deploy/scheduler --replicas=0

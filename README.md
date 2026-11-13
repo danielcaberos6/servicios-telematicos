@@ -124,7 +124,7 @@ Tras modificar funciones o triggers, crea una migración que instale el cambio. 
 
 ## Publicar en Docker Hub
 
-La imagen lleva el código y las dependencias de producción. No incluye `.env`, fotos subidas, pruebas ni documentación. Para construirla y subirla (cambia `usuario` por tu cuenta de Docker Hub):
+La imagen lleva el código y las dependencias de producción. No incluye `.env`, fotos subidas, carnets, adjuntos del chat, pruebas ni documentación. Para construirla y subirla (cambia `usuario` por tu cuenta de Docker Hub):
 
 ```sh
 docker login
@@ -139,7 +139,7 @@ Quien la descargue solo necesita `docker-compose.hub.yml`, en una carpeta aparte
 DOCKERHUB_USER=usuario docker compose -f docker-compose.hub.yml up -d
 ```
 
-Por defecto arranca con `APP_ENV=production`, sin datos de demostración y con `APP_DEBUG=false`. Con `APP_ENV=local` carga las cuentas y subastas de ejemplo. Las fotos se guardan en el volumen `fotos` y la base en `pgdata`.
+Por defecto arranca con `APP_ENV=production`, sin datos de demostración y con `APP_DEBUG=false`. Con `APP_ENV=local` carga las cuentas y subastas de ejemplo. Las fotos se guardan en el volumen `fotos`, los carnets en `identidad`, los adjuntos del chat en `conversaciones` y la base en `pgdata`.
 
 Define `APP_KEY` en el entorno para que las sesiones sobrevivan a la recreación del contenedor. Si falta, se genera una al arrancar. Para obtener una:
 
