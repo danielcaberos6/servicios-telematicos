@@ -122,6 +122,33 @@ La lógica de negocio vive en PostgreSQL: el esquema inicial está en `database/
 
 Tras modificar funciones o triggers, crea una migración que instale el cambio. El comando `php artisan subastas:instalar-funciones` reinstala las funciones generales y sus ampliaciones de búsqueda, publicación, participación, normativa, consultas, fondos, operaciones, reputación y reportes económicos. El orden vigente está en `routes/console.php`; `PublicacionSubastas.sql` se instala después de `Funciones.sql` para conservar la revisión, el filtro por radio y las reglas de puja y cierre. Los archivos que contienen ampliaciones de esquema se ejecutan mediante migraciones, una sola vez.
 
+## Publicar en Docker Hub
+
+La imagen lleva el código y las dependencias de producción. No incluye `.env`, fotos subidas, pruebas ni documentación. Para construirla y subirla (cambia `usuario` por tu cuenta de Docker Hub):
+
+```sh
+docker login
+docker build -f dockerfile -t usuario/subastaya:1.0 -t usuario/subastaya:latest .
+docker push usuario/subastaya:1.0
+docker push usuario/subastaya:latest
+```
+
+Quien la descargue solo necesita `docker-compose.hub.yml`, en una carpeta aparte. En la carpeta del proyecto, Compose leería el `.env` de desarrollo.
+
+```sh
+DOCKERHUB_USER=usuario docker compose -f docker-compose.hub.yml up -d
+```
+
+Por defecto arranca con `APP_ENV=production`, sin datos de demostración y con `APP_DEBUG=false`. Con `APP_ENV=local` carga las cuentas y subastas de ejemplo. Las fotos se guardan en el volumen `fotos` y la base en `pgdata`.
+
+Define `APP_KEY` en el entorno para que las sesiones sobrevivan a la recreación del contenedor. Si falta, se genera una al arrancar. Para obtener una:
+
+```sh
+docker run --rm --entrypoint php usuario/subastaya artisan key:generate --show
+```
+
+El compose de desarrollo también puede construir la imagen con nombre: `IMAGEN=usuario/subastaya TAG=1.0 docker compose build laravel` y luego `docker compose push laravel`.
+
 ## Detener
 
 ```sh

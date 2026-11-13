@@ -1,0 +1,75 @@
+# Ejecuta SubastaYA con la imagen publicada en Docker Hub, sin el código fuente.
+# Úsalo en una carpeta aparte: en la del proyecto, Compose leería el .env de
+# desarrollo (APP_ENV=local, APP_DEBUG=true).
+#
+#   DOCKERHUB_USER=usuario docker compose -f docker-compose.hub.yml up -d
+#
+# Variables (en el entorno o en un archivo .env junto a este):
+#   DOCKERHUB_USER  cuenta de Docker Hub que publicó la imagen (obligatoria)
+#   TAG             versión de la imagen (latest)
+#   APP_KEY         clave fija de Laravel; genérala con:
+#                   docker run --rm --entrypoint php usuario/subastaya artisan key:generate --show
+#   APP_ENV         production (sin ejemplos) o local (con cuentas y subastas de demostración)
+#   APP_PORT        puerto publicado (8000)
+#   DB_PASSWORD     contraseña de PostgreSQL
+
+name: subastaya-hub
+
+x-app: &app
+    image: ${DOCKERHUB_USER:?Define DOCKERHUB_USER con la cuenta de Docker Hub}/subastaya:${TAG:-latest}
+    init: true
+    restart: unless-stopped
+    volumes:
+        - fotos:/app/storage/app/public
+    environment:
+        APP_ENV: ${APP_ENV:-production}
+        APP_DEBUG: ${APP_DEBUG:-false}
+        APP_KEY: ${APP_KEY:-}
+        APP_URL: ${APP_URL:-http://localhost:${APP_PORT:-8000}}
+        LOG_CHANNEL: stderr
+        DB_CONNECTION: pgsql
+        DB_HOST: postgres
+        DB_PORT: 5432
+        DB_DATABASE: ${DB_DATABASE:-subastaya}
+        DB_USERNAME: ${DB_USERNAME:-subastaya}
+        DB_PASSWORD: ${DB_PASSWORD:-subastaya_local}
+
+services:
+    laravel:
+        <<: *app
+        ports:
+            - "${APP_PORT:-8000}:8000"
+        depends_on:
+            postgres:
+                condition: service_healthy
+        healthcheck:
+            test: ["CMD", "curl", "--fail", "--silent", "--output", "/dev/null", "http://localhost:8000/"]
+            interval: 10s
+            timeout: 5s
+            retries: 12
+
+    scheduler:
+        <<: *app
+        entrypoint: ["php", "artisan", "schedule:work"]
+        depends_on:
+            laravel:
+                condition: service_healthy
+
+    postgres:
+        image: postgres:16
+        restart: unless-stopped
+        environment:
+            POSTGRES_DB: ${DB_DATABASE:-subastaya}
+            POSTGRES_USER: ${DB_USERNAME:-subastaya}
+            POSTGRES_PASSWORD: ${DB_PASSWORD:-subastaya_local}
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+            interval: 5s
+            timeout: 5s
+            retries: 12
+
+volumes:
+    pgdata:
+    fotos:
