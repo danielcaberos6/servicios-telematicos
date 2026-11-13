@@ -35,3 +35,4 @@ docs
 phpunit.xml
 .phpunit.result.cache
 .phpunit.cache
+k8s

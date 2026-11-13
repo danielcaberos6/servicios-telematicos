@@ -27,3 +27,6 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 .env.bak
+
+# Secretos de Kubernetes
+/k8s/secret.env

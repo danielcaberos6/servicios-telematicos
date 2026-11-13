@@ -1,0 +1,45 @@
+# Ejecuta cada minuto el cierre de subastas, los recordatorios y la revisión
+# de entregas. Debe tener una sola réplica para no repetir las tareas.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: scheduler
+spec:
+    replicas: 1
+    strategy:
+        type: Recreate
+    selector:
+        matchLabels:
+            app: scheduler
+    template:
+        metadata:
+            labels:
+                app: scheduler
+        spec:
+            enableServiceLinks: false
+            securityContext:
+                runAsNonRoot: true
+                runAsUser: 1000
+                runAsGroup: 1000
+            initContainers:
+                # Espera a que la aplicación haya aplicado las migraciones.
+                - name: esperar-app
+                  image: danielcaberos/subastaya
+                  imagePullPolicy: IfNotPresent
+                  command: ["sh", "-c", "until curl -fs -o /dev/null http://subastaya:8000/up; do echo 'Esperando a la aplicación'; sleep 5; done"]
+            containers:
+                - name: scheduler
+                  image: danielcaberos/subastaya
+                  imagePullPolicy: IfNotPresent
+                  command: ["php", "artisan", "schedule:work"]
+                  envFrom:
+                      - configMapRef:
+                            name: subastaya-config
+                      - secretRef:
+                            name: subastaya-secret
+                  resources:
+                      requests:
+                          cpu: 50m
+                          memory: 128Mi
+                      limits:
+                          memory: 384Mi

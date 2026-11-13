@@ -149,6 +149,10 @@ docker run --rm --entrypoint php usuario/subastaya artisan key:generate --show
 
 El compose de desarrollo también puede construir la imagen con nombre: `IMAGEN=usuario/subastaya TAG=1.0 docker compose build laravel` y luego `docker compose push laravel`.
 
+## Kubernetes
+
+Los manifiestos para desplegar la imagen publicada están en `k8s/`. Los requisitos, los pasos y la operación están en [`k8s/README.md`](k8s/README.md).
+
 ## Detener
 
 ```sh

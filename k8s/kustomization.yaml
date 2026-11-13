@@ -1,0 +1,32 @@
+# Despliegue de SubastaYA en Kubernetes: kubectl apply -k k8s/
+# Requisitos y pasos en k8s/README.md.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: subastaya
+
+resources:
+    - namespace.yaml
+    - postgres.yaml
+    - app.yaml
+    - scheduler.yaml
+
+# Los generadores añaden un sufijo según el contenido: al cambiar config.env
+# o secret.env, los pods se reinician con los valores nuevos.
+configMapGenerator:
+    - name: subastaya-config
+      envs:
+          - config.env
+
+secretGenerator:
+    - name: subastaya-secret
+      envs:
+          - secret.env
+
+images:
+    - name: danielcaberos/subastaya
+      newTag: "1.0"
+
+labels:
+    - pairs:
+          app.kubernetes.io/part-of: subastaya
