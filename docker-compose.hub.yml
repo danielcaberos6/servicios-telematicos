@@ -12,6 +12,9 @@
 #   APP_ENV         production (sin ejemplos) o local (con cuentas y subastas de demostración)
 #   APP_PORT        puerto publicado (8000)
 #   DB_PASSWORD     contraseña de PostgreSQL
+#   ADMIN_CORREO, ADMIN_CONTRASENA
+#                   crean el administrador al arrancar (necesario en production,
+#                   donde no hay cuentas de demostración)
 
 name: subastaya-hub
 
@@ -35,6 +38,8 @@ x-app: &app
         DB_DATABASE: ${DB_DATABASE:-subastaya}
         DB_USERNAME: ${DB_USERNAME:-subastaya}
         DB_PASSWORD: ${DB_PASSWORD:-subastaya_local}
+        ADMIN_CORREO: ${ADMIN_CORREO:-}
+        ADMIN_CONTRASENA: ${ADMIN_CONTRASENA:-}
 
 services:
     laravel:

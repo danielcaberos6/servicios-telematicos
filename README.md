@@ -141,6 +141,14 @@ DOCKERHUB_USER=usuario docker compose -f docker-compose.hub.yml up -d
 
 Por defecto arranca con `APP_ENV=production`, sin datos de demostración y con `APP_DEBUG=false`. Con `APP_ENV=local` carga las cuentas y subastas de ejemplo. Las fotos se guardan en el volumen `fotos`, los carnets en `identidad`, los adjuntos del chat en `conversaciones` y la base en `pgdata`.
 
+En `production` no se crea ninguna cuenta, ni siquiera la de administrador. Define `ADMIN_CORREO` y `ADMIN_CONTRASENA` para que se cree al arrancar, o créalo a mano (pregunta la contraseña sin mostrarla):
+
+```sh
+docker compose -f docker-compose.hub.yml exec laravel php artisan subastas:crear-admin admin@tu-dominio.com
+```
+
+Si la cuenta ya existe, el comando le asigna el rol de administrador y la reactiva sin cambiar su contraseña. Funciona igual en cualquier servidor con Laravel: `php artisan subastas:crear-admin`.
+
 Define `APP_KEY` en el entorno para que las sesiones sobrevivan a la recreación del contenedor. Si falta, se genera una al arrancar. Para obtener una:
 
 ```sh

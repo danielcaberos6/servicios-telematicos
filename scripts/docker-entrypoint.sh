@@ -7,6 +7,8 @@ set -eu
 #   CREATE_TEST_DB=true    crea la base subastaya_test que usan las pruebas.
 #   APP_KEY                clave fija; si falta, se genera una en .env.
 #   APP_ENV=production     guarda en caché configuración, rutas y vistas.
+#   ADMIN_CORREO y ADMIN_CONTRASENA
+#                          crean el administrador si aún no existe.
 
 if [ ! -f .env ]; then
     cp .env.example .env
@@ -37,6 +39,12 @@ fi
 
 php artisan migrate --force
 php artisan db:seed --force
+# En producción no hay cuentas de demostración: con ADMIN_CORREO y
+# ADMIN_CONTRASENA se crea (o recupera) el administrador. Repetirlo no cambia
+# la contraseña de una cuenta existente.
+if [ -n "${ADMIN_CORREO:-}" ] && [ -n "${ADMIN_CONTRASENA:-}" ]; then
+    php artisan subastas:crear-admin --no-interaction
+fi
 # Solo carga ejemplos con APP_ENV=local o testing; en otros entornos no hace nada.
 php artisan subastas:cargar-demo
 

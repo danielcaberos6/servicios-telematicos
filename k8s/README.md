@@ -36,7 +36,7 @@ printf 'APP_KEY=base64:%s\nDB_PASSWORD=%s\n' "$(openssl rand -base64 32)" "$(ope
 
 Revisa `k8s/config.env`:
 - `APP_URL`: la IP de un nodo con el puerto 30080.
-- `APP_ENV=local` crea las cuentas de demostración (incluido el administrador) y las subastas de ejemplo. Con `production` no se crea ninguna cuenta, ni siquiera la de administrador.
+- `APP_ENV=local` crea las cuentas de demostración (incluido el administrador) y las subastas de ejemplo. Con `production` no se crea ninguna cuenta: añade `ADMIN_CORREO` y `ADMIN_CONTRASENA` a `secret.env` para crear el administrador al arrancar, o ejecuta `kubectl -n subastaya exec -it deploy/subastaya -c app -- php artisan subastas:crear-admin admin@tu-dominio.com`.
 
 ## 3. Desplegar
 
