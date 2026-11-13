@@ -10,7 +10,11 @@ class CuentasDemoSeeder extends Seeder
 {
     public function run(): void
     {
-        
+        // Contraseñas públicas: solo para desarrollo. En producción, el
+        // administrador se crea con php artisan subastas:crear-admin.
+        if (! app()->environment(['local', 'testing'])) {
+            return;
+        }
 
         DB::transaction(function () {
             foreach ([
