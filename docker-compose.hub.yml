@@ -13,8 +13,8 @@
 #   APP_PORT        puerto publicado (8000)
 #   DB_PASSWORD     contraseña de PostgreSQL
 #   ADMIN_CORREO, ADMIN_CONTRASENA
-#                   crean el administrador al arrancar (necesario en production,
-#                   donde no hay cuentas de demostración)
+#                   administrador inicial en production; si faltan, se usa
+#                   admin@subastaya.test / Admin2026! (cámbiala después)
 
 name: subastaya-hub
 
