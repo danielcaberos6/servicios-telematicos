@@ -8,7 +8,17 @@ set -eu
 #   APP_KEY                clave fija; si falta, se genera una en .env.
 #   APP_ENV=production     guarda en caché configuración, rutas y vistas.
 
-test -f .env || cp .env.example .env
+if [ ! -f .env ]; then
+    cp .env.example .env
+    # Fuera del compose de desarrollo (imagen publicada), el .env generado no
+    # debe dejar el modo depuración activo: mostraría la configuración en las
+    # páginas de error. Las variables del contenedor siguen teniendo prioridad.
+    if [ "${COMPOSER_INSTALL:-false}" != "true" ]; then
+        sed -i -e 's/^APP_ENV=.*/APP_ENV=production/' \
+            -e 's/^APP_DEBUG=.*/APP_DEBUG=false/' \
+            -e 's/^LOG_CHANNEL=.*/LOG_CHANNEL=stderr/' .env
+    fi
+fi
 
 if [ "${COMPOSER_INSTALL:-false}" = "true" ]; then
     export GIT_CONFIG_GLOBAL="${GIT_CONFIG_GLOBAL:-/tmp/subastaya.gitconfig}"
