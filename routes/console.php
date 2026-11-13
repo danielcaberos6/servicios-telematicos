@@ -1,5 +1,8 @@
 <?php
 
+use Database\Seeders\NormasDemoSeeder;
+use Database\Seeders\ReportesDemoSeeder;
+use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
@@ -62,10 +65,6 @@ Artisan::command('subastas:crear-bd-pruebas', function () {
     DB::statement('create database '.DB::getQueryGrammar()->wrap($nombre));
     $this->info("Base {$nombre} creada.");
 })->purpose('Crea la base de datos que usa la suite de pruebas');
-
-use Database\Seeders\NormasDemoSeeder;
-use Database\Seeders\ReportesDemoSeeder;
-use Illuminate\Foundation\Inspiring;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
